@@ -150,7 +150,7 @@
 %% Javier de Ruiz Garcia\affil{2}{Universidad de Murcia, Bioquimica y Biologia
 %% Molecular, Murcia, Spain}, \and Franklin Sonnery\affil{2}{}}
 
-\author{Renato Fabbri\affil{1}{University of São Paulo}
+\author{Renato Fabbri\affil{1}{University of S\~ao Paulo}
 %James Smith\affil{2}{University of Oregon}
 %\and
 %Jane Smith\affil{1}{}
@@ -171,9 +171,9 @@
 
 \begin{abstract}
 Percolate is a python package for harnessing the social networks of the user.
-It is based on the pilars of: analysis, social percolation, 
-creation of audiovisual artifacts, resource recommendation, and
-typologies. The fields of complex networks and linked data give
+It is based on the pilars of: social percolation, 
+creation of audiovisual artifacts, resource recommendation, 
+typologies and the generation of reports. The fields of complex networks and linked data give
 scientific support for the exploitation of the integrated (virtual)
 social space.
 \end{abstract}
@@ -202,14 +202,14 @@ social space.
 
 \section{}
 %------------------------------------------------
-The Percolate package consists of routines for social harnessing and depends of four packages: Gmane, Participation, Social, MASS.
+The Percolate package consists of routines for social harnessing and can be directly hacked mainly through four packages: Gmane, Participation, Social, MASS. The text ahead consists of the core features of each of these five python packages.
 
 \section{}
 
 \subsection{Packages}
 \subsubsection{Gmane}
 The Gmane package is dedicated to exploring the Gmane database of email lists.
-Core functionalities are:
+Core features are:
 \begin{itemize}
     \item Download email messages from Gmane database.
     \item Load messages and make basic data structures.
@@ -220,6 +220,7 @@ Core functionalities are:
     \item Histograms and circular statistics for time activity.
     \item Histograms for user activity.
     \item Facilities for network evolution of fixed window size, such as plotting timeline of measures and making video of the evolving network through Versinus~\cite{Versinus}.
+    \item Facilities to output images and latex tables. 
 \end{itemize}
 \subsubsection{Participation}
 The participation package is dedicated to exploring social participation data. Core features are:
@@ -228,15 +229,15 @@ The participation package is dedicated to exploring social participation data. C
     \item Data integration through linked data principles (RDF data, OWL ontologies).
     \item Access to routines of participatory data translation from PostgreSQL, MySQL and MongoDB to RDF (triplification).
     \item Access to routines for delivering participatory OWL ontologies.
-    \item Routines to raise ontologies from data, return OWL code and images. (This is a novel and pertinent method of making ontologies to fit data, a somewhat \emph{data-driven ontology making method}).
+    \item Routines to raise ontologies from data, return OWL code and images. (This is a novel and pertinent method of making ontologies to fit data, a somewhat \emph{data-driven ontology elaboration method}).
     \item Analysis of participatory data through complex networks (interaction and friendship networks) and text mining (BoW, Kolmorov-Smirnov histogram comparison and entropy).
     \item Resource recommendation, with explicit routines and potential uses.
-    \item Recommendation of resources by both absolute criteria (ranking of users, words, etc.) and by criteria relative to a reference resource (recommend users given a reference post).
+    \item Recommendation of resources by both absolute criteria (ranking of users, words, etc.) and by criteria relative to a reference resource (e.g. recommend users given a reference post).
     \item Bootstrapping the basic structure of ontologies to HTML.
     \item Simplest web server to give HTTP access to data and methods.
 \end{itemize}
 \subsubsection{Social}
-The social package delivers routines for usual social network data, such as Facebook, Twitter, LinkedIn and IRC. Core features are:
+The social package delivers routines to access usual social network platforms data, such as Facebook, Twitter, LinkedIn and IRC. Core features are:
 \begin{itemize}
     \item Screen scrapping of Facebook data.
     \item Twitter search and streaming through multiple APP keys.
@@ -249,13 +250,13 @@ MASS is music and audio in sample sequences. Core features are:
     \item Synthesis routines for notes and noises.
     \item Calculations in 64 bit floating point.
     \item Parameters updated each PCM sample.
-    \item Exact handle of duration, frequency measurements.
+    \item Exact handle of duration and frequency parameters.
     \item ADSR envelopes.
     \item Table lookup.
     \item Four basic waveforms (sine, saw, square and triangle). 
     \item Tremolo and vibrato implementations.
     \item Musical and DSP methods implemented according to~\cite{musicArticle}.
-    \item Predefined synthesis methods for other packages (Gmane, Social, Participation).
+    \item Predefined synthesis methods for other packages (Gmane, Social, Participation, Percolate).
 \end{itemize}
 \subsubsection{Percolate}
 Percolate unites Gmane, Participation, Social and MASS packages to enable anthropological physics experiments and social harnessing. Core features are:
@@ -321,7 +322,10 @@ Routines for raising ontologies: OPa, OPS, OBS, VBS, OCD, Ontologiaa
 %----------------------------------------------------------------------------------------
 
 \begin{acknowledgments}
-This work was partially supported by a grant from the Spanish Ministry of Science and Technology.
+	Author is grateful to CNPq (process
+	140860/2013-4, project 870336/1997-5), UNDP
+	(contract 2013/00056, project BRA/12/018), SNAS/SGPR,
+	and the Postgraduate Committee of the IFSC/USP.
 \end{acknowledgments}
 
 %----------------------------------------------------------------------------------------
