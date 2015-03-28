@@ -2975,7 +2975,7 @@ on the page. See documentation if you need more help.}
 \setlength{\fboxsep}{6pt}
 \ifx \@significancetext\@empty
 \renewcommand\thefootnote{}%
-\footnotetext{\vbox to 3.7cm{\significanceheadfont Reserved for Publication Footnotes\vfill}}%
+\footnotetext{\vbox to 3.7cm{\significanceheadfont \vfill}}%
 \else
 \renewcommand\thefootnote{}%
 \footnotetext{\vbox{\fcolorbox{signitext}{signiback}{\parbox{232pt}{\par\vspace*{2pt}{\significanceheadfont \color{signitext}Significance}\par\vspace*{12pt}%

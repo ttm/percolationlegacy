@@ -200,10 +200,11 @@ social space.
 %% The first letter of the article should be drop cap: \dropcap{} e.g.,
 %\dropcap{I}n this article we study the evolution of ''almost-sharp'' fronts
 
-\section{Introduction}
+\section{}
 %------------------------------------------------
+The Percolate package consists of routines for social harnessing and depends of four packages: Gmane, Participation, Social, MASS.
 
-\section{Results}
+\section{}
 
 \subsection{Packages}
 \subsubsection{Gmane}
@@ -227,9 +228,10 @@ The participation package is dedicated to exploring social participation data. C
     \item Data integration through linked data principles (RDF data, OWL ontologies).
     \item Access to routines of participatory data translation from PostgreSQL, MySQL and MongoDB to RDF (triplification).
     \item Access to routines for delivering participatory OWL ontologies.
-    \item Routines to raise ontology from data, return OWL code and images.
-    \item Analysis of participatory data through complex networks and text mining.
+    \item Routines to raise ontologies from data, return OWL code and images. (This is a novel and pertinent method of making ontologies to fit data, a somewhat \emph{data-driven ontology making method}).
+    \item Analysis of participatory data through complex networks (interaction and friendship networks) and text mining (BoW, Kolmorov-Smirnov histogram comparison and entropy).
     \item Resource recommendation, with explicit routines and potential uses.
+    \item Recommendation of resources by both absolute criteria (ranking of users, words, etc.) and by criteria relative to a reference resource (recommend users given a reference post).
     \item Bootstrapping the basic structure of ontologies to HTML.
     \item Simplest web server to give HTTP access to data and methods.
 \end{itemize}
@@ -258,12 +260,15 @@ MASS is music and audio in sample sequences. Core features are:
 \subsubsection{Percolate}
 Percolate unites Gmane, Participation, Social and MASS packages to enable anthropological physics experiments and social harnessing. Core features are:
 \begin{itemize}
-    \item Enable percolator processes in social systems.
+    \item Ease percolation in social systems by processes such as collection and diffusion of information.
     \item Enable knowledge about the networked self.
     \item Make abstract animations from social data.
+    \item Make music from social data to fit animation as soundtrack.
     \item Verification of expected stability and differentiation on the social structures.
     \item Directions for agents and networks typologies, extending features from Gmane package.
-    \item Integration of resources through RDF data and OWL ontologies. Enabling cross provenance resource recommendation and extending facilities from the Participation package.
+    \item Integration of resources through RDF data and OWL ontologies. 
+    \item Routines for representing data from social networks (tweets, Facebook data, IRC logs, LinkedIn, Gmane lists) as RDF.
+    \item Cross provenance resource recommendation, extending facilities from the Participation package.
     \item Generation of activity reports.
 \end{itemize}
 
@@ -349,88 +354,94 @@ This work was partially supported by a grant from the Spanish Ministry of Scienc
 %% following \begin{thebibliography}
 
 \begin{thebibliography}{10}
-\bibitem{BN}
-M.~Belkin and P.~Niyogi, {\em Using manifold structure for partially
-  labelled classification}, Advances in NIPS, 15 (2003).
 
-\bibitem{BBG:EmbeddingRiemannianManifoldHeatKernel}
-P.~B\'erard, G.~Besson, and S.~Gallot, {\em Embedding {R}iemannian
-  manifolds by their heat kernel}, Geom. and Fun. Anal., 4 (1994),
-  pp.~374--398.
+\bibitem{Versinus}
+Fabbri, Renato. "Versinus: a visualization method for graphs in evolution." arXiv preprint arXiv:1412.7311 (2014).
 
-\bibitem{CLAcha1}
-R.R.~Coifman and S.~Lafon, {\em Diffusion maps}, Appl. Comp. Harm. Anal.,
-  21 (2006), pp.~5--30.
-
-\bibitem{DiffusionPNAS}
-R.R.~Coifman, S.~Lafon, A.~Lee, M.~Maggioni, B.~Nadler, F.~Warner, and
-  S.~Zucker, {\em Geometric diffusions as a tool for harmonic analysis and
-  structure definition of data. {P}art {I}: Diffusion maps}, Proc. of Nat.
-  Acad. Sci.,  (2005), pp.~7426--7431.
-
-\bibitem{Clementi:LowDimensionaFreeEnergyLandscapesProteinFolding}
-P.~Das, M.~Moll, H.~Stamati, L.~Kavraki, and C.~Clementi, {\em
-  Low-dimensional, free-energy landscapes of protein-folding reactions by
-  nonlinear dimensionality reduction}, P.N.A.S., 103 (2006), pp.~9885--9890.
-
-\bibitem{DoGri}
-D.~Donoho and C.~Grimes, {\em Hessian eigenmaps: new locally linear
-  embedding techniques for high-dimensional data}, Proceedings of the National
-  Academy of Sciences, 100 (2003), pp.~5591--5596.
-
-\bibitem{DoGri:WhenDoesIsoMap}
-D.~L. Donoho and C.~Grimes, {\em When does isomap recover natural
-  parameterization of families of articulated images?}, Tech. Report Tech. Rep.
-  2002-27, Department of Statistics, Stanford University, August 2002.
-
-\bibitem{GruterWidman:GreenFunction}
-M.~Gr\"uter and K.-O. Widman, {\em The {G}reen function for uniformly
-  elliptic equations}, Man. Math., 37 (1982), pp.~303--342.
-
-\bibitem{Simon:NeumannEssentialSpectrum}
-R.~Hempel, L.~Seco, and B.~Simon, {\em The essential spectrum of neumann
-  laplacians on some bounded singular domains}, 1991.
-
-\bibitem{1}
-Kadison, R.\ V.\ and Singer, I.\ M.\ (1959)
-Extensions of pure states, {\it Amer.\ J.\ Math.\ \bf
-81}, 383-400.
-
-\bibitem{2}
-Anderson, J.\ (1981) A conjecture concerning the pure states of
-$B(H)$ and a related theorem. in {\it Topics in Modern Operator
-Theory}, Birkha\"user, pp.\ 27-43.
-
-\bibitem{3}
-Anderson, J.\ (1979) Extreme points in sets of
-positive linear maps on $B(H)$. {\it J.\ Funct.\
-Anal.\
-\bf 31}, 195-217.
-
-\bibitem{4}
-Anderson, J.\ (1979) Pathology in the Calkin algebra. {\it J.\
-Operator Theory \bf 2}, 159-167.
-
-\bibitem{5}
-Johnson, B.\ E.\ and Parrott, S.\ K.\ (1972) Operators commuting
-with a von Neumann algebra modulo the set of compact operators.
-{\it J.\ Funct.\ Anal.\ \bf 11}, 39-61.
-
-\bibitem{6}
-Akemann, C.\ and Weaver, N.\ (2004) Consistency of a
-counterexample to Naimark's problem. {\it Proc.\ Nat.\ Acad.\
-Sci.\ USA \bf 101}, 7522-7525.
-
-\bibitem{TSL}
-J.~Tenenbaum, V.~de~Silva, and J.~Langford, {\em A global geometric
-  framework for nonlinear dimensionality reduction}, Science, 290 (2000),
-  pp.~2319--2323.
-
-\bibitem{ZhaZha}
-Z.~Zhang and H.~Zha, {\em Principal manifolds and nonlinear dimension
-  reduction via local tangent space alignement}, Tech. Report CSE-02-019,
-  Department of computer science and engineering, Pennsylvania State
-  University, 2002.
+\bibitem{musicArticle}
+Fabbri, Renato, et al. "Psychophysics of musical elements in the discrete-time representation of sound." arXiv preprint arXiv:1412.6853 (2014).
+%\bibitem{BN}
+%M.~Belkin and P.~Niyogi, {\em Using manifold structure for partially
+%  labelled classification}, Advances in NIPS, 15 (2003).
+%
+%\bibitem{BBG:EmbeddingRiemannianManifoldHeatKernel}
+%P.~B\'erard, G.~Besson, and S.~Gallot, {\em Embedding {R}iemannian
+%  manifolds by their heat kernel}, Geom. and Fun. Anal., 4 (1994),
+%  pp.~374--398.
+%
+%\bibitem{CLAcha1}
+%R.R.~Coifman and S.~Lafon, {\em Diffusion maps}, Appl. Comp. Harm. Anal.,
+%  21 (2006), pp.~5--30.
+%
+%\bibitem{DiffusionPNAS}
+%R.R.~Coifman, S.~Lafon, A.~Lee, M.~Maggioni, B.~Nadler, F.~Warner, and
+%  S.~Zucker, {\em Geometric diffusions as a tool for harmonic analysis and
+%  structure definition of data. {P}art {I}: Diffusion maps}, Proc. of Nat.
+%  Acad. Sci.,  (2005), pp.~7426--7431.
+%
+%\bibitem{Clementi:LowDimensionaFreeEnergyLandscapesProteinFolding}
+%P.~Das, M.~Moll, H.~Stamati, L.~Kavraki, and C.~Clementi, {\em
+%  Low-dimensional, free-energy landscapes of protein-folding reactions by
+%  nonlinear dimensionality reduction}, P.N.A.S., 103 (2006), pp.~9885--9890.
+%
+%\bibitem{DoGri}
+%D.~Donoho and C.~Grimes, {\em Hessian eigenmaps: new locally linear
+%  embedding techniques for high-dimensional data}, Proceedings of the National
+%  Academy of Sciences, 100 (2003), pp.~5591--5596.
+%
+%\bibitem{DoGri:WhenDoesIsoMap}
+%D.~L. Donoho and C.~Grimes, {\em When does isomap recover natural
+%  parameterization of families of articulated images?}, Tech. Report Tech. Rep.
+%  2002-27, Department of Statistics, Stanford University, August 2002.
+%
+%\bibitem{GruterWidman:GreenFunction}
+%M.~Gr\"uter and K.-O. Widman, {\em The {G}reen function for uniformly
+%  elliptic equations}, Man. Math., 37 (1982), pp.~303--342.
+%
+%\bibitem{Simon:NeumannEssentialSpectrum}
+%R.~Hempel, L.~Seco, and B.~Simon, {\em The essential spectrum of neumann
+%  laplacians on some bounded singular domains}, 1991.
+%
+%\bibitem{1}
+%Kadison, R.\ V.\ and Singer, I.\ M.\ (1959)
+%Extensions of pure states, {\it Amer.\ J.\ Math.\ \bf
+%81}, 383-400.
+%
+%\bibitem{2}
+%Anderson, J.\ (1981) A conjecture concerning the pure states of
+%$B(H)$ and a related theorem. in {\it Topics in Modern Operator
+%Theory}, Birkha\"user, pp.\ 27-43.
+%
+%\bibitem{3}
+%Anderson, J.\ (1979) Extreme points in sets of
+%positive linear maps on $B(H)$. {\it J.\ Funct.\
+%Anal.\
+%\bf 31}, 195-217.
+%
+%\bibitem{4}
+%Anderson, J.\ (1979) Pathology in the Calkin algebra. {\it J.\
+%Operator Theory \bf 2}, 159-167.
+%
+%\bibitem{5}
+%Johnson, B.\ E.\ and Parrott, S.\ K.\ (1972) Operators commuting
+%with a von Neumann algebra modulo the set of compact operators.
+%{\it J.\ Funct.\ Anal.\ \bf 11}, 39-61.
+%
+%\bibitem{6}
+%Akemann, C.\ and Weaver, N.\ (2004) Consistency of a
+%counterexample to Naimark's problem. {\it Proc.\ Nat.\ Acad.\
+%Sci.\ USA \bf 101}, 7522-7525.
+%
+%\bibitem{TSL}
+%J.~Tenenbaum, V.~de~Silva, and J.~Langford, {\em A global geometric
+%  framework for nonlinear dimensionality reduction}, Science, 290 (2000),
+%  pp.~2319--2323.
+%
+%\bibitem{ZhaZha}
+%Z.~Zhang and H.~Zha, {\em Principal manifolds and nonlinear dimension
+%  reduction via local tangent space alignement}, Tech. Report CSE-02-019,
+%  Department of computer science and engineering, Pennsylvania State
+%  University, 2002.
 \end{thebibliography}
 
 %----------------------------------------------------------------------------------------
