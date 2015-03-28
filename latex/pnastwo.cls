@@ -341,27 +341,26 @@ This version is dated \currversion^^J^^J}
 \footlinefont
 \ifodd\c@page
 \hbox to \textwidth{\footlinefont \let\it\footlineit
-\theurl\hfill\footlinefont PNAS\hskip6pt  \vrule depth 2pt\hskip6pt
-{\foliofont\theissuedate}\hskip6pt\vrule\hskip6pt\thevolume\hskip6pt
-\vrule\hskip6pt\theissuenumber\hskip6pt \vrule\hskip6pt
+\theurl\hfill\footlinefont \hskip6pt
+{\foliofont\theissuedate}\hskip6pt\hskip6pt\thevolume\hskip6pt
+\hskip6pt\theissuenumber\hskip6pt \hskip6pt
 {\foliofont\the\c@page{\footlineit--}\expandafter\ifx\csname
 lastpage\endcsname\relax ??\else\lastpage\fi}}%
 \else
 \hbox to \textwidth{\footlinefont \let\it\footlineit
 {\foliofont\the\c@page{\footlineit--}\expandafter\ifx\csname
 lastpage\endcsname\relax ??\else\lastpage\fi}\hskip6pt
-\vrule depth 2pt\hskip6pt PNAS\hskip6pt
-\vrule\hskip6pt{\foliofont\theissuedate}\hskip6pt\vrule\hskip6pt
+\vrule depth 2pt\hskip6pt \hskip6pt{\foliofont\theissuedate}\hskip6pt\vrule\hskip6pt
 \thevolume\hskip6pt\vrule\hskip6pt\theissuenumber\hfill
 \theurl}%
 \fi\else%
 \ifodd\c@page
 \hbox to\textwidth{{\let\it\footlineit\footlinefont\thefootlineauthor}\hfill
-\footlinefont PNAS\hskip6pt\vrule depth 2pt\hskip6pt{\foliofont\theissuedate}%
-\hskip6pt\vrule depth2pt\hskip6pt\thevolume\hskip6pt\vrule depth 2pt\hskip6pt\theissuenumber\hskip6pt\vrule\hskip6pt{\foliofont\the\c@page}}%
+\footlinefont \hskip6pt\hskip6pt{\foliofont\theissuedate}%
+\hskip6pt\hskip6pt\thevolume\hskip6pt\hskip6pt\theissuenumber\hskip6pt\hskip6pt{\foliofont\the\c@page}}%
 \else%
 \hbox to\textwidth{\let\it\footlineit\footlinefont{\foliofont \the\c@page}%
-\hskip6pt\vrule depth 2pt height 6pt\hskip6pt\theurl\hfill\thefootlineauthor}\fi\fi}%\rightnumber
+\hskip6pt\hskip6pt\theurl\hfill\thefootlineauthor}\fi\fi}%\rightnumber
 }
 \let\@evenfoot\@oddfoot
 %
@@ -3154,13 +3153,13 @@ tabnote\the\tablenotenum\endcsname
 
 \def\track#1{\footcomment{#1}}
 
-\url{www.pnas.org --- ---}
-\issuedate{Issue Date}
+\url{http://pypi.python.org/pypi/percolate}
+\issuedate{}
 \copyrightyear{2007}
-\volume{Volume}
-\issuenumber{Issue Number}
+\volume{}
+\issuenumber{}
 %\setcounter{page}{2687}
-\footlineauthor{Footline Author}
+\footlineauthor{}
 
 \long\def\@footnotetext#1{\insert\footins{%
     \reset@font\footnotesize
