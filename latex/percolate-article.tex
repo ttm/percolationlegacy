@@ -206,11 +206,66 @@ social space.
 \section{Results}
 
 \subsection{Packages}
-\subsubsection{GMANE}
+\subsubsection{Gmane}
+The Gmane package is dedicated to exploring the Gmane database of email lists.
+Core functionalities are:
+\begin{itemize}
+    \item Download email messages from Gmane database.
+    \item Load messages and make basic data structures.
+    \item Make interaction networks.
+    \item Take measures from interaction network.
+    \item Make PCA from measures, with observance of each component formation.
+    \item Observe Erd\"os sectors in the networks (see appendix).
+    \item Histograms and circular statistics for time activity.
+    \item Histograms for user activity.
+    \item Facilities for network evolution of fixed window size, such as plotting timeline of measures and making video of the evolving network through Versinus~\cite{Versinus}.
+\end{itemize}
 \subsubsection{Participation}
+The participation package is dedicated to exploring social participation data. Core features are:
+\begin{itemize}
+    \item Access to a starting set of participatory data (see appendix).
+    \item Data integration through linked data principles (RDF data, OWL ontologies).
+    \item Access to routines of participatory data translation from PostgreSQL, MySQL and MongoDB to RDF (triplification).
+    \item Access to routines for delivering participatory OWL ontologies.
+    \item Routines to raise ontology from data, return OWL code and images.
+    \item Analysis of participatory data through complex networks and text mining.
+    \item Resource recommendation, with explicit routines and potential uses.
+    \item Bootstrapping the basic structure of ontologies to HTML.
+    \item Simplest web server to give HTTP access to data and methods.
+\end{itemize}
 \subsubsection{Social}
+The social package delivers routines for usual social network data, such as Facebook, Twitter, LinkedIn and IRC. Core features are:
+\begin{itemize}
+    \item Screen scrapping of Facebook data.
+    \item Twitter search and streaming through multiple APP keys.
+    \item Parsing IRC logs.
+    \item Access data from LinkedIn (ToDo).
+\end{itemize}
 \subsubsection{MASS}
+MASS is music and audio in sample sequences. Core features are:
+\begin{itemize}
+    \item Synthesis routines for notes and noises.
+    \item Calculations in 64 bit floating point.
+    \item Parameters updated each PCM sample.
+    \item Exact handle of duration, frequency measurements.
+    \item ADSR envelopes.
+    \item Table lookup.
+    \item Four basic waveforms (sine, saw, square and triangle). 
+    \item Tremolo and vibrato implementations.
+    \item Musical and DSP methods implemented according to~\cite{musicArticle}.
+    \item Predefined synthesis methods for other packages (Gmane, Social, Participation).
+\end{itemize}
 \subsubsection{Percolate}
+Percolate unites Gmane, Participation, Social and MASS packages to enable anthropological physics experiments and social harnessing. Core features are:
+\begin{itemize}
+    \item Enable percolator processes in social systems.
+    \item Enable knowledge about the networked self.
+    \item Make abstract animations from social data.
+    \item Verification of expected stability and differentiation on the social structures.
+    \item Directions for agents and networks typologies, extending features from Gmane package.
+    \item Integrated resource recommendation, extending facilities from the Participation package.
+    \item Generation of activity reports.
+\end{itemize}
 
 \subsection{Real Data}
 
@@ -221,14 +276,6 @@ social space.
 \section{Discussion}
 
 \begin{materials}
-\begin{definition}
-	The Erd\"os Sectors S of the network N are defined as the three sectors provenient from the comperrisson of
-	N to an Erd\"os-Renyi network with the same number of nodes and adges.
-\begin{eqnarray}
-equations
-\end{eqnarray}
-\end{definition}
-
 %\begin{theorem}
 %with $|Error|\leq C\, \delta | log\delta| $ where $C$ depends only
 %on $\|\theta\|_{L^{\infty}}$ and $\|
@@ -244,8 +291,25 @@ equations
 %\appendix
 %An appendix without a title.
 %
-%\appendix[Appendix title]
+\appendix[Erd\"os sectors]
 %An appendix with a title.
+\begin{definition}
+	The Erd\"os Sectors S of the network N are defined as the three sectors provenient from the comperrisson of
+	N to an Erd\"os-Renyi network with the same number of nodes and adges.
+\begin{eqnarray}
+equations
+\end{eqnarray}
+\end{definition}
+
+\appendix[Data and ontologies on the participation package]
+Data: Participa.br, AA, Cidade Democrática
+
+Routines for data triplification: Participa.br, AA, Cidade Democrática
+
+Ontologies: OPa, OPS, OBS, VBS, OCD, Ontologiaa (old OPA?).
+
+Routines for raising ontologies: OPa, OPS, OBS, VBS, OCD, Ontologiaa
+
 
 %----------------------------------------------------------------------------------------
 %	ACKNOWLEDGEMENTS
