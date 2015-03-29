@@ -9,18 +9,18 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='percolate',
+    name='percolation',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
     version='0.1.dev1',
 
-    description='Percolate is an anthropological physics platform for social harnessing',
+    description='Percolation is an anthropological physics platform for social harnessing',
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://github.com/ttm/percolate',
+    url='https://github.com/ttm/percolation',
 
     # Author details
     author='Renato Fabbri',
@@ -72,7 +72,7 @@ setup(
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
-    packages=["percolate"],
+    packages=["percolation"],
     #packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
 
     # List run-time dependencies here.  These will be installed by pip when your

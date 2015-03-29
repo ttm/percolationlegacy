@@ -2,7 +2,7 @@
 Percolate your social systems
 ==================================================================
 
-Percolate unites Gmane, Participation, Social and MASS packages to enable anthropological physics experiments and social harnessing. Core features are:  
+Percolation unites Gmane, Participation, Social and MASS packages to enable anthropological physics experiments and social harnessing. Core features are:  
 
     - Ease percolation in social systems by processes such as collection and diffusion of information.
 
@@ -30,7 +30,7 @@ Usage example
 
 .. code:: python
 
-    import percolate as P
+    import percolation as P
 
     # Use participation, social, gmane and mass
     # to explore your social systems.
