@@ -16,7 +16,7 @@ def makeBasicGraph():
     g.namespace_manager.bind("xsd", r.namespace.XSD)    
     g.namespace_manager.bind("owl", r.namespace.OWL)    
     return g,A
-def C(ag=[makeBasicGraph()],uri="foo",label="bar",superclass=None,comment=None,color=None,label_en=None):
+def C(ag=[makeBasicGraph()],uri="foo",label="bar",superclass=None,comment=None,comment_br=None,color=None,label_en=None):
     for gg in ag:
         g,A=gg
         G(g,uri,rdf.type,owl.Class)
@@ -45,7 +45,17 @@ def C(ag=[makeBasicGraph()],uri="foo",label="bar",superclass=None,comment=None,c
                 e.attr["arrowhead"]="empty"
                 e.attr["arrowsize"]=2
         if comment:
-            G(g,uri,rdfs.comment,LL(comment,lang="pt"))
+            if type(comment) in (type([1,2]),type((1,2))):
+                for co in comment:
+                    G(g,uri,rdfs.comment,LL(co,lang="en"))
+            else:
+                G(g,uri,rdfs.comment,LL(comment,lang="en"))
+        if comment_br:
+            if type(comment_br) in (type([1,2]),type((1,2))):
+                for co in comment_br:
+                    G(g,uri,rdfs.comment,LL(co,lang="pt"))
+            else:
+                G(g,uri,rdfs.comment,LL(comment_br,lang="pt"))
         if color:
             nd.attr['color']=color
 
