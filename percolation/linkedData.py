@@ -18,11 +18,13 @@ def makeBasicGraph():
 
 
 
-def C(ag=[ags["geral"]],uri="foo",label="bar",superclass=None,comment=None,color=None):
+def C(ag=[ags["geral"]],uri="foo",label="bar",superclass=None,comment=None,color=None,label_en=None):
     for gg in ag:
         g,A=gg
         G(g,uri,rdf.type,owl.Class)
         G(g,uri,rdfs.label,L(label,lang="pt"))
+        if label_en:
+            G(g,uri,rdfs.label,L(label_en,lang="en"))
         A.add_node(label,style="filled")
         nd=A.get_node(label)
         if superclass:
