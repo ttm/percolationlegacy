@@ -1,4 +1,5 @@
 import rdflib as r, pygraphviz as gv
+COUNT=0
 obs = r.Namespace("http://purl.org/socialparticipation/obs/")
 rdf = r.namespace.RDF
 rdfs = r.namespace.RDFS
@@ -7,15 +8,25 @@ xsd = r.namespace.XSD
 def G(g,S,P,O):
     g.add((S,P,O))
 LL=r.Literal
-def makeBasicGraph():
+def makeBasicGraph(extra_namespaces=[]):
+    """each namespace a tuple (tag,URI)"""
     g,A=r.Graph(),gv.AGraph(directed=True,strict=False)
     A.graph_attr["label"]="Ontologia da tese"
-    g.namespace_manager.bind("ot", "http://purl.org/socialparticipation/ot/")    
+    #g.namespace_manager.bind("ot", "http://purl.org/socialparticipation/ot/")    
     g.namespace_manager.bind("rdf", r.namespace.RDF)    
     g.namespace_manager.bind("rdfs", r.namespace.RDFS)    
     g.namespace_manager.bind("xsd", r.namespace.XSD)    
     g.namespace_manager.bind("owl", r.namespace.OWL)    
+    for tag, namespace in zip(*extra_namespaces):
+        g.namespace_manager.bind(tag, namespace)    
+
     return g,A
+def startGraphs(ids=("mid1","mid2"),titles=("Ontology1","ConceptX"),extra_namespaces=[]):
+    ags={}
+    for iid,title in zip(ids,titles):
+         ags[iid]=makeBasicGraph(extra_namespaces)
+         ags[iid][1].graph_attr["label"]=title
+    return ags
 def C(ag=[makeBasicGraph()],uri="foo",label="bar",superclass=None,comment=None,comment_pt=None,color=None,label_en=None):
     for gg in ag:
         g,A=gg
