@@ -1,4 +1,4 @@
-import rdflib as r, percolation as P, pygraphviz as gv, os
+import rdflib as r, percolation as P, pygraphviz as gv, os, datetime
 check=P.utils.check
 from rdflib.plugins.sparql import prepareQuery
 
@@ -15,7 +15,7 @@ class ns:
     ocd = r.Namespace("http://purl.org/socialparticipation/ocd/") # cidade democrática
     ore = r.Namespace("http://purl.org/socialparticipation/ore/") # ontology of the reseach, for registering ongoing works, a RDF AA
     ot  = r.Namespace("http://purl.org/socialparticipation/ot/")  # ontology of the thesis, for academic conceptualizations
-    per = r.Namespace("http://purl.org/socialparticipation/po/") # percolation, this framework itself
+    po=per = r.Namespace("http://purl.org/socialparticipation/po/") # percolation, this framework itself
     fb  = r.Namespace("http://purl.org/socialparticipation/fb/")  # facebook
     tw  = r.Namespace("http://purl.org/socialparticipation/tw/")  # twitter
     irc = r.Namespace("http://purl.org/socialparticipation/irc/") # irc
@@ -30,19 +30,21 @@ query_=prepareQuery(
 def G(g,S,P,O):
     g.add((S,P,O))
 LL=r.Literal
-def writeAll(per_graph,sname="img_and_rdf",sdir="./",full=False):
+def writeAll(per_graph,sname="img_and_rdf",sdir="./",full=False,remove=False):
     nome_=sname
     g,A=per_graph
     if not os.path.isdir(sdir):
         os.mkdir(sdir)
     for i in ("figs","dot","rdf"):
-        if os.path.isdir(sdir+i):
+        if os.path.isdir(sdir+i) and remove:
             for afile in os.listdir(sdir+i):
                 os.remove(sdir+i+"/"+afile)
             os.rmdir(sdir+i)
-        os.mkdir(sdir+i)
-    def mkName(tdir,tname,ttype): return "{}{}{}"
+        if not os.path.isdir(sdir+i):
+            os.mkdir(sdir+i)
     if full=="True":
+        nome=(sdir+"figs/%s.png"%(nome_,))
+        A.draw(nome,prog="dot")
         nome=(sdir+"figs/%s_2.png"%(nome_,))
         A.draw(nome,prog="circo")
         nome=(sdir+"figs/%s_3.png"%(nome_,))
@@ -55,10 +57,17 @@ def writeAll(per_graph,sname="img_and_rdf",sdir="./",full=False):
         A.graph_attr["size"]="39.5,32"
         nome=(sdir+"figs/%sN.png"%(nome_,))
         A.draw(nome,prog="neato")
+    if full=="circo":
+        print("on the circo draw")
+#        A.graph_attr["splines"]=True
+#        A.graph_attr["overlap"]=False
+#        A.graph_attr["size"]="39.5,32"
+        nome=(sdir+"figs/%sC.png"%(nome_,))
+        A.draw(nome,prog="circo")
     elif full:
         nome=(sdir+"figs/%s.png"%(nome_,))
         A.draw(nome,prog="dot")
-    print("drawed")
+    check("drawed")
 
     f=open(sdir+"rdf/%s.owl"%(nome_,),"wb")
     f.write(g.serialize())
@@ -66,6 +75,7 @@ def writeAll(per_graph,sname="img_and_rdf",sdir="./",full=False):
     f=open(sdir+"rdf/%s.ttl"%(nome_,),"wb")
     f.write(g.serialize(format="turtle"))
     f.close()
+    check("written")
 
 
 def makeBasicGraph(extra_namespaces=[],glabel="Ontologia da tese"):
@@ -128,17 +138,28 @@ def C(ag=[makeBasicGraph()],uri="foo",label="bar",superclass=None,comment=None,l
         if color:
             nd.attr['color']=color
 
-def I(ga=[makeBasicGraph()],uri="turiref",string="astringid",label="alabel"):
-    global COUNT
+def IC(ga=[makeBasicGraph()],uri="turiref",string="astringid",label="alabel"):
     ind=uri+"#"+str(string)
     if label:
         for g,A in ga:
             G(g,ind,ns.rdf.type,uri)
-            A.add_node(COUNT,style="filled")
-            nd=A.get_node(COUNT)
-            nd.attr['color']="#A2F3D1"
-            nd.attr['label']=label
+            G(g,ind,ns.rdfs.label,LL(label))
+            A.add_node(label,style="filled")
+            nd=A.get_node(label)
+            nd.attr['color']="#02F3DD"
     return ind
+
+#def I(ga=[makeBasicGraph()],uri="turiref",string="astringid",label="alabel"):
+#    global COUNT
+#    ind=uri+"#"+str(string)
+#    if label:
+#        for g,A in ga:
+#            G(g,ind,ns.rdf.type,uri)
+#            A.add_node(COUNT,style="filled")
+#            nd=A.get_node(COUNT)
+#            nd.attr['color']="#A2F3D1"
+#            nd.attr['label']=label
+#    return ind
 
 def link_(ga=[makeBasicGraph()],ind="uriref",label="alabel",props=["uri1","uri2"],objs=["uri1","uri2"]):
     """Link an instance with the object classes through the props"""
@@ -160,7 +181,10 @@ def link(ga=[makeBasicGraph()],ind="uriref",label="alabel",props=["uri1","uri2"]
     # acha o name do uriref buscando no grafo
     for prop, val in zip(props,vals):
         for g,A in ga:
-            G(g,ind,prop,LL(val,datatype=ns.xsd.string))
+            if type(val)==type(datetime.datetime.now()):
+                G(g,ind,prop,LL(val,datatype=ns.xsd.datetime))
+            else:
+                G(g,ind,prop,LL(val,datatype=ns.xsd.string))
             A.add_node(COUNT,style="filled")
             nd=A.get_node(COUNT)
             nd.attr["label"]=val
