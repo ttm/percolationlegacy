@@ -70,5 +70,5 @@ P.rdf.P([tg],P.rdf.ns.per.enables,"enables","enables")
 P.rdf.L([tg],"Snapshot","enables","Snapshot Analysis")
 P.rdf.L([tg],"Sequence","enables","Sequence Analysis")
 
-P.rdf.writeAll(tg,"PO")
+P.rdf.writeAll(tg,"PO","./",True)
 

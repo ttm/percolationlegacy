@@ -1,25 +1,40 @@
-import rdflib as r, pygraphviz as gv, os
+import rdflib as r, percolation as P, pygraphviz as gv, os
+check=P.utils.check
+from rdflib.plugins.sparql import prepareQuery
+
+#bb=g.query(query,initBindings={"fid":ind})
+#label=[i for i in bb][0][0].value
+
 COUNT=0
 class ns:
-    obs = r.Namespace("http://purl.org/socialparticipation/obs/")
-    aa = r.Namespace("http://purl.org/socialparticipation/aa/")
-    vbs = r.Namespace("http://purl.org/socialparticipation/vbs/")
-    opa = r.Namespace("http://purl.org/socialparticipation/opa/")
-    ops = r.Namespace("http://purl.org/socialparticipation/ops/")
-    ocd = r.Namespace("http://purl.org/socialparticipation/ocd/")
-    ore = r.Namespace("http://purl.org/socialparticipation/ore/")
-    ot = r.Namespace("http://purl.org/socialparticipation/ot/")
-    per = r.Namespace("http://purl.org/socialparticipation/per/")
+    obs = r.Namespace("http://purl.org/socialparticipation/obs/") # ontology of the social library
+    aa  = r.Namespace("http://purl.org/socialparticipation/aa/")  # algorithmic autoregulation
+    vbs = r.Namespace("http://purl.org/socialparticipation/vbs/") # vocabulary of the social library
+    opa = r.Namespace("http://purl.org/socialparticipation/opa/") # participabr
+    ops = r.Namespace("http://purl.org/socialparticipation/ops/") # social participation ontology
+    ocd = r.Namespace("http://purl.org/socialparticipation/ocd/") # cidade democrática
+    ore = r.Namespace("http://purl.org/socialparticipation/ore/") # ontology of the reseach, for registering ongoing works, a RDF AA
+    ot  = r.Namespace("http://purl.org/socialparticipation/ot/")  # ontology of the thesis, for academic conceptualizations
+    per = r.Namespace("http://purl.org/socialparticipation/po/") # percolation, this framework itself
+    fb  = r.Namespace("http://purl.org/socialparticipation/fb/")  # facebook
+    tw  = r.Namespace("http://purl.org/socialparticipation/tw/")  # twitter
+    irc = r.Namespace("http://purl.org/socialparticipation/irc/") # irc
+    ld  = r.Namespace("http://purl.org/socialparticipation/ld/")  # linkedin 
     rdf = r.namespace.RDF
     rdfs = r.namespace.RDFS
     owl = r.namespace.OWL
     xsd = r.namespace.XSD
+query_=prepareQuery(
+        "SELECT ?name WHERE {?fid fb:name ?name}"
+        ,initNs={"fb":ns.fb})
 def G(g,S,P,O):
     g.add((S,P,O))
 LL=r.Literal
-def writeAll(per_graph,sname="img_and_rdf",sdir="./"):
+def writeAll(per_graph,sname="img_and_rdf",sdir="./",full=False):
     nome_=sname
     g,A=per_graph
+    if not os.path.isdir(sdir):
+        os.mkdir(sdir)
     for i in ("figs","dot","rdf"):
         if os.path.isdir(sdir+i):
             for afile in os.listdir(sdir+i):
@@ -27,19 +42,28 @@ def writeAll(per_graph,sname="img_and_rdf",sdir="./"):
             os.rmdir(sdir+i)
         os.mkdir(sdir+i)
     def mkName(tdir,tname,ttype): return "{}{}{}"
-    nome=("figs/%s.png"%(nome_,))
-    A.draw(nome,prog="dot")
-    nome=("figs/%s_2.png"%(nome_,))
-    A.draw(nome,prog="circo")
-    nome=("figs/%s_3.png"%(nome_,))
-    A.draw(nome,prog="fdp")
+    if full=="True":
+        nome=(sdir+"figs/%s_2.png"%(nome_,))
+        A.draw(nome,prog="circo")
+        nome=(sdir+"figs/%s_3.png"%(nome_,))
+        A.draw(nome,prog="fdp")
+        A.write("dot/%s.dot"%(nome_,))
+    if full=="neato":
+        print("on the draw")
+        A.graph_attr["splines"]=True
+        A.graph_attr["overlap"]=False
+        A.graph_attr["size"]="39.5,32"
+        nome=(sdir+"figs/%sN.png"%(nome_,))
+        A.draw(nome,prog="neato")
+    elif full:
+        nome=(sdir+"figs/%s.png"%(nome_,))
+        A.draw(nome,prog="dot")
+    print("drawed")
 
-    A.write("dot/%s.dot"%(nome_,))
-
-    f=open("rdf/%s.owl"%(nome_,),"wb")
+    f=open(sdir+"rdf/%s.owl"%(nome_,),"wb")
     f.write(g.serialize())
     f.close()
-    f=open("rdf/%s.ttl"%(nome_,),"wb")
+    f=open(sdir+"rdf/%s.ttl"%(nome_,),"wb")
     f.write(g.serialize(format="turtle"))
     f.close()
 
@@ -104,6 +128,48 @@ def C(ag=[makeBasicGraph()],uri="foo",label="bar",superclass=None,comment=None,l
         if color:
             nd.attr['color']=color
 
+def I(ga=[makeBasicGraph()],uri="turiref",string="astringid",label="alabel"):
+    global COUNT
+    ind=uri+"#"+str(string)
+    if label:
+        for g,A in ga:
+            G(g,ind,ns.rdf.type,uri)
+            A.add_node(COUNT,style="filled")
+            nd=A.get_node(COUNT)
+            nd.attr['color']="#A2F3D1"
+            nd.attr['label']=label
+    return ind
+
+def link_(ga=[makeBasicGraph()],ind="uriref",label="alabel",props=["uri1","uri2"],objs=["uri1","uri2"]):
+    """Link an instance with the object classes through the props"""
+    query=prepareQuery(
+            "SELECT ?name WHERE {?fid fb:name ?name}",
+            initNs={"fb":ns.fb})
+    for prop, obj in zip(props,objs):
+        for g,A in ga:
+            G(g,ind,prop,obj)
+            bb=g.query(query,initBindings={"fid":obj})
+            oname=[i for i in bb][0][0].value
+            A.add_edge(label,oname)
+            e=A.get_edge(label,oname)
+            e.attr["label"]=prop.split("/")[-1]
+
+def link(ga=[makeBasicGraph()],ind="uriref",label="alabel",props=["uri1","uri2"],vals=["val1","val2"]):
+    """Link an instance with the vals through the props"""
+    global COUNT
+    # acha o name do uriref buscando no grafo
+    for prop, val in zip(props,vals):
+        for g,A in ga:
+            G(g,ind,prop,LL(val,datatype=ns.xsd.string))
+            A.add_node(COUNT,style="filled")
+            nd=A.get_node(COUNT)
+            nd.attr["label"]=val
+            nd.attr['color']="#02F3F1"
+            A.add_edge(  label,COUNT)
+            e=A.get_edge(label,COUNT); COUNT+=1
+            e.attr["label"]=prop.split("/")[-1]
+
+
 def P(ag=[makeBasicGraph()],uri="foo",label="bar",label_pt=None,comment=None):
     """Add object property to RDF graph"""
     for gg in ag:
@@ -126,6 +192,20 @@ def D(ag=[makeBasicGraph()],uri="foo",label="bar",dtype=ns.xsd.string,comment=No
             G(g,uri,ns.rdfs.comment,LL(comment,lang="en"))
         if label_pt:
             G(g,uri,ns.rdfs.label,LL(label_pt,lang="pt"))
+def L_(ga,sub,pred,obj):
+    for g,A in ga:
+        G(g,sub,pred,obj)
+        # draw
+        # get names
+        # make edge
+        bb=g.query(query_,initBindings={"fid":sub})
+        sname=[i for i in bb][0][0].value
+        bb=g.query(query_,initBindings={"fid":obj})
+        oname=[i for i in bb][0][0].value
+        A.add_edge(sname,oname)
+        e=A.get_edge(sname,oname)
+        e.attr["label"]=pred.split("/")[-1]
+
 def L(ag=[makeBasicGraph()],olabel="foo",llabel="bar",dlabel="baz"):
     """Add object property link with labels for origin, link, destination"""
     for gg in ag:
