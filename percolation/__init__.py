@@ -1,2 +1,1 @@
-from .linkedData import *
-foo="bar"
+from . import rdf

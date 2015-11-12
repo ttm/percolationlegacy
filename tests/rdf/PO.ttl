@@ -1,0 +1,82 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix per: <http://purl.org/socialparticipation/per/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+per:Provenance a owl:Class ;
+    rdfs:label "Provenance"@en,
+        "Proveniência"@pt ;
+    rdfs:comment "A class for whatever informations about the provenance of the data."@en .
+
+per:Sequence a owl:Class ;
+    rdfs:label "Sequence"@en,
+        "Sequência"@pt ;
+    rdfs:comment "A sequence of data snapshots, possibly ordered with respect to time or another reference."@en ;
+    rdfs:subClassOf per:Dataset .
+
+per:SequenceAnalysis a owl:Class ;
+    rdfs:label "Sequence Analysis"@en,
+        "Análise de Sequência"@pt ;
+    rdfs:comment "A sequence of data snapshots, possibly ordered with respect to time or another reference."@en ;
+    rdfs:subClassOf per:Analysis .
+
+per:Snapshot a owl:Class ;
+    rdfs:label "Snapshot"@en,
+        "Snapshot"@pt ;
+    rdfs:comment "a collection of data taken together as a unit of analysis."@en ;
+    rdfs:subClassOf per:Dataset .
+
+per:SnapshotAnalysis a owl:Class ;
+    rdfs:label "Snapshot Analysis"@en,
+        "Análise de Snapshot"@pt ;
+    rdfs:comment "a collection of data taken together as a unit of analysis."@en ;
+    rdfs:subClassOf per:Analysis .
+
+per:availableAt a owl:DatatypeProperty ;
+    rdfs:label "available at"@pt ;
+    rdfs:comment "an instance where the data can be found, preferably a URL where the data is publicly available"@en ;
+    rdfs:range xsd:string .
+
+per:createdAt a owl:DatatypeProperty ;
+    rdfs:label "created at"@pt ;
+    rdfs:range xsd:datetime .
+
+per:donatedBy a owl:DatatypeProperty ;
+    rdfs:label "donated by"@pt ;
+    rdfs:range xsd:string .
+
+per:enables a owl:ObjectProperty ;
+    rdfs:label "enables"@en,
+        "enables"@pt .
+
+per:holonym a owl:ObjectProperty ;
+    rdfs:label "holonym"@en,
+        "holonímia"@pt .
+
+per:meronym a owl:ObjectProperty ;
+    rdfs:label "meronym"@en,
+        "meronímia"@pt .
+
+per:platform a owl:DatatypeProperty ;
+    rdfs:label "plataforma"@pt,
+        "platform"@pt ;
+    rdfs:comment "a name or identifier for the social media platform from which the data was collected"@en ;
+    rdfs:range xsd:string .
+
+per:provenance a owl:ObjectProperty ;
+    rdfs:label "provenance"@en,
+        "proveniência"@pt .
+
+per:Analysis a owl:Class ;
+    rdfs:label "Analysis"@en,
+        "Análise"@pt ;
+    rdfs:comment "A quantitative analysis expressed by numbers, datastructures and interpretations."@en ;
+    rdfs:subClassOf per:Dataset .
+
+per:Dataset a owl:Class ;
+    rdfs:label "Dataset"@en,
+        "Dataset"@pt ;
+    rdfs:comment "A collection of data typically in a computer readable format."@en .
+

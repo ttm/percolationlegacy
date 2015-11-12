@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+>
+  <rdf:Description rdf:about="http://purl.org/socialparticipation/per/meronym">
+    <rdfs:label xml:lang="en">meronym</rdfs:label>
+    <rdfs:label xml:lang="pt">meronímia</rdfs:label>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://purl.org/socialparticipation/per/Sequence">
+    <rdfs:subClassOf rdf:resource="http://purl.org/socialparticipation/per/Dataset"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:label xml:lang="pt">Sequência</rdfs:label>
+    <rdfs:comment xml:lang="en">A sequence of data snapshots, possibly ordered with respect to time or another reference.</rdfs:comment>
+    <rdfs:label xml:lang="en">Sequence</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://purl.org/socialparticipation/per/availableAt">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:comment xml:lang="en">an instance where the data can be found, preferably a URL where the data is publicly available</rdfs:comment>
+    <rdfs:label xml:lang="pt">available at</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://purl.org/socialparticipation/per/platform">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:label xml:lang="pt">platform</rdfs:label>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:label xml:lang="pt">plataforma</rdfs:label>
+    <rdfs:comment xml:lang="en">a name or identifier for the social media platform from which the data was collected</rdfs:comment>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://purl.org/socialparticipation/per/SnapshotAnalysis">
+    <rdfs:label xml:lang="en">Snapshot Analysis</rdfs:label>
+    <rdfs:subClassOf rdf:resource="http://purl.org/socialparticipation/per/Analysis"/>
+    <rdfs:label xml:lang="pt">Análise de Snapshot</rdfs:label>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:comment xml:lang="en">a collection of data taken together as a unit of analysis.</rdfs:comment>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://purl.org/socialparticipation/per/Snapshot">
+    <rdfs:label xml:lang="en">Snapshot</rdfs:label>
+    <rdfs:label xml:lang="pt">Snapshot</rdfs:label>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:subClassOf rdf:resource="http://purl.org/socialparticipation/per/Dataset"/>
+    <rdfs:comment xml:lang="en">a collection of data taken together as a unit of analysis.</rdfs:comment>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://purl.org/socialparticipation/per/donatedBy">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:label xml:lang="pt">donated by</rdfs:label>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://purl.org/socialparticipation/per/SequenceAnalysis">
+    <rdfs:label xml:lang="pt">Análise de Sequência</rdfs:label>
+    <rdfs:subClassOf rdf:resource="http://purl.org/socialparticipation/per/Analysis"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:comment xml:lang="en">A sequence of data snapshots, possibly ordered with respect to time or another reference.</rdfs:comment>
+    <rdfs:label xml:lang="en">Sequence Analysis</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://purl.org/socialparticipation/per/holonym">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:label xml:lang="en">holonym</rdfs:label>
+    <rdfs:label xml:lang="pt">holonímia</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://purl.org/socialparticipation/per/createdAt">
+    <rdfs:label xml:lang="pt">created at</rdfs:label>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#datetime"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://purl.org/socialparticipation/per/Provenance">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:comment xml:lang="en">A class for whatever informations about the provenance of the data.</rdfs:comment>
+    <rdfs:label xml:lang="en">Provenance</rdfs:label>
+    <rdfs:label xml:lang="pt">Proveniência</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://purl.org/socialparticipation/per/Dataset">
+    <rdfs:comment xml:lang="en">A collection of data typically in a computer readable format.</rdfs:comment>
+    <rdfs:label xml:lang="en">Dataset</rdfs:label>
+    <rdfs:label xml:lang="pt">Dataset</rdfs:label>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://purl.org/socialparticipation/per/Analysis">
+    <rdfs:subClassOf rdf:resource="http://purl.org/socialparticipation/per/Dataset"/>
+    <rdfs:label xml:lang="pt">Análise</rdfs:label>
+    <rdfs:comment xml:lang="en">A quantitative analysis expressed by numbers, datastructures and interpretations.</rdfs:comment>
+    <rdfs:label xml:lang="en">Analysis</rdfs:label>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://purl.org/socialparticipation/per/provenance">
+    <rdfs:label xml:lang="pt">proveniência</rdfs:label>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:label xml:lang="en">provenance</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://purl.org/socialparticipation/per/enables">
+    <rdfs:label xml:lang="pt">enables</rdfs:label>
+    <rdfs:label xml:lang="en">enables</rdfs:label>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </rdf:Description>
+</rdf:RDF>
