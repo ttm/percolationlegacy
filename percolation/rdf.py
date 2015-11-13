@@ -67,16 +67,18 @@ def writeAll(per_graph,sname="img_and_rdf",sdir="./",full=False,remove=False):
     elif full:
         nome=(sdir+"figs/%s.png"%(nome_,))
         A.draw(nome,prog="dot")
-    check("drawed")
+    check("{} drawed".format(nome_))
     A.write(sdir+"dot/%s.dot"%(nome_,))
+    check("dot written")
 
     f=open(sdir+"rdf/%s.owl"%(nome_,),"wb")
     f.write(g.serialize())
     f.close()
+    check("owl written")
     f=open(sdir+"rdf/%s.ttl"%(nome_,),"wb")
     f.write(g.serialize(format="turtle"))
     f.close()
-    check("written")
+    check("ttl written")
 
 
 def makeBasicGraph(extra_namespaces=[],glabel="Ontologia da tese"):
