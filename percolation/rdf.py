@@ -138,24 +138,28 @@ def C(ag=[makeBasicGraph()],uri="foo",label="bar",superclass=None,comment=None,l
                 G(g,uri,ns.rdfs.comment,LL(comment_pt,lang="pt"))
         if color:
             nd.attr['color']=color
-def IC_(ga=None,uri="turiref",string="astringid",label="alabel"):
+def IC_(ga=None,uri="turiref",string="astringid",label="alabel",clabel=True):
     ind=uri+"#"+str(string)
-    if label and ga:
+    if ga:
         for g,A in ga:
             G(g,ind,ns.rdf.type,uri)
-            G(g,ind,ns.rdfs.label,LL(label))
+            if clabel:
+                G(g,ind,ns.rdfs.label,LL(label))
+        if label:
             A.add_node(label,style="filled")
             nd=A.get_node(label)
             nd.attr['color']="#02F3DD"
     return ind
 
 
-def IC(ga=None,uri="turiref",string="astringid",label="alabel"):
+def IC(ga=None,uri="turiref",string="astringid",label="alabel",clabel=True):
     ind=uri+"#"+str(string)
-    if label and ga:
+    if ga:
         for g,A in ga:
             G(g,ind,ns.rdf.type,uri)
-            G(g,ind,ns.rdfs.label,LL(label))
+            if clabel:
+                G(g,ind,ns.rdfs.label,LL(label))
+        if label:
             A.add_node(label,style="filled")
             nd=A.get_node(label)
             nd.attr['color']="#02F3DD"
@@ -173,18 +177,18 @@ def IC(ga=None,uri="turiref",string="astringid",label="alabel"):
 #            nd.attr['label']=label
 #    return ind
 
-def link_(ga=[makeBasicGraph()],ind="uriref",label="alabel",props=["uri1","uri2"],objs=["uri1","uri2"]):
+def link_(ga=[makeBasicGraph()],ind="uriref",slabel="alabel",props=["uri1","uri2"],objs=["uri1","uri2"],labels=["l1","l2"]):
     """Link an instance with the object classes through the props"""
-    query=prepareQuery(
-            "SELECT ?name WHERE {?fid fb:name ?name}",
-            initNs={"fb":ns.fb})
-    for prop, obj in zip(props,objs):
+#    query=prepareQuery(
+#            "SELECT ?name WHERE {?fid fb:name ?name}",
+#            initNs={"fb":ns.fb})
+    for prop, obj, label in zip(props,objs,labels):
         for g,A in ga:
             G(g,ind,prop,obj)
-            bb=g.query(query,initBindings={"fid":obj})
-            oname=[i for i in bb][0][0].value
-            A.add_edge(label,oname)
-            e=A.get_edge(label,oname)
+            #bb=g.query(query,initBindings={"fid":obj})
+            #oname=[i for i in bb][0][0].value
+            A.add_edge(slabel,label)
+            e=A.get_edge(slabel,label)
             e.attr["label"]=prop.split("/")[-1]
 
 def link(ga=[makeBasicGraph()],ind="uriref",label="alabel",props=["uri1","uri2"],vals=["val1","val2"]):
