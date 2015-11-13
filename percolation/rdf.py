@@ -68,6 +68,7 @@ def writeAll(per_graph,sname="img_and_rdf",sdir="./",full=False,remove=False):
         nome=(sdir+"figs/%s.png"%(nome_,))
         A.draw(nome,prog="dot")
     check("drawed")
+    A.write(sdir+"dot/%s.dot"%(nome_,))
 
     f=open(sdir+"rdf/%s.owl"%(nome_,),"wb")
     f.write(g.serialize())
@@ -137,10 +138,21 @@ def C(ag=[makeBasicGraph()],uri="foo",label="bar",superclass=None,comment=None,l
                 G(g,uri,ns.rdfs.comment,LL(comment_pt,lang="pt"))
         if color:
             nd.attr['color']=color
-
-def IC(ga=[makeBasicGraph()],uri="turiref",string="astringid",label="alabel"):
+def IC_(ga=None,uri="turiref",string="astringid",label="alabel"):
     ind=uri+"#"+str(string)
-    if label:
+    if label and ga:
+        for g,A in ga:
+            G(g,ind,ns.rdf.type,uri)
+            G(g,ind,ns.rdfs.label,LL(label))
+            A.add_node(label,style="filled")
+            nd=A.get_node(label)
+            nd.attr['color']="#02F3DD"
+    return ind
+
+
+def IC(ga=None,uri="turiref",string="astringid",label="alabel"):
+    ind=uri+"#"+str(string)
+    if label and ga:
         for g,A in ga:
             G(g,ind,ns.rdf.type,uri)
             G(g,ind,ns.rdfs.label,LL(label))
