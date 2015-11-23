@@ -5,8 +5,33 @@ from rdflib.plugins.sparql import prepareQuery
 #bb=g.query(query,initBindings={"fid":ind})
 #label=[i for i in bb][0][0].value
 
+"""
+para as URIs:
+reserved    = gen-delims / sub-delims
+
+gen-delims  = ":" / "/" / "?" / "#" / "[" / "]" / "@"
+
+sub-delims  = "!" / "$" / "&" / "'" / "(" / ")"
+            / "*" / "+" / "," / ";" / "="
+https://tools.ietf.org/html/rfc3986#section-2
+
+A URI também não é splitada com %
+r.namespace.split_uri("http://purl.org/socialparticipation/irc/Participant#labMacambiraLaleniaLog1%2818")
+"""
+def LL_(literal):
+    if type(literal)==type(1):
+        ttype=ns.xsd.integer
+    if type(literal)==type(True):
+        ttype=ns.xsd.boolean
+    elif type(literal)==type(datetime.datetime.now()):
+        ttype=ns.xsd.datetime
+    else:
+        ttype=ns.xsd.string
+    return r.Literal(literal,datatype=ttype)
+
 COUNT=0
 class ns:
+    cm = r.Namespace("http://purl.org/socialparticipation/cm/")   # caixa mágica
     obs = r.Namespace("http://purl.org/socialparticipation/obs/") # ontology of the social library
     aa  = r.Namespace("http://purl.org/socialparticipation/aa/")  # algorithmic autoregulation
     vbs = r.Namespace("http://purl.org/socialparticipation/vbs/") # vocabulary of the social library
@@ -67,7 +92,7 @@ def writeAll(per_graph,sname="img_and_rdf",sdir="./",full=False,remove=False):
     elif full:
         nome=(sdir+"figs/%s.png"%(nome_,))
         A.draw(nome,prog="dot")
-    check("{} drawed".format(nome_))
+    check("{} was rendered".format(nome_))
     A.write(sdir+"dot/%s.dot"%(nome_,))
     check("dot written")
 
@@ -98,32 +123,46 @@ def startGraphs(ids=("mid1","mid2"),titles=("Ontology1","ConceptX"),extra_namesp
          ags[iid]=makeBasicGraph(extra_namespaces)
          ags[iid][1].graph_attr["label"]=title
     return ags
-def C(ag=[makeBasicGraph()],uri="foo",label="bar",superclass=None,comment=None,label_pt=None,comment_pt=None,color=None):
+def C(ag=[makeBasicGraph()],uri="foo",label="bar",superclass=None,comment=None,label_pt=None,comment_pt=None,color=None,graph_lang="en"):
     for gg in ag:
         g,A=gg
         G(g,uri,ns.rdf.type,ns.owl.Class)
         G(g,uri,ns.rdfs.label,LL(label,lang="en"))
         if label_pt:
             G(g,uri,ns.rdfs.label,LL(label_pt,lang="pt"))
-        A.add_node(label,style="filled")
-        nd=A.get_node(label)
+        if graph_lang=="pt":
+            A.add_node(label_pt,style="filled")
+            nd=A.get_node(label_pt)
+        else:
+            A.add_node(label,style="filled")
+            nd=A.get_node(label)
         if superclass:
             if type(superclass) in (type([1,2]),type((1,2))):
                 for sp in superclass:
                     G(g,uri,ns.rdfs.subClassOf,sp)
-                    print([i for i in g.objects(sp,ns.rdfs.label)])
-                    lsuperclass=[i for i in g.objects(sp,ns.rdfs.label) if i.language=="en"][0].title()
-                    A.add_edge(  label, lsuperclass)
-                    e=A.get_edge(label, lsuperclass)
+                    #print([i for i in g.objects(sp,ns.rdfs.label)])
+                    if graph_lang=="pt":
+                        lsuperclass=[i for i in g.objects(sp,ns.rdfs.label) if i.language=="pt"][0].title()
+#                        lsuperclass=[i for i in g.objects(sp,ns.rdfs.label) if i.lang=="pt"][0].title()
+                        A.add_edge(  label_pt, lsuperclass)
+                        e=A.get_edge(label_pt, lsuperclass)
+                    else:
+                        lsuperclass=[i for i in g.objects(sp,ns.rdfs.label) if i.language=="en"][0].title()
+                        A.add_edge(  label, lsuperclass)
+                        e=A.get_edge(label, lsuperclass)
                     e.attr["arrowhead"]="empty"
                     e.attr["arrowsize"]=2
             else:
                 G(g,uri,ns.rdfs.subClassOf,superclass)
                 #lsuperclass=[i for i in g.objects(superclass,rdfs.label)][-1]
-                lsuperclass=[i for i in g.objects(superclass,ns.rdfs.label) if i.language=="en"][0]
-                print(lsuperclass)
-                A.add_edge(  label, lsuperclass)
-                e=A.get_edge(label, lsuperclass)
+                if graph_lang=="pt":
+                    lsuperclass=[i for i in g.objects(superclass,ns.rdfs.label) if i.language=="pt"][0]
+                    A.add_edge(  label_pt, lsuperclass)
+                    e=A.get_edge(label_pt, lsuperclass)
+                else:
+                    lsuperclass=[i for i in g.objects(superclass,ns.rdfs.label) if i.language=="en"][0]
+                    A.add_edge(  label, lsuperclass)
+                    e=A.get_edge(label, lsuperclass)
                 e.attr["arrowhead"]="empty"
                 e.attr["arrowsize"]=2
         if comment:
@@ -154,12 +193,12 @@ def IC_(ga=None,uri="turiref",string="astringid",label="alabel",clabel=True):
     return ind
 
 
-def IC(ga=None,uri="turiref",string="astringid",label="alabel",clabel=True):
+def IC(ga=None,uri="turiref",string="astringid",label=None,clabel=True):
     ind=uri+"#"+str(string)
     if ga:
         for g,A in ga:
             G(g,ind,ns.rdf.type,uri)
-            if clabel:
+            if clabel and label:
                 G(g,ind,ns.rdfs.label,LL(label))
         if label:
             A.add_node(label,style="filled")
@@ -189,8 +228,9 @@ def link_(ga=[makeBasicGraph()],ind="uriref",slabel="alabel",props=["uri1","uri2
             G(g,ind,prop,obj)
             #bb=g.query(query,initBindings={"fid":obj})
             #oname=[i for i in bb][0][0].value
-            A.add_edge(slabel,label)
-            e=A.get_edge(slabel,label)
+            slabel_=slabel.replace("%","")
+            A.add_edge(  slabel_,label)
+            e=A.get_edge(slabel_,label)
             e.attr["label"]=prop.split("/")[-1]
 
 def link(ga=[makeBasicGraph()],ind="uriref",label="alabel",props=["uri1","uri2"],vals=["val1","val2"]):
@@ -199,18 +239,15 @@ def link(ga=[makeBasicGraph()],ind="uriref",label="alabel",props=["uri1","uri2"]
     # acha o name do uriref buscando no grafo
     for prop, val in zip(props,vals):
         for g,A in ga:
-            if type(val)==type(datetime.datetime.now()):
-                G(g,ind,prop,LL(val,datatype=ns.xsd.datetime))
-            else:
-                G(g,ind,prop,LL(val,datatype=ns.xsd.string))
+            G(g,ind,prop,LL_(val))
             A.add_node(COUNT,style="filled")
             nd=A.get_node(COUNT)
             nd.attr["label"]=val
             nd.attr['color']="#02F3F1"
+            label=label.replace("%","FOO")
             A.add_edge(  label,COUNT)
             e=A.get_edge(label,COUNT); COUNT+=1
             e.attr["label"]=prop.split("/")[-1]
-
 
 def P(ag=[makeBasicGraph()],uri="foo",label="bar",label_pt=None,comment=None):
     """Add object property to RDF graph"""
