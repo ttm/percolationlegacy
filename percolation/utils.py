@@ -1,4 +1,4 @@
-import time, pickle
+import time, pickle, os
 import builtins as B
 TT=time.time()
 # check
@@ -6,6 +6,26 @@ def check(amsg="string message"):
     global TT
     print(amsg, time.time()-TT); TT=time.time()
 # pdumps aqui tb
+class Dumper:
+    def __init__(self,tfilename):
+        if os.path.isfile(tfilename):
+            self.f=open(tfilename,"ab")
+        else:
+            self.f=open(tfilename,"wb")
+    def dump(self,tobj):
+        pickle.dump(tobj,self.f)
+    def close(self):
+        self.f.close()
+def pRead2(tfilename):
+    """pickle read for the Dumper class"""
+    objs=[]
+    with open(tfilename,"rb") as f:
+        while 1:
+            try:
+                objs.append(pickle.load(f))
+            except EOFError:
+                break
+    return objs
 def pDump(tobject,tfilename):
     with open(tfilename,"wb") as f:
         pickle.dump(tobject,f,-1)
@@ -25,6 +45,15 @@ def utf8Fix(string):
 def countMe(ggraph,uri,o="?o"):
     query=r"SELECT (COUNT(?o) as ?count) WHERE {{   ?s {} {}}}".format(uri,o)
     return [i for i in ggraph.query(query)][0][0].value
+def countMe2(ggraph,uri):
+    query=r"SELECT (COUNT(?s) as ?count) WHERE {{?s a {}}}".format(uri)
+    return [i for i in ggraph.query(query)][0][0].value
 def getAll(ggraph,uri):
     query="SELECT ?o WHERE {{?s {} ?o}}".format(uri)
     return list(set([i[0].value for i in ggraph.query(query)]))
+def getAll2(ggraph,uri):
+    query="SELECT ?o WHERE {{?s {} ?o}}".format(uri)
+    return list(set([i[0] for i in ggraph.query(query)]))
+def cred(twc_class):
+    t=twc_class
+    return [t.tak,t.taks,t.tat,t.tats]
