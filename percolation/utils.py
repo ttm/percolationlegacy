@@ -14,6 +14,19 @@ def zipDir(odirpath,dpath="./afilename.zip"):
     zipdir(odirpath, zipf)
     zipf.close()
 
+def zipDir2(odirpath,dpath="./afilename"):
+    i=0
+    zipf = zipfile.ZipFile("{}{}.zip".format(dpath,"00000"), 'w')
+    for root, dirs, files in os.walk(odirpath):
+        for file in files:
+            zipf.write(os.path.join(root, file))
+            i+=1
+            if i%5000==0:
+                zipf.close()
+                zipf = zipfile.ZipFile("{}{}.zip".format(dpath,i), 'w')
+    zipf.close()
+
+#
 #if __name__ == '__main__':
 #    zipf = zipfile.ZipFile('Python.zip', 'w')
 #    zipdir('tmp/', zipf)
