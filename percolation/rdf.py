@@ -44,6 +44,7 @@ class ns:
     fb  = r.Namespace("http://purl.org/socialparticipation/fb/")  # facebook
     tw  = r.Namespace("http://purl.org/socialparticipation/tw/")  # twitter
     irc = r.Namespace("http://purl.org/socialparticipation/irc/") # irc
+    gmane = r.Namespace("http://purl.org/socialparticipation/gmane/") # gmane
     ld  = r.Namespace("http://purl.org/socialparticipation/ld/")  # linkedin 
     rdf = r.namespace.RDF
     rdfs = r.namespace.RDFS

@@ -2,6 +2,23 @@ import time, pickle, os
 import builtins as B
 TT=time.time()
 # check
+import zipfile
+
+def zipdir(path, ziph):
+    # ziph is zipfile handle
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            ziph.write(os.path.join(root, file))
+def zipDir(odirpath,dpath="./afilename.zip"):
+    zipf = zipfile.ZipFile(dpath, 'w')
+    zipdir(odirpath, zipf)
+    zipf.close()
+
+#if __name__ == '__main__':
+#    zipf = zipfile.ZipFile('Python.zip', 'w')
+#    zipdir('tmp/', zipf)
+#    zipf.close()
+
 def check(amsg="string message"):
     global TT
     print(amsg, time.time()-TT); TT=time.time()
