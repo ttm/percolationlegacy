@@ -46,6 +46,20 @@ class Dumper:
         pickle.dump(tobj,self.f)
     def close(self):
         self.f.close()
+def pRead3(tfilename,tweets,fopen=None):
+    """pickle read for the Dumper class"""
+    if not fopen:
+        f=open(tfilename,"rb")
+    else:
+        f=fopen
+    #while len(tweets)<9900:
+    while len(tweets)<5000:
+        try:
+            tweets+=pickle.load(f)
+        except EOFError:
+            break
+    return tweets,f
+
 def pRead2(tfilename):
     """pickle read for the Dumper class"""
     objs=[]

@@ -219,7 +219,7 @@ def IC(ga=None,uri="turiref",string="astringid",label=None,clabel=True):
 #            nd.attr['label']=label
 #    return ind
 
-def link_(ga=[makeBasicGraph()],ind="uriref",slabel="alabel",props=["uri1","uri2"],objs=["uri1","uri2"],labels=["l1","l2"]):
+def link_(ga=[makeBasicGraph()],ind="uriref",slabel="alabel",props=["uri1","uri2"],objs=["uri1","uri2"],labels=["l1","l2"],draw=True):
     """Link an instance with the object classes through the props"""
 #    query=prepareQuery(
 #            "SELECT ?name WHERE {?fid fb:name ?name}",
@@ -229,26 +229,28 @@ def link_(ga=[makeBasicGraph()],ind="uriref",slabel="alabel",props=["uri1","uri2
             G(g,ind,prop,obj)
             #bb=g.query(query,initBindings={"fid":obj})
             #oname=[i for i in bb][0][0].value
-            slabel_=slabel.replace("%","")
-            A.add_edge(  slabel_,label)
-            e=A.get_edge(slabel_,label)
-            e.attr["label"]=prop.split("/")[-1]
+            if draw:
+                slabel_=slabel.replace("%","")
+                A.add_edge(  slabel_,label)
+                e=A.get_edge(slabel_,label)
+                e.attr["label"]=prop.split("/")[-1]
 
-def link(ga=[makeBasicGraph()],ind="uriref",label="alabel",props=["uri1","uri2"],vals=["val1","val2"]):
+def link(ga=[makeBasicGraph()],ind="uriref",label="alabel",props=["uri1","uri2"],vals=["val1","val2"],draw=True):
     """Link an instance with the vals through the props"""
     global COUNT
     # acha o name do uriref buscando no grafo
     for prop, val in zip(props,vals):
         for g,A in ga:
             G(g,ind,prop,LL_(val))
-            A.add_node(COUNT,style="filled")
-            nd=A.get_node(COUNT)
-            nd.attr["label"]=val
-            nd.attr['color']="#02F3F1"
-            label=label.replace("%","FOO")
-            A.add_edge(  label,COUNT)
-            e=A.get_edge(label,COUNT); COUNT+=1
-            e.attr["label"]=prop.split("/")[-1]
+            if draw:
+                A.add_node(COUNT,style="filled")
+                nd=A.get_node(COUNT)
+                nd.attr["label"]=val
+                nd.attr['color']="#02F3F1"
+                label=label.replace("%","FOO")
+                A.add_edge(  label,COUNT)
+                e=A.get_edge(label,COUNT); COUNT+=1
+                e.attr["label"]=prop.split("/")[-1]
 
 def P(ag=[makeBasicGraph()],uri="foo",label="bar",label_pt=None,comment=None):
     """Add object property to RDF graph"""
