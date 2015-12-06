@@ -125,7 +125,7 @@ qq="""
     GROUP BY ?p
     ORDER BY ?count
     """
-sparql = SPARQLWrapper("http://data.aalto.fi/sparql")
+#sparql = SPARQLWrapper("http://data.aalto.fi/sparql")
 #sparql.setQuery(hh+qq)
 #sparql.setReturnFormat(JSON)
 #results9 = sparql.query().convert()
@@ -220,39 +220,115 @@ def mQuery(query,mvars):
 # puxado tb authorList, faz a query certa para obter
 # as ids e labels com relação a cada Artigo.
 # Estes são clicks, monta rede
+#qq=r"""
+#  SELECT ?{} ?{} {{
+#    ?s a bibo:Article .
+#    ?s bibo:authorList ?o .
+#      ?o rdf:rest*/rdf:first ?person .
+#      ?person foaf:name ?name .
+#    }} LIMIT 5000 
+#    """; mvars="name", "s"
+#c("antes query 8")
+#mres8=mQuery(qq,mvars)
+#c("query 8")
+#dd={}
+#for res in mres8:
+#    if res[-1] in dd.keys():
+#        dd[res[-1]]+=[res[0]]
+#    else:
+#        dd[res[-1]]=[res[0]]
+## dd tem os cliques
+#import networkx as x
+#gg=x.Graph()
+#for key in dd:
+#    i=1
+#    for id1 in dd[key]:
+#        if gg.has_node(id1): gg.node[id1]["weight"]+=1.
+#        else:       gg.add_node(id1,weight=1.)
+#    for id1 in dd[key]:
+#        for id2 in dd[key][i:]:
+#            if gg.has_edge(id1,id2): gg[id1][id2]["weight"]+=1.
+#            else:       gg.add_edge(id1,id2,weight=1.)
+#        i+=1
+
+
+######## TTM FORA DO AR
+#sparql = SPARQLWrapper("http://data.uni-muenster.de/sparql/query")
+##http://data.uni-muenster.de/sparql
+#qq=r"""
+#  SELECT DISTINCT ?{} {{
+#    ?s ?p ?o .
+#    }} 
+#    """; mvars="p",
+#mres=mQuery(qq,mvars)
+#c("primeira query")
+
+
+#sparql = SPARQLWrapper("http://data.digitalsocial.eu/graph/organizations-and-activities")
+#sparql = SPARQLWrapper("http://data.digitalsocial.eu/sparql") # funciona
+##http://data.uni-muenster.de/sparql
+#qq=r"""
+#  SELECT DISTINCT ?{} {{
+#    ?s ?p ?o .
+#    }} 
+#    """; mvars="p",
+#mres=mQuery(qq,mvars)
+#c("primeira query")
+
+#sparql = SPARQLWrapper("http://pt.dbpedia.org/sparql")
+#qq=r"""
+#  SELECT ?{} ?{} {{
+#    ?s foaf:knows ?o .
+#    }} 
+#    """; mvars="s","o"
+#mres=mQuery(qq,mvars)
+#c("primeira query")
+## dah uma rede de 300 pessoas
+
+sparql = SPARQLWrapper("http://data.semanticweb.org/sparql")
+qq=r"""
+  SELECT DISTINCT ?{} {{
+    ?s ?p ?o .
+    }} 
+    """; mvars="p",
 qq=r"""
   SELECT ?{} ?{} {{
-    ?s a bibo:Article .
-    ?s bibo:authorList ?o .
-      ?o rdf:rest*/rdf:first ?person .
-      ?person foaf:name ?name .
-    }} LIMIT 5000 
-    """; mvars="name", "s"
-c("antes query 8")
-mres8=mQuery(qq,mvars)
-c("query 8")
-dd={}
-for res in mres8:
-    if res[-1] in dd.keys():
-        dd[res[-1]]+=[res[0]]
-    else:
-        dd[res[-1]]=[res[0]]
-# dd tem os cliques
-import networkx as x
-gg=x.Graph()
-for key in dd:
-    i=1
-    for id1 in dd[key]:
-        if gg.has_node(id1): gg.node[id1]["weight"]+=1.
-        else:       gg.add_node(id1,weight=1.)
-    for id1 in dd[key]:
-        for id2 in dd[key][i:]:
-            if gg.has_edge(id1,id2): gg[id1][id2]["weight"]+=1.
-            else:       gg.add_edge(id1,id2,weight=1.)
-        i+=1
+    ?s foaf:lastName ?o .
+    }} 
+    """; mvars="s","o"
 
+qq=r"""
+  SELECT DISTINCT ?{} ?{} {{
+    ?s <http://data.semanticweb.org/ns/swc/ontology#isPanelistAt> ?o .
+    }} 
+    """; mvars="s","o"
+qq=r"""
+  SELECT DISTINCT ?{} {{
+    ?s foaf:lastName ?o .
+    ?s ?p ?o2 .
+    }} 
+    """; mvars="p",
+qq=r"""
+  SELECT DISTINCT ?{} ?{} {{
+    ?s foaf:member ?o .
+    }} 
+    """; mvars="s","o"
 
-
+#qq=r"""
+#  SELECT ?{} ?{} {{
+#    ?s foaf:knows ?o .
+#    }} 
+#    """; mvars="s","o"
+mres=mQuery(qq,mvars)
+c("primeira query")
+# dah uma rede de 300 pessoas
+qq=r"""
+  SELECT ?{} ?{} {{
+    ?s <http://www.w3.org/ns/org#memberOf> ?o .
+    }} 
+    """; mvars="s","o"
+mres2=mQuery(qq,mvars)
+c("segunda query")
 
 # http://data.uni-muenster.de/sparql
 
