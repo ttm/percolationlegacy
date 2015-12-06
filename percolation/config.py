@@ -45,7 +45,8 @@ def makeFusekiConfig(names0=["labMacambiraLaleniaLog3","labMacambiraLaleniaLog2"
             urls=""
             for count in range(name[1]+1):
                 url="https://raw.githubusercontent.com/OpenLinkedSocialData/{}/master/rdf/{}{:05d}Triplestore.owl".format(name[0],name[0],count)
-                urls+="[ ja:externalContent <{}> ] ;\n ".format(url)
+               
+                urls+=" ja:content [ ja:externalContent <{}> ] ;\n ".format(url)
             body+="""
 <#service{}> rdf:type fuseki:Service ;
     fuseki:name                        "{}" ; 
@@ -55,7 +56,6 @@ def makeFusekiConfig(names0=["labMacambiraLaleniaLog3","labMacambiraLaleniaLog2"
           ja:defaultGraph 
             [
               a ja:MemoryModel ;
-              ja:content 
                 {}
             ] ;
       ] .
