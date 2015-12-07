@@ -1,0 +1,295 @@
+
+    @prefix :        <#> .
+    @prefix fuseki:  <http://jena.apache.org/fuseki#> .
+    @prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+    @prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+    @prefix tdb:        <http://jena.hpl.hp.com/2008/tdb#> .
+    @prefix ja:         <http://jena.hpl.hp.com/2005/11/Assembler#> .
+    @prefix tw:         <http://purl.org/socialparticipation/tw/> .
+    @prefix irc:        <http://purl.org/socialparticipation/irc/> .
+    @prefix fb:         <http://purl.org/socialparticipation/irc/> .
+    @prefix opa:        <http://purl.org/socialparticipation/fb/> .
+    @prefix ocd:        <http://purl.org/socialparticipation/opa/> .
+    @prefix aa:         <http://purl.org/socialparticipation/ocd/> .
+    @prefix gmane:      <http://purl.org/socialparticipation/gmane/> .
+
+    [] rdf:type fuseki:Server ;
+       fuseki:services (
+ <#service0> <#service1> <#service2> <#service3> # OK
+ <#service4> <#service5> <#service6> <#service7> # OK
+# <#service8>
+# <#service9> 
+ <#service10> <#service11> <#service12> <#service13> <#service14> <#service15> <#service16> <#service17>  # OK
+) .
+
+
+<#service0> rdf:type fuseki:Service ;
+    fuseki:name                        "participabr" ; 
+    fuseki:serviceQuery                "query" ;
+    fuseki:dataset 
+       [  rdf:type ja:RDFDataset ;
+          ja:defaultGraph 
+            [
+              a ja:MemoryModel ;
+              ja:content 
+                [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/opa/master/participaTriplestore.rdf> ] ;
+            ] ;
+      ] .
+            
+<#service1> rdf:type fuseki:Service ;
+    fuseki:name                        "cidadedemocratica" ; 
+    fuseki:serviceQuery                "query" ;
+    fuseki:dataset 
+       [  rdf:type ja:RDFDataset ;
+          ja:defaultGraph 
+            [
+              a ja:MemoryModel ;
+              ja:content 
+                [ ja:externalContent <file:/disco/triplas/cdTriplestore.rdf> ] ;
+            ] ;
+      ] .
+            
+<#service2> rdf:type fuseki:Service ;
+    fuseki:name                        "aa" ; 
+    fuseki:serviceQuery                "query" ;
+    fuseki:dataset 
+       [  rdf:type ja:RDFDataset ;
+          ja:defaultGraph 
+            [
+              a ja:MemoryModel ;
+              ja:content 
+                [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/aa01/master/rdf/aaTriplestore.rdf> ] ;
+            ] ;
+      ] .
+            
+<#service3> rdf:type fuseki:Service ;
+    fuseki:name                        "gmane-comp-gcc-libstdcPP-devel" ; 
+    fuseki:serviceQuery                "query" ;
+    fuseki:dataset 
+       [  rdf:type ja:RDFDataset ;
+          ja:defaultGraph 
+            [
+              a ja:MemoryModel ;
+              ja:content 
+                [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/gmane-comp-gcc-libstdcPP-devel/master/rdf/gmane-comp-gcc-libstdc++-develTranslate.owl> ] ;
+            ] ;
+      ] .
+            
+<#service4> rdf:type fuseki:Service ;
+    fuseki:name                        "music_tw" ; 
+    fuseki:serviceQuery                "query" ;
+    fuseki:dataset 
+       [  rdf:type ja:RDFDataset ;
+          ja:defaultGraph 
+            [
+              a ja:MemoryModel ;
+                 ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/music_tw/master/rdf/music_twTranslate00000.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/music_tw/master/rdf/music_twTranslate00001.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/music_tw/master/rdf/music_twTranslate00002.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/music_tw/master/rdf/music_twTranslate00003.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/music_tw/master/rdf/music_twTranslate00004.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/music_tw/master/rdf/music_twTranslate00005.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/music_tw/master/rdf/music_twTranslate00006.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/music_tw/master/rdf/music_twTranslate00007.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/music_tw/master/rdf/music_twTranslate00008.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/music_tw/master/rdf/music_twTranslate00009.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/music_tw/master/rdf/music_twTranslate00010.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/music_tw/master/rdf/music_twTranslate00011.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/music_tw/master/rdf/music_twTranslate00012.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/music_tw/master/rdf/music_twTranslate00013.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/music_tw/master/rdf/music_twTranslate00014.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/music_tw/master/rdf/music_twTranslate00015.owl> ] ;
+ 
+            ] ;
+      ] .
+            
+<#service5> rdf:type fuseki:Service ;
+    fuseki:name                        "obama_tw" ; 
+    fuseki:serviceQuery                "query" ;
+    fuseki:dataset 
+       [  rdf:type ja:RDFDataset ;
+          ja:defaultGraph 
+            [
+              a ja:MemoryModel ;
+                 ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/obama_tw/master/rdf/obama_twTranslate00000.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/obama_tw/master/rdf/obama_twTranslate00001.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/obama_tw/master/rdf/obama_twTranslate00002.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/obama_tw/master/rdf/obama_twTranslate00003.owl> ] ;
+ 
+            ] ;
+      ] .
+            
+<#service6> rdf:type fuseki:Service ;
+    fuseki:name                        "porn_tw" ; 
+    fuseki:serviceQuery                "query" ;
+    fuseki:dataset 
+       [  rdf:type ja:RDFDataset ;
+          ja:defaultGraph 
+            [
+              a ja:MemoryModel ;
+                 ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/porn_tw/master/rdf/porn_twTranslate00000.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/porn_tw/master/rdf/porn_twTranslate00001.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/porn_tw/master/rdf/porn_twTranslate00002.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/porn_tw/master/rdf/porn_twTranslate00003.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/porn_tw/master/rdf/porn_twTranslate00004.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/porn_tw/master/rdf/porn_twTranslate00005.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/porn_tw/master/rdf/porn_twTranslate00006.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/porn_tw/master/rdf/porn_twTranslate00007.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/porn_tw/master/rdf/porn_twTranslate00008.owl> ] ;
+ 
+            ] ;
+      ] .
+            
+<#service7> rdf:type fuseki:Service ;
+    fuseki:name                        "god_tw" ; 
+    fuseki:serviceQuery                "query" ;
+    fuseki:dataset 
+       [  rdf:type ja:RDFDataset ;
+          ja:defaultGraph 
+            [
+              a ja:MemoryModel ;
+                 ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/god_tw/master/rdf/god_twTranslate00000.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/god_tw/master/rdf/god_twTranslate00001.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/god_tw/master/rdf/god_twTranslate00002.owl> ] ;
+ 
+            ] ;
+      ] .
+            
+<#service8> rdf:type fuseki:Service ;
+    fuseki:name                        "art_tw" ; 
+    fuseki:serviceQuery                "query" ;
+    fuseki:dataset 
+       [  rdf:type ja:RDFDataset ;
+          ja:defaultGraph 
+            [
+              a ja:MemoryModel ;
+                 ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/art_tw/master/rdf/art_twTranslate00000.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/art_tw/master/rdf/art_twTranslate00001.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/art_tw/master/rdf/art_twTranslate00002.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/art_tw/master/rdf/art_twTranslate00003.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/art_tw/master/rdf/art_twTranslate00004.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/art_tw/master/rdf/art_twTranslate00005.owl> ] ;
+  ja:content [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/art_tw/master/rdf/art_twTranslate00006.owl> ] ;
+ 
+            ] ;
+      ] .
+            
+<#service9> rdf:type fuseki:Service ;
+    fuseki:name                        "labMacambiraLaleniaLog3" ; 
+    fuseki:serviceQuery                "query" ;
+    fuseki:dataset 
+       [  rdf:type ja:RDFDataset ;
+          ja:defaultGraph 
+            [
+              a ja:MemoryModel ;
+              ja:content 
+                [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/labMacambiraLaleniaLog3/master/rdf/labMacambiraLaleniaLog3Translate.owl> ] ;
+            ] ;
+      ] .
+            
+<#service10> rdf:type fuseki:Service ;
+    fuseki:name                        "labMacambiraLaleniaLog2" ; 
+    fuseki:serviceQuery                "query" ;
+    fuseki:dataset 
+       [  rdf:type ja:RDFDataset ;
+          ja:defaultGraph 
+            [
+              a ja:MemoryModel ;
+              ja:content 
+                [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/labMacambiraLaleniaLog2/master/rdf/labMacambiraLaleniaLog2Translate.owl> ] ;
+            ] ;
+      ] .
+            
+<#service11> rdf:type fuseki:Service ;
+    fuseki:name                        "foradoeixo" ; 
+    fuseki:serviceQuery                "query" ;
+    fuseki:dataset 
+       [  rdf:type ja:RDFDataset ;
+          ja:defaultGraph 
+            [
+              a ja:MemoryModel ;
+              ja:content 
+                [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/foradoeixo/master/rdf/foradoeixoTranslate.owl> ] ;
+            ] ;
+      ] .
+            
+<#service12> rdf:type fuseki:Service ;
+    fuseki:name                        "gmane-linux-audio-users" ; 
+    fuseki:serviceQuery                "query" ;
+    fuseki:dataset 
+       [  rdf:type ja:RDFDataset ;
+          ja:defaultGraph 
+            [
+              a ja:MemoryModel ;
+              ja:content 
+                [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/gmane-linux-audio-users/master/rdf/gmane-linux-audio-usersTranslate.owl> ] ;
+            ] ;
+      ] .
+            
+<#service13> rdf:type fuseki:Service ;
+    fuseki:name                        "gmane-linux-audio-devel" ; 
+    fuseki:serviceQuery                "query" ;
+    fuseki:dataset 
+       [  rdf:type ja:RDFDataset ;
+          ja:defaultGraph 
+            [
+              a ja:MemoryModel ;
+              ja:content 
+                [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/gmane-linux-audio-devel/master/rdf/gmane-linux-audio-develTranslate.owl> ] ;
+            ] ;
+      ] .
+            
+<#service14> rdf:type fuseki:Service ;
+    fuseki:name                        "gmane-politics-organizations-metareciclagem" ; 
+    fuseki:serviceQuery                "query" ;
+    fuseki:dataset 
+       [  rdf:type ja:RDFDataset ;
+          ja:defaultGraph 
+            [
+              a ja:MemoryModel ;
+              ja:content 
+                [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/gmane-politics-organizations-metareciclagem/master/rdf/gmane-politics-organizations-metareciclagemTranslate.owl> ] ;
+            ] ;
+      ] .
+            
+<#service15> rdf:type fuseki:Service ;
+    fuseki:name                        "arenaNETmundial_tw" ; 
+    fuseki:serviceQuery                "query" ;
+    fuseki:dataset 
+       [  rdf:type ja:RDFDataset ;
+          ja:defaultGraph 
+            [
+              a ja:MemoryModel ;
+              ja:content 
+                [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/arenaNETmundial_tw/master/rdf/arenaNETmundial_twTranslate.owl> ] ;
+            ] ;
+      ] .
+            
+<#service16> rdf:type fuseki:Service ;
+    fuseki:name                        "matehackers" ; 
+    fuseki:serviceQuery                "query" ;
+    fuseki:dataset 
+       [  rdf:type ja:RDFDataset ;
+          ja:defaultGraph 
+            [
+              a ja:MemoryModel ;
+              ja:content 
+                [ ja:externalContent <https://raw.githubusercontent.com/OpenLinkedSocialData/matehackers/master/rdf/matehackersTranslate.owl> ] ;
+            ] ;
+      ] .
+            
+        <#service17> rdf:type fuseki:Service ;
+        # URI of the dataset -- http://host:port/dsfoo
+        fuseki:name                        "dsfoo" ; 
+        fuseki:serviceQuery                "sparql" ;
+        fuseki:serviceQuery                "query" ;
+        fuseki:serviceUpdate               "update" ;
+        fuseki:serviceUpload               "upload" ;
+        fuseki:serviceReadWriteGraphStore  "data" ;     
+        fuseki:serviceReadGraphStore       "get" ;
+        fuseki:dataset               [
+                                    rdf:type ja:RDFDataset ;
+                                 ] ;
+        .
+        
