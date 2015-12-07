@@ -4,6 +4,9 @@ TT=time.time()
 # check
 import zipfile
 
+def utf8(astring):
+    """Ensure string is utf8"""
+    return astring.strip().encode("utf-8").decode("utf-8","ignore")
 def zipdir(path, ziph):
     # ziph is zipfile handle
     for root, dirs, files in os.walk(path):
@@ -13,7 +16,6 @@ def zipDir(odirpath,dpath="./afilename.zip"):
     zipf = zipfile.ZipFile(dpath, 'w')
     zipdir(odirpath, zipf)
     zipf.close()
-
 def zipDir2(odirpath,dpath="./afilename"):
     i=0
     zipf = zipfile.ZipFile("{}{}.zip".format(dpath,"00000"), 'w')
