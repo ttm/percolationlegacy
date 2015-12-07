@@ -18,7 +18,7 @@ def makeFusekiConfig(names0=["labMacambiraLaleniaLog3","labMacambiraLaleniaLog2"
     if not empty:
         for i, name in enumerate(names2+names2_):
             if "gcc" in name:
-                url="https://raw.githubusercontent.com/OpenLinkedSocialData/{}/master/rdf/{}Triplestore.owl".format(name,name.replace("P","+"))
+                url="https://raw.githubusercontent.com/OpenLinkedSocialData/{}/master/rdf/{}Translate.owl".format(name,name.replace("P","+"))
             if "participabr" in name:
                 url="https://raw.githubusercontent.com/OpenLinkedSocialData/opa/master/participaTriplestore.rdf"
             if "cidadedemocratica" in name:
@@ -44,7 +44,7 @@ def makeFusekiConfig(names0=["labMacambiraLaleniaLog3","labMacambiraLaleniaLog2"
             i+=len(names2)
             urls=""
             for count in range(name[1]+1):
-                url="https://raw.githubusercontent.com/OpenLinkedSocialData/{}/master/rdf/{}{:05d}Triplestore.owl".format(name[0],name[0],count)
+                url="https://raw.githubusercontent.com/OpenLinkedSocialData/{}/master/rdf/{}Translate{:05d}.owl".format(name[0],name[0],count)
                
                 urls+=" ja:content [ ja:externalContent <{}> ] ;\n ".format(url)
             body+="""
@@ -62,7 +62,7 @@ def makeFusekiConfig(names0=["labMacambiraLaleniaLog3","labMacambiraLaleniaLog2"
             """.format(i,name[0],urls)
         for i, name in enumerate(names0+names0_):
             i+=len(names1)+len(names2)
-            url="https://raw.githubusercontent.com/OpenLinkedSocialData/{}/master/rdf/{}Triplestore.owl".format(name,name)
+            url="https://raw.githubusercontent.com/OpenLinkedSocialData/{}/master/rdf/{}Translate.owl".format(name,name)
             body+="""
 <#service{}> rdf:type fuseki:Service ;
     fuseki:name                        "{}" ; 
@@ -95,7 +95,7 @@ def makeFusekiConfig(names0=["labMacambiraLaleniaLog3","labMacambiraLaleniaLog2"
                 .
             """.format(i,name)
             if "gcc" in name:
-                execline+=["./s-put http://localhost:82/{} default https://raw.githubusercontent.com/OpenLinkedSocialData/{}/master/rdf/{}Triplestore.owl".format(name,name,name.replace("P","+"))]
+                execline+=["./s-put http://localhost:82/{} default https://raw.githubusercontent.com/OpenLinkedSocialData/{}/master/rdf/{}Translate.owl".format(name,name,name.replace("P","+"))]
             if "participabr" in name:
                 execline+=["./s-put http://localhost:82/{} default https://raw.githubusercontent.com/OpenLinkedSocialData/opa/master/participaTriplestore.rdf".format(name)]
             if "cidadedemocratica" in name:
@@ -120,7 +120,7 @@ def makeFusekiConfig(names0=["labMacambiraLaleniaLog3","labMacambiraLaleniaLog2"
             """.format(i,name[0])
             count=0
             for arq in range(name[1]+1):
-                execline+=["./s-put http://localhost:82/{} default https://raw.githubusercontent.com/OpenLinkedSocialData/{}/master/rdf/{}{:05d}Triplestore.owl".format(name[0],name[0],name[0],count)]
+                execline+=["./s-put http://localhost:82/{} default https://raw.githubusercontent.com/OpenLinkedSocialData/{}/master/rdf/{}Translate{:05d}.owl".format(name[0],name[0],name[0],count)]
                 count+=1
         for i, name in enumerate(names0+names0_):
             i+=len(names1)+len(names2)
@@ -138,7 +138,7 @@ def makeFusekiConfig(names0=["labMacambiraLaleniaLog3","labMacambiraLaleniaLog2"
                                              ] ;
                 .
             """.format(i,name)
-            execline+=["./s-put http://localhost:82/{} default https://raw.githubusercontent.com/OpenLinkedSocialData/{}/master/rdf/{}Triplestore.owl".format(name,name,name)]
+            execline+=["./s-put http://localhost:82/{} default https://raw.githubusercontent.com/OpenLinkedSocialData/{}/master/rdf/{}Translate.owl".format(name,name,name)]
 
     body+="""
         <#service{}> rdf:type fuseki:Service ;
