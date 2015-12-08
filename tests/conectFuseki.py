@@ -115,9 +115,8 @@ prefix bibo: <http://purl.org/ontology/bibo/>
 prefix foaf: <http://xmlns.com/foaf/0.1/> 
 prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> 
 prefix aiiso:<http://purl.org/vocab/aiiso/schema#>
-prefix teach:<http://linkedscience.org/teach/ns#>  
-
- """ 
+prefix teach:<http://linkedscience.org/teach/ns#>\n
+""" 
 qq="""
   SELECT DISTINCT ?p (COUNT(?p) AS ?count ) {
     ?s ?p ?o .

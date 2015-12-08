@@ -1,12 +1,34 @@
-import time, pickle, os
+import time, pickle, os, zipfile
 import builtins as B
+from SPARQLWrapper import SPARQLWrapper, JSON
 TT=time.time()
-# check
-import zipfile
 
 def utf8(astring):
     """Ensure string is utf8"""
     return astring.strip().encode("utf-8").decode("utf-8","ignore")
+hh="""
+prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
+prefix dct: <http://purl.org/dc/terms/> 
+prefix dce: <http://purl.org/dc/elements/1.1/> 
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#> 
+prefix bibo: <http://purl.org/ontology/bibo/> 
+prefix foaf: <http://xmlns.com/foaf/0.1/> 
+prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> 
+prefix aiiso:<http://purl.org/vocab/aiiso/schema#>
+prefix teach:<http://linkedscience.org/teach/ns#>\n
+""" 
+def mQuery(spql_endpoint,query,mvars):
+    query_=query.format(*mvars)
+    spql_endpoint.setQuery(hh+query_)
+    spql_endpoint.setReturnFormat(JSON)
+    results9 = spql_endpoint.query().convert()
+    res=[]
+    for result in results9["results"]["bindings"]:
+        res.append([result[i]['value'] for i in mvars])
+    return res
 def zipdir(path, ziph):
     # ziph is zipfile handle
     for root, dirs, files in os.walk(path):

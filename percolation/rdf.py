@@ -18,7 +18,7 @@ https://tools.ietf.org/html/rfc3986#section-2
 A URI também não é splitada com %
 r.namespace.split_uri("http://purl.org/socialparticipation/irc/Participant#labMacambiraLaleniaLog1%2818")
 """
-def LL_(literal):
+def LL_(literal,lang=None):
     if type(literal)==type(1):
         ttype=ns.xsd.integer
     if type(literal)==type(True):
@@ -27,7 +27,11 @@ def LL_(literal):
         ttype=ns.xsd.datetime
     else:
         ttype=ns.xsd.string
-    return r.Literal(literal,datatype=ttype)
+        literal=P.utils.utf8(literal)
+    if not lang:
+        return r.Literal(literal,datatype=ttype)
+    else:
+        return r.Literal(literal,lang=lang,datatype=ttype)
 
 COUNT=0
 class ns:
@@ -55,7 +59,6 @@ query_=prepareQuery(
         ,initNs={"fb":ns.fb})
 def G(g,S,P,O):
     g.add((S,P,O))
-LL=r.Literal
 def writeAll(per_graph,sname="img_and_rdf",sdir="./",full=False,remove=False):
     nome_=sname
     g,A=per_graph
@@ -128,9 +131,9 @@ def C(ag=[makeBasicGraph()],uri="foo",label="bar",superclass=None,comment=None,l
     for gg in ag:
         g,A=gg
         G(g,uri,ns.rdf.type,ns.owl.Class)
-        G(g,uri,ns.rdfs.label,LL(label,lang="en"))
+        G(g,uri,ns.rdfs.label,LL_(label,lang="en"))
         if label_pt:
-            G(g,uri,ns.rdfs.label,LL(label_pt,lang="pt"))
+            G(g,uri,ns.rdfs.label,LL_(label_pt,lang="pt"))
         if graph_lang=="pt":
             A.add_node(label_pt,style="filled")
             nd=A.get_node(label_pt)
@@ -169,15 +172,15 @@ def C(ag=[makeBasicGraph()],uri="foo",label="bar",superclass=None,comment=None,l
         if comment:
             if type(comment) in (type([1,2]),type((1,2))):
                 for co in comment:
-                    G(g,uri,ns.rdfs.comment,LL(co,lang="en"))
+                    G(g,uri,ns.rdfs.comment,LL_(co,lang="en"))
             else:
-                G(g,uri,ns.rdfs.comment,LL(comment,lang="en"))
+                G(g,uri,ns.rdfs.comment,LL_(comment,lang="en"))
         if comment_pt:
             if type(comment_pt) in (type([1,2]),type((1,2))):
                 for co in comment_pt:
-                    G(g,uri,ns.rdfs.comment,LL(co,lang="pt"))
+                    G(g,uri,ns.rdfs.comment,LL_(co,lang="pt"))
             else:
-                G(g,uri,ns.rdfs.comment,LL(comment_pt,lang="pt"))
+                G(g,uri,ns.rdfs.comment,LL_(comment_pt,lang="pt"))
         if color:
             nd.attr['color']=color
 def IC_(ga=None,uri="turiref",string="astringid",label="alabel",clabel=True):
@@ -186,7 +189,7 @@ def IC_(ga=None,uri="turiref",string="astringid",label="alabel",clabel=True):
         for g,A in ga:
             G(g,ind,ns.rdf.type,uri)
             if clabel:
-                G(g,ind,ns.rdfs.label,LL(label))
+                G(g,ind,ns.rdfs.label,LL_(label))
         if label:
             A.add_node(label,style="filled")
             nd=A.get_node(label)
@@ -200,7 +203,7 @@ def IC(ga=None,uri="turiref",string="astringid",label=None,clabel=True):
         for g,A in ga:
             G(g,ind,ns.rdf.type,uri)
             if clabel and label:
-                G(g,ind,ns.rdfs.label,LL(label))
+                G(g,ind,ns.rdfs.label,LL_(label))
         if label:
             A.add_node(label,style="filled")
             nd=A.get_node(label)
@@ -257,23 +260,23 @@ def P(ag=[makeBasicGraph()],uri="foo",label="bar",label_pt=None,comment=None):
     for gg in ag:
         g=gg[0]
         G(g,uri,ns.rdf.type,ns.owl.ObjectProperty)
-        G(g,uri,ns.rdfs.label,LL(label,lang="en"))
+        G(g,uri,ns.rdfs.label,LL_(label,lang="en"))
         if label_pt:
-            G(g,uri,ns.rdfs.label,LL(label_pt,lang="pt"))
+            G(g,uri,ns.rdfs.label,LL_(label_pt,lang="pt"))
         if comment:
-            G(g,uri,ns.rdfs.comment,LL(comment,lang="en"))
+            G(g,uri,ns.rdfs.comment,LL_(comment,lang="en"))
 
 def D(ag=[makeBasicGraph()],uri="foo",label="bar",dtype=ns.xsd.string,comment=None,label_pt=None):
     """Add data property to RDF graph"""
     for gg in ag:
         g=gg[0]
         G(g,uri,ns.rdf.type,ns.owl.DatatypeProperty)
-        G(g,uri,ns.rdfs.label,LL(label,lang="pt"))
+        G(g,uri,ns.rdfs.label,LL_(label,lang="pt"))
         G(g,uri,ns.rdfs.range,dtype)
         if comment:
-            G(g,uri,ns.rdfs.comment,LL(comment,lang="en"))
+            G(g,uri,ns.rdfs.comment,LL_(comment,lang="en"))
         if label_pt:
-            G(g,uri,ns.rdfs.label,LL(label_pt,lang="pt"))
+            G(g,uri,ns.rdfs.label,LL_(label_pt,lang="pt"))
 def L_(ga,sub,pred,obj):
     for g,A in ga:
         G(g,sub,pred,obj)
