@@ -1,7 +1,13 @@
 from SPARQLWrapper import SPARQLWrapper, JSON
 import rdflib as r, percolation as P
 c=P.utils.check
+# ./s-query --service http://200.144.255.210:8082/god_tw  'SELECT (COUNT(?s) as ?cs) WHERE {?s <http://purl.org/socialparticipation/tw/sentAt> ?o}'
 # ./s-query --service http://200.144.255.210:8082/lau_gmane  'SELECT (COUNT(?s) as ?cs) WHERE {?s <http://purl.org/socialparticipation/gmane/sentAt> ?o}'
+# ./s-query --service http://200.144.255.210:8082/dsfoo  'SELECT (COUNT(?s) as ?cs) WHERE {?s <http://purl.org/socialparticipation/tw/sentAt> ?o}'
+
+# ./s-put http://200.144.255.210:8082/dsfoo <http://banana.com> /disco/repos/music_tw/rdf/music_twTranslate00000.owl
+# ./s-query --service http://200.144.255.210:8082/dsfoo  'SELECT (COUNT(?s) as ?cs)  WHERE { GRAPH <http://banana.com> { ?s <http://purl.org/socialparticipation/tw/sentAt> ?o } }'
+# ./s-put http://200.144.255.210:8082/dsfoo default /disco/repos/labMacambiraLaleniaLog2/rdf/labMacambiraLaleniaLog2Translate.owl
 #sparql = SPARQLWrapper("http://200.144.255.210:8082/lau_gmane")
 #sparql.setQuery("""
 #    SELECT ?s ?o
