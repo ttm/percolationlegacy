@@ -24,11 +24,14 @@ def mQuery(spql_endpoint,query,mvars):
     query_=query.format(*mvars)
     spql_endpoint.setQuery(hh+query_)
     spql_endpoint.setReturnFormat(JSON)
-    results9 = spql_endpoint.query().convert()
-    res=[]
-    for result in results9["results"]["bindings"]:
-        res.append([result[i]['value'] for i in mvars])
-    return res
+    results = spql_endpoint.query().convert()
+    if "update" in spql_endpoint:
+        return results
+    else:
+        res=[]
+        for result in results["results"]["bindings"]:
+            res.append([result[i]['value'] for i in mvars])
+        return res
 def zipdir(path, ziph):
     # ziph is zipfile handle
     for root, dirs, files in os.walk(path):
