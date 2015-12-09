@@ -17,7 +17,7 @@ def makeNetwork(endpoint_url,relation_uri,label_uri=None,rtype=1,directed=False)
     else: 
        mvars="i1","i2"
        label_qpart=""
-   tvars=" ".join(["?{}" for i in mvars])
+    tvars=" ".join(["?{}" for i in mvars])
     if rtype==1:
         query="""SELECT  {}
                        WHERE {{ ?i1  {} ?i2 .

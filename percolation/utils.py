@@ -3,6 +3,38 @@ import builtins as B
 from SPARQLWrapper import SPARQLWrapper, JSON
 TT=time.time()
 
+def testRdfs(path,end_url,do_query=True):
+    files=os.listdir(path)
+    for afile in files:
+        afile_=path+afile
+        tgraph="http://{}".format(afile.lower())
+        #"s-put http://200.144.255.210:8082/dsfoo http://adorno.enfeite.ttl AdornoNaoEhEnfeiteTranslate.ttl"
+        cmd="s-put {} {} {}".format(end_url, tgraph, afile_)
+        check(cmd)
+        os.system(cmd); check(cmd)
+        if do_query:
+            q='SELECT (COUNT(?s) as ?{{}})  WHERE {{{{ GRAPH <{}> {{{{ ?s ?p ?o }}}} }}}}'.format(tgraph)
+            check(q)
+            res1=mQuery(end_url,q,("cs",))
+            check(res1)
+            q='SELECT DISTINCT ?{{}} WHERE {{{{ GRAPH <{}> {{{{ ?s ?p ?o }}}} }}}} LIMIT 5'.format(tgraph)
+            res2=mQuery(end_url,q,("s",))
+            check(res2); print("\n")
+#        cmd="s-query --service {}  'SELECT (COUNT(?s) as ?cs)  WHERE {{ GRAPH <{}> {{ ?s ?p ?o }} }}'".format(end_url,tgraph)
+#        os.system(cmd); check(cmd)
+#        cmd="s-query --service {}  'SELECT ?s WHERE {{ GRAPH <{}> {{ ?s ?p ?o }} }} LIMIT 1'".format(end_url,tgraph)
+#        os.system(cmd); check(cmd)
+
+def getGraphs(path,end_url):
+    files=os.listdir(path)
+    for afile in files:
+        afile_=path+afile
+        #"s-put http://200.144.255.210:8082/dsfoo http://adorno.enfeite.ttl AdornoNaoEhEnfeiteTranslate.ttl"
+        cmd="s-put {} http://{} {}".format(end_url,afile,afile_)
+        os.system(cmd)
+        check(cmd)
+
+
 def utf8(astring):
     """Ensure string is utf8"""
     return astring.strip().encode("utf-8").decode("utf-8","ignore")
@@ -18,16 +50,39 @@ prefix bibo: <http://purl.org/ontology/bibo/>
 prefix foaf: <http://xmlns.com/foaf/0.1/> 
 prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> 
 prefix aiiso:<http://purl.org/vocab/aiiso/schema#>
-prefix teach:<http://linkedscience.org/teach/ns#>\n
-""" 
-def mQuery(spql_endpoint,query,mvars):
-    query_=query.format(*mvars)
-    spql_endpoint.setQuery(hh+query_)
-    spql_endpoint.setReturnFormat(JSON)
-    results = spql_endpoint.query().convert()
-    if "update" in spql_endpoint:
-        return results
+prefix teach:<http://linkedscience.org/teach/ns#>
+prefix cm: <http://purl.org/socialparticipation/cm/>
+prefix obs: <http://purl.org/socialparticipation/obs/>
+prefix aa: <http://purl.org/socialparticipation/aa/>
+prefix vbs: <http://purl.org/socialparticipation/vbs/>
+prefix opa: <http://purl.org/socialparticipation/opa/>
+prefix ops: <http://purl.org/socialparticipation/ops/>
+prefix ocd: <http://purl.org/socialparticipation/ocd/>
+prefix ore: <http://purl.org/socialparticipation/ore/>
+prefix ot: <http://purl.org/socialparticipation/ot/>
+prefix po: <http://purl.org/socialparticipation/po/>
+prefix fb: <http://purl.org/socialparticipation/fb/>
+prefix tw: <http://purl.org/socialparticipation/tw/>
+prefix irc: <http://purl.org/socialparticipation/irc/>
+prefix gmane: <http://purl.org/socialparticipation/gmane/>
+prefix ld: <http://purl.org/socialparticipation/ld/>\n""" 
+def mQuery(spql_endpoint,query,mvars=None):
+    se=spql_endpoint[:]
+    spql_endpoint=SPARQLWrapper(spql_endpoint)
+    if mvars:
+        query=query.format(*mvars)
+        query=hh+query
+        spql_endpoint.setQuery(query)
+        spql_endpoint.setReturnFormat(JSON)
     else:
+        #spql_endpoint.method = 'POST'
+        spql_endpoint.method = 'PUT'
+        spql_endpoint.setQuery(query)
+    #if "update" in se: # or if not mvars
+    if not mvars: # or if not mvars
+        return spql_endpoint.query().convert()
+    else:
+        results = spql_endpoint.query().convert()
         res=[]
         for result in results["results"]["bindings"]:
             res.append([result[i]['value'] for i in mvars])

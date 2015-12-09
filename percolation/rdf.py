@@ -1,5 +1,6 @@
 import rdflib as r, percolation as P, pygraphviz as gv, os, datetime
 check=P.utils.check
+utf8=P.utils.utf8
 from rdflib.plugins.sparql import prepareQuery
 
 #bb=g.query(query,initBindings={"fid":ind})
@@ -19,15 +20,15 @@ A URI também não é splitada com %
 r.namespace.split_uri("http://purl.org/socialparticipation/irc/Participant#labMacambiraLaleniaLog1%2818")
 """
 def LL_(literal,lang=None):
-    if type(literal)==type(1):
+    if type(literal)==type(1123):
         ttype=ns.xsd.integer
-    if type(literal)==type(True):
+    elif type(literal)==type(True):
         ttype=ns.xsd.boolean
     elif type(literal)==type(datetime.datetime.now()):
         ttype=ns.xsd.datetime
     else:
         ttype=ns.xsd.string
-        literal=P.utils.utf8(literal)
+        literal=utf8(literal)
     if not lang:
         return r.Literal(literal,datatype=ttype)
     else:
@@ -35,25 +36,25 @@ def LL_(literal,lang=None):
 
 COUNT=0
 class ns:
-    cm = r.Namespace("http://purl.org/socialparticipation/cm/")   # caixa mágica
-    obs = r.Namespace("http://purl.org/socialparticipation/obs/") # ontology of the social library
-    aa  = r.Namespace("http://purl.org/socialparticipation/aa/")  # algorithmic autoregulation
-    vbs = r.Namespace("http://purl.org/socialparticipation/vbs/") # vocabulary of the social library
-    opa = r.Namespace("http://purl.org/socialparticipation/opa/") # participabr
-    ops = r.Namespace("http://purl.org/socialparticipation/ops/") # social participation ontology
-    ocd = r.Namespace("http://purl.org/socialparticipation/ocd/") # cidade democrática
-    ore = r.Namespace("http://purl.org/socialparticipation/ore/") # ontology of the reseach, for registering ongoing works, a RDF AA
-    ot  = r.Namespace("http://purl.org/socialparticipation/ot/")  # ontology of the thesis, for academic conceptualizations
+    cm =     r.Namespace("http://purl.org/socialparticipation/cm/")   # caixa mágica
+    obs =    r.Namespace("http://purl.org/socialparticipation/obs/") # ontology of the social library
+    aa  =    r.Namespace("http://purl.org/socialparticipation/aa/")  # algorithmic autoregulation
+    vbs =    r.Namespace("http://purl.org/socialparticipation/vbs/") # vocabulary of the social library
+    opa =    r.Namespace("http://purl.org/socialparticipation/opa/") # participabr
+    ops =    r.Namespace("http://purl.org/socialparticipation/ops/") # social participation ontology
+    ocd =    r.Namespace("http://purl.org/socialparticipation/ocd/") # cidade democrática
+    ore =    r.Namespace("http://purl.org/socialparticipation/ore/") # ontology of the reseach, for registering ongoing works, a RDF AA
+    ot  =    r.Namespace("http://purl.org/socialparticipation/ot/")  # ontology of the thesis, for academic conceptualizations
     po=per = r.Namespace("http://purl.org/socialparticipation/po/") # percolation, this framework itself
-    fb  = r.Namespace("http://purl.org/socialparticipation/fb/")  # facebook
-    tw  = r.Namespace("http://purl.org/socialparticipation/tw/")  # twitter
-    irc = r.Namespace("http://purl.org/socialparticipation/irc/") # irc
-    gmane = r.Namespace("http://purl.org/socialparticipation/gmane/") # gmane
-    ld  = r.Namespace("http://purl.org/socialparticipation/ld/")  # linkedin 
-    rdf = r.namespace.RDF
-    rdfs = r.namespace.RDFS
-    owl = r.namespace.OWL
-    xsd = r.namespace.XSD
+    fb  =    r.Namespace("http://purl.org/socialparticipation/fb/")  # facebook
+    tw  =    r.Namespace("http://purl.org/socialparticipation/tw/")  # twitter
+    irc =    r.Namespace("http://purl.org/socialparticipation/irc/") # irc
+    gmane =  r.Namespace("http://purl.org/socialparticipation/gmane/") # gmane
+    ld  =    r.Namespace("http://purl.org/socialparticipation/ld/")  # linkedin 
+    rdf =    r.namespace.RDF
+    rdfs =   r.namespace.RDFS
+    owl =    r.namespace.OWL
+    xsd =    r.namespace.XSD
 query_=prepareQuery(
         "SELECT ?name WHERE {?fid fb:name ?name}"
         ,initNs={"fb":ns.fb})
@@ -197,14 +198,14 @@ def IC_(ga=None,uri="turiref",string="astringid",label="alabel",clabel=True):
     return ind
 
 
-def IC(ga=None,uri="turiref",string="astringid",label=None,clabel=True):
+def IC(ga=None,uri="turiref",string="astringid",label=None,clabel=True,draw=False):
     ind=uri+"#"+str(string)
     if ga:
         for g,A in ga:
             G(g,ind,ns.rdf.type,uri)
             if clabel and label:
                 G(g,ind,ns.rdfs.label,LL_(label))
-        if label:
+        if label and draw:
             A.add_node(label,style="filled")
             nd=A.get_node(label)
             nd.attr['color']="#02F3DD"
@@ -245,7 +246,7 @@ def link(ga=[makeBasicGraph()],ind="uriref",label="alabel",props=["uri1","uri2"]
     for prop, val in zip(props,vals):
         for g,A in ga:
             G(g,ind,prop,LL_(val))
-            if draw:
+            if draw and label:
                 A.add_node(COUNT,style="filled")
                 nd=A.get_node(COUNT)
                 nd.attr["label"]=val
