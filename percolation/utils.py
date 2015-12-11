@@ -3,14 +3,13 @@ import builtins as B
 from SPARQLWrapper import SPARQLWrapper, JSON
 TT=time.time()
 
-def testRdfs(path,end_url,do_query=True):
+def testRdfs(path,end_url,do_query=True,write_back=True):
     files=os.listdir(path)
     for afile in files:
         afile_=path+afile
         tgraph="http://{}".format(afile.lower())
         #"s-put http://200.144.255.210:8082/dsfoo http://adorno.enfeite.ttl AdornoNaoEhEnfeiteTranslate.ttl"
         cmd="s-put {} {} {}".format(end_url, tgraph, afile_)
-        check(cmd)
         os.system(cmd); check(cmd)
         if do_query:
             q='SELECT (COUNT(?s) as ?{{}})  WHERE {{{{ GRAPH <{}> {{{{ ?s ?p ?o }}}} }}}}'.format(tgraph)
@@ -20,6 +19,22 @@ def testRdfs(path,end_url,do_query=True):
             q='SELECT DISTINCT ?{{}} WHERE {{{{ GRAPH <{}> {{{{ ?s ?p ?o }}}} }}}} LIMIT 5'.format(tgraph)
             res2=mQuery(end_url,q,("s",))
             check(res2); print("\n")
+
+#        q="SELECT DISTINCT ?{} WHERE {{ GRAPH ?g {{ }} }}"
+#        v="g"
+#        graphs=[i[0] for i in mQuery(end_url,q,v)]
+#        if "http://discovery.info" not in graphs:
+#            success=mQuery(end_url,"CREATE GRAPH <http://discovery.info>")
+#        # build query to insert
+#        uquery="""WITH GRAPH <http://discovery.info>
+#             INSERT DATA {
+## endpoint
+## networktype
+## basic info: nparticipants, nedges, date snapshot
+## original
+#             }
+#        """
+
 #        cmd="s-query --service {}  'SELECT (COUNT(?s) as ?cs)  WHERE {{ GRAPH <{}> {{ ?s ?p ?o }} }}'".format(end_url,tgraph)
 #        os.system(cmd); check(cmd)
 #        cmd="s-query --service {}  'SELECT ?s WHERE {{ GRAPH <{}> {{ ?s ?p ?o }} }} LIMIT 1'".format(end_url,tgraph)

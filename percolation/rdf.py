@@ -26,6 +26,8 @@ def LL_(literal,lang=None):
         ttype=ns.xsd.boolean
     elif type(literal)==type(datetime.datetime.now()):
         ttype=ns.xsd.datetime
+    elif type(literal)==type(datetime.date(2015,3,4)):
+        ttype=ns.xsd.date
     else:
         ttype=ns.xsd.string
         literal=utf8(literal)
@@ -223,7 +225,7 @@ def IC(ga=None,uri="turiref",string="astringid",label=None,clabel=True,draw=Fals
 #            nd.attr['label']=label
 #    return ind
 
-def link_(ga=[makeBasicGraph()],ind="uriref",slabel="alabel",props=["uri1","uri2"],objs=["uri1","uri2"],labels=["l1","l2"],draw=True):
+def link_(ga=[makeBasicGraph()],ind="uriref",slabel=None,props=["uri1","uri2"],objs=["uri1","uri2"],labels=["l1","l2"],draw=True):
     """Link an instance with the object classes through the props"""
 #    query=prepareQuery(
 #            "SELECT ?name WHERE {?fid fb:name ?name}",
@@ -233,7 +235,7 @@ def link_(ga=[makeBasicGraph()],ind="uriref",slabel="alabel",props=["uri1","uri2
             G(g,ind,prop,obj)
             #bb=g.query(query,initBindings={"fid":obj})
             #oname=[i for i in bb][0][0].value
-            if draw:
+            if draw and slabel:
                 slabel_=slabel.replace("%","")
                 A.add_edge(  slabel_,label)
                 e=A.get_edge(slabel_,label)
