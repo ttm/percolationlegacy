@@ -51,7 +51,7 @@ fnames_+=[
 ("DemocraciaDiretaJa14072013.gdf","DemocraciaDiretaJa14072013_interacoes.gdf",0,"ddjbrasil","https://www.facebook.com/groups/ddjbrasil/permalink/347023325397298/"),
 ("Tecnoxamanismo08032014.gdf","Tecnoxamanismo08032014_interactions.gdf","505090906188661",0,["https://www.facebook.com/groups/505090906188661/permalink/733144993383250/","https://www.facebook.com/groups/505090906188661/permalink/733157380048678/"]),
 ("Tecnoxamanismo15032014.gdf","Tecnoxamanismo15032014_interactions.gdf","505090906188661",0,["https://www.facebook.com/groups/505090906188661/permalink/733144993383250/","https://www.facebook.com/groups/505090906188661/permalink/733157380048678/"]),
-("Latesfip08032014.gdf","Latesfip08032014_interactions.gdf","183557128478424",0,"https://www.facebook.com/groups/183557128478424/permalink/266610616839741/"),]]
+("Latesfip08032014.gdf","Latesfip08032014_interactions.gdf","183557128478424",0,"https://www.facebook.com/groups/183557128478424/permalink/266610616839741/"),]
 fnames_+=[
         ("CalebLuporini25022014.gdf",     None,"1110305437","calebml"),
         ("DanielGonzales23022014.gdf",    None,"100002080034739","daniel.gonzalezxavier"),
@@ -150,6 +150,7 @@ ff=[i[0] for i in fnames_]
 #for fname in ff:
 #    eurl="http://200.144.255.210:8082/dsfoo"
 #    path="/home/r/repos/social/tests/publishing/fb4/{}/rdf/".format(fname.replace(".gml","_gml_fb"))
+#    path="/home/r/repos/social/tests/publishing/fb3/{}_fb/rdf/".format(fname.split(".")[0])
 #    P.utils.testRdfs(path,eurl,False)
 
 
@@ -157,10 +158,5 @@ ff=[i[0] for i in fnames_]
 # write to the info, meta or discovery graph about the graphs created
 
 # access this point to retrieve info from other graphs
-
-# make derived structures
-relation_uri=P.rdf.ns.fb.friend
-#makeNetwork(endpoint_url,relation_uri,label_uri=None,rtype=1,directed=False):
-
 
 
