@@ -51,7 +51,7 @@ fnames_+=[
 ("DemocraciaDiretaJa14072013.gdf","DemocraciaDiretaJa14072013_interacoes.gdf",0,"ddjbrasil","https://www.facebook.com/groups/ddjbrasil/permalink/347023325397298/"),
 ("Tecnoxamanismo08032014.gdf","Tecnoxamanismo08032014_interactions.gdf","505090906188661",0,["https://www.facebook.com/groups/505090906188661/permalink/733144993383250/","https://www.facebook.com/groups/505090906188661/permalink/733157380048678/"]),
 ("Tecnoxamanismo15032014.gdf","Tecnoxamanismo15032014_interactions.gdf","505090906188661",0,["https://www.facebook.com/groups/505090906188661/permalink/733144993383250/","https://www.facebook.com/groups/505090906188661/permalink/733157380048678/"]),
-("Latesfip08032014.gdf","Latesfip08032014_interactions.gdf","183557128478424",0,"https://www.facebook.com/groups/183557128478424/permalink/266610616839741/"),]]
+("Latesfip08032014.gdf","Latesfip08032014_interactions.gdf","183557128478424",0,"https://www.facebook.com/groups/183557128478424/permalink/266610616839741/"),]
 fnames_+=[
         ("CalebLuporini25022014.gdf",     None,"1110305437","calebml"),
         ("DanielGonzales23022014.gdf",    None,"100002080034739","daniel.gonzalezxavier"),
@@ -147,10 +147,12 @@ fnames_+=[
         ("ViniciusSampaio18022013_2050.gml",None,"529899682","sampaio.vinicius"),
         ]
 ff=[i[0] for i in fnames_] 
-#for fname in ff:
-#    eurl="http://200.144.255.210:8082/dsfoo"
+ff=['gmane.comp.gcc.libstdc++.devel']
+for fname in ff:
+    eurl="http://200.144.255.210:8082/dsfoo"
 #    path="/home/r/repos/social/tests/publishing/fb4/{}/rdf/".format(fname.replace(".gml","_gml_fb"))
-#    P.utils.testRdfs(path,eurl,False)
+    path="/home/r/repos/gmane/tests/publishing/{}/rdf/".format(fname.replace(".","-").replace("+","P"))
+    P.utils.testRdfs(path,eurl,False)
 
 
 #P.utils.testRdfs(path,eurl,False)

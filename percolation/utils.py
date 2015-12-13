@@ -198,3 +198,5 @@ def getAll2(ggraph,uri):
 def cred(twc_class):
     t=twc_class
     return [t.tak,t.taks,t.tat,t.tats]
+def breakMe():
+    a=oasijdaoisjdoiasjdoiasjdoiajsdoiajsdoiajsd
