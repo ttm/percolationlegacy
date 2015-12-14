@@ -62,7 +62,7 @@ query_=prepareQuery(
         ,initNs={"fb":ns.fb})
 def G(g,S,P,O):
     g.add((S,P,O))
-def writeAll(per_graph,sname="img_and_rdf",sdir="./",full=False,remove=False,dot=False):
+def writeAll(per_graph,sname="img_and_rdf",sdir="./",full=False,remove=False,dot=False,sizelimit=None):
     nome_=sname
     g,A=per_graph
     if not os.path.isdir(sdir):
@@ -103,15 +103,43 @@ def writeAll(per_graph,sname="img_and_rdf",sdir="./",full=False,remove=False,dot
     if dot:
         A.write(sdir+"dot/%s.dot"%(nome_,))
         check("dot written")
-
-    f=open(sdir+"rdf/%s.owl"%(nome_,),"wb")
-    f.write(g.serialize())
-    f.close()
-    check("owl written")
-    f=open(sdir+"rdf/%s.ttl"%(nome_,),"wb")
-    f.write(g.serialize(format="turtle"))
-    f.close()
-    check("ttl written")
+    if sizelimit:
+        i=0
+        j=0
+        g_=r.Graph()
+        g_.namespace_manager.bind("irc", ns.irc)    
+        for sub, pred, obj in g:
+            g_.add((sub,pred,obj))
+            i+=1
+            if i%sizelimit==0:
+                f=open(sdir+"rdf/{}{:05d}.owl".format(nome_,j),"wb")
+                f.write(g_.serialize())
+                f.close()
+                check("owl written")
+                f=open(sdir+"rdf/{}{:05d}.ttl".format(nome_,j),"wb")
+                f.write(g_.serialize(format="turtle"))
+                f.close()
+                check("ttl written")
+                g_=r.Graph()
+                g_.namespace_manager.bind("irc", ns.irc)
+                j+=1
+        f=open(sdir+"rdf/{}{:05d}.owl".format(nome_,j),"wb")
+        f.write(g_.serialize())
+        f.close()
+        check("owl written")
+        f=open(sdir+"rdf/{}{:05d}.ttl".format(nome_,j),"wb")
+        f.write(g_.serialize(format="turtle"))
+        f.close()
+        check("ttl written")
+    else:
+        f=open(sdir+"rdf/%s.owl"%(nome_,),"wb")
+        f.write(g.serialize())
+        f.close()
+        check("owl written")
+        f=open(sdir+"rdf/%s.ttl"%(nome_,),"wb")
+        f.write(g.serialize(format="turtle"))
+        f.close()
+        check("ttl written")
 
 
 def makeBasicGraph(extra_namespaces=[],glabel="Ontologia da tese"):
