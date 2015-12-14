@@ -30,7 +30,7 @@ def LL_(literal,lang=None):
         ttype=ns.xsd.date
     else:
         ttype=ns.xsd.string
-        literal=utf8(literal)
+        literal=utf8(str(literal))
     if not lang:
         return r.Literal(literal,datatype=ttype)
     else:
@@ -62,7 +62,7 @@ query_=prepareQuery(
         ,initNs={"fb":ns.fb})
 def G(g,S,P,O):
     g.add((S,P,O))
-def writeAll(per_graph,sname="img_and_rdf",sdir="./",full=False,remove=False):
+def writeAll(per_graph,sname="img_and_rdf",sdir="./",full=False,remove=False,dot=False):
     nome_=sname
     g,A=per_graph
     if not os.path.isdir(sdir):
@@ -100,8 +100,9 @@ def writeAll(per_graph,sname="img_and_rdf",sdir="./",full=False,remove=False):
         nome=(sdir+"figs/%s.png"%(nome_,))
         A.draw(nome,prog="dot")
     check("{} was rendered".format(nome_))
-    A.write(sdir+"dot/%s.dot"%(nome_,))
-    check("dot written")
+    if dot:
+        A.write(sdir+"dot/%s.dot"%(nome_,))
+        check("dot written")
 
     f=open(sdir+"rdf/%s.owl"%(nome_,),"wb")
     f.write(g.serialize())
