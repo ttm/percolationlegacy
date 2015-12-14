@@ -166,10 +166,10 @@ def makeFusekiConfig(names0=["labMacambiraLaleniaLog3","labMacambiraLaleniaLog2"
     @prefix ja:         <http://jena.hpl.hp.com/2005/11/Assembler#> .
     @prefix tw:         <http://purl.org/socialparticipation/tw/> .
     @prefix irc:        <http://purl.org/socialparticipation/irc/> .
-    @prefix fb:         <http://purl.org/socialparticipation/irc/> .
-    @prefix opa:        <http://purl.org/socialparticipation/fb/> .
-    @prefix ocd:        <http://purl.org/socialparticipation/opa/> .
-    @prefix aa:         <http://purl.org/socialparticipation/ocd/> .
+    @prefix fb:         <http://purl.org/socialparticipation/fb/> .
+    @prefix opa:        <http://purl.org/socialparticipation/opa/> .
+    @prefix ocd:        <http://purl.org/socialparticipation/ocd/> .
+    @prefix aa:         <http://purl.org/socialparticipation/aa/> .
     @prefix gmane:      <http://purl.org/socialparticipation/gmane/> .
 
     [] rdf:type fuseki:Server ;

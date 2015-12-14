@@ -147,12 +147,17 @@ fnames_+=[
         ("ViniciusSampaio18022013_2050.gml",None,"529899682","sampaio.vinicius"),
         ]
 ff=[i[0] for i in fnames_] 
-ff=['gmane.comp.gcc.libstdc++.devel']
+#ff=['gmane.comp.gcc.libstdc++.devel']
+ff=['gmane.comp.java.hadoop.hive.user']
 for fname in ff:
+    eurl="http://localhost:82/dsfoo"
+    eurl="http://127.0.0.1:82/dsfoo"
     eurl="http://200.144.255.210:8082/dsfoo"
 #    path="/home/r/repos/social/tests/publishing/fb4/{}/rdf/".format(fname.replace(".gml","_gml_fb"))
-    path="/home/r/repos/gmane/tests/publishing/{}/rdf/".format(fname.replace(".","-").replace("+","P"))
-    P.utils.testRdfs(path,eurl,False)
+#    path="/home/r/repos/gmane/tests/publishing/{}/rdf/".format(fname.replace(".","-").replace("+","P"))
+    path="/root/repos/gmane/tests/publishing/{}/rdf/".format(fname.replace(".","-").replace("+","P"))
+#    P.utils.testRdfs(path,eurl,False)
+    P.utils.testRdfs(path,eurl)
 
 
 #P.utils.testRdfs(path,eurl,False)
