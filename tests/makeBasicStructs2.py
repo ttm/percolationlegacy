@@ -148,16 +148,22 @@ fnames_+=[
         ]
 ff=[i[0] for i in fnames_] 
 #ff=['gmane.comp.gcc.libstdc++.devel']
-ff=['gmane.comp.java.hadoop.hive.user']
+ff=['gmane.politics.organizations.metareciclagem', 'gmane.comp.gcc.libstdc++.devel', 'gmane.linux.audio.devel', 'gmane.linux.audio.users']+['gmane.comp.web.egroupware.user', 'gmane.culture.language.basque.eibartarrak','gmane.org.operators.nznog', 'gmane.science.nmr.relax.scm',"gmane.linux.fbdev.devel",]
+ff='gmane.politics.marxism.marxmail', 'gmane.mail.spam.spamassassin.devel','gmane.comp.audio.supercollider.devel', 'gmane.linux.ubuntu.devel.kernel.general',"gmane.comp.video.ffmpeg.user","gmane.comp.mathematics.maxima.general"
+ff="arenaNETmundial_tw","art_tw","QuartaSemRacismoClubeSDV_tw","SnapDetremura_tw"
+ff="game_tw","god_tw","music_tw","obama_tw","porn_tw","science_tw"
 for fname in ff:
     eurl="http://localhost:82/dsfoo"
     eurl="http://127.0.0.1:82/dsfoo"
     eurl="http://200.144.255.210:8082/dsfoo"
 #    path="/home/r/repos/social/tests/publishing/fb4/{}/rdf/".format(fname.replace(".gml","_gml_fb"))
 #    path="/home/r/repos/gmane/tests/publishing/{}/rdf/".format(fname.replace(".","-").replace("+","P"))
+    path="/root/repos/gmane1/{}/rdf/".format(fname.replace(".","-").replace("+","P"))
     path="/root/repos/gmane/tests/publishing/{}/rdf/".format(fname.replace(".","-").replace("+","P"))
-#    P.utils.testRdfs(path,eurl,False)
-    P.utils.testRdfs(path,eurl)
+    path="/root/repos/twitter1/{}/rdf/".format(fname)
+    path="/root/repos/twitter2/{}/rdf/".format(fname)
+    P.utils.testRdfs(path,eurl,False)
+#    P.utils.testRdfs(path,eurl)
 
 
 #P.utils.testRdfs(path,eurl,False)

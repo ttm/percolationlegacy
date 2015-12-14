@@ -107,7 +107,6 @@ def writeAll(per_graph,sname="img_and_rdf",sdir="./",full=False,remove=False,dot
         i=0
         j=0
         g_=r.Graph()
-        g_.namespace_manager.bind("irc", ns.irc)    
         for sub, pred, obj in g:
             g_.add((sub,pred,obj))
             i+=1
@@ -121,7 +120,6 @@ def writeAll(per_graph,sname="img_and_rdf",sdir="./",full=False,remove=False,dot
                 f.close()
                 check("ttl written")
                 g_=r.Graph()
-                g_.namespace_manager.bind("irc", ns.irc)
                 j+=1
         f=open(sdir+"rdf/{}{:05d}.owl".format(nome_,j),"wb")
         f.write(g_.serialize())

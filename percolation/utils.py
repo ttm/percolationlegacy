@@ -8,6 +8,7 @@ def testRdfs(path,end_url,do_query=True,write_back=True):
     for afile in files:
         afile_=path+afile
         tgraph="http://{}".format(afile.lower())
+        tgraph="".join(i for i in tgraph if not i.isdigit()).replace("_","")
         #"s-put http://200.144.255.210:8082/dsfoo http://adorno.enfeite.ttl AdornoNaoEhEnfeiteTranslate.ttl"
         cmd="s-put {} {} {}".format(end_url, tgraph, afile_)
         os.system(cmd); check(cmd)
