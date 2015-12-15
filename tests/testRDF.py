@@ -19,17 +19,23 @@ mreso=[]
 for graph in graphs[:10]:
    c("check: " +graph)
    q='SELECT (COUNT(?s) as ?{{}})  WHERE {{{{ GRAPH <{}> {{{{ ?s ?p ?o }}}} }}}}'.format(graph)
-   mres+=[P.utils.mQuery(end_url,q,("cs",))]
+   mres+=P.utils.mQuery(end_url,q,("cs",))[0]
    q='SELECT (COUNT(DISTINCT ?s) as ?{{}})  WHERE {{{{ GRAPH <{}> {{{{ ?s ?p ?o }}}} }}}}'.format(graph)
-   mress+=[P.utils.mQuery(end_url,q,("cs",))]
+   mress+=P.utils.mQuery(end_url,q,("cs",))[0]
    q='SELECT (COUNT(DISTINCT ?p) as ?{{}})  WHERE {{{{ GRAPH <{}> {{{{ ?s ?p ?o }}}} }}}}'.format(graph)
-   mresp+=[P.utils.mQuery(end_url,q,("cs",))]
+   mresp+=P.utils.mQuery(end_url,q,("cs",))[0]
    q='SELECT (COUNT(DISTINCT ?o) as ?{{}})  WHERE {{{{ GRAPH <{}> {{{{ ?s ?p ?o }}}} }}}}'.format(graph)
-   mreso+=[P.utils.mQuery(end_url,q,("cs",))]
+   mreso+=P.utils.mQuery(end_url,q,("cs",))[0]
 
 # write as latex tables for the article
 # migrate text latexHelpers to percolation
-
+labels=graphs[:10]
+labelsh="graph id","triples","subjects","predicates","objects"
+data=[[int(ii) for ii in [i,j,k,l]] for i,j,k,l in zip(mres,mress,mresp,mreso)]
+caption="count of RDF basic units"
+filename="fooTableHere.tex"
+P.tableHelpers.lTable(labels,labelsh,data,caption,filename,ttype="textGeral__")
+#P.tableHelpers.lTable(labels,labelsh,data,caption,filename,ttype="kolmNull"):
 
 
 

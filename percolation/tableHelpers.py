@@ -1,5 +1,4 @@
 import numpy as n, string, re, builtins as B, langid
-import gmane as g
 def fSize(tablefname,ftag="scriptsize",write=False):
     """Change size of table font"""
     with open(tablefname,"r") as f:
@@ -310,15 +309,15 @@ def writeTex(string,filename):
         f.write(string)
 def dl(fname,hl,vl,hl_=[],over=1):
     fname+=".tex"
-    foo=g.doubleLines(fname,hlines=hl,vlines=vl,hlines_=hl_)
+    foo=doubleLines(fname,hlines=hl,vlines=vl,hlines_=hl_)
     if not over:
         fname=fname.replace(".tex","_.tex")
-    g.writeTex(foo,fname)
+    writeTex(foo,fname)
 def me(fname,mark,locs,over=0):
     fn=fname+".tex"
-    foo=g.markEntries_(fn,mark,locs)
+    foo=markEntries_(fn,mark,locs)
     if not over:
         fn=fn.replace(".tex","_.tex")
-    g.writeTex(foo,fn)
+    writeTex(foo,fn)
 
 
