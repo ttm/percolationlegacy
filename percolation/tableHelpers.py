@@ -1,4 +1,10 @@
 import numpy as n, string, re, builtins as B, langid
+def doubleColumn(tablefname):
+    with open(tablefname,"r") as f:
+        lines=f.read()
+    l=lines.replace("\\begin{table}","\\begin{table*}").replace("\\end{table}","\\end{table*}")
+    writeTex(l,tablefname)
+
 def fSize(tablefname,ftag="scriptsize",write=False):
     """Change size of table font"""
     with open(tablefname,"r") as f:
