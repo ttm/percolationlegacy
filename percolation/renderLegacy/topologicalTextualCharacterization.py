@@ -1,12 +1,56 @@
 import percolation as P
 c=P.utils.check
 
+class Analysis:
+    def __init__(self,endpoint_url,data_dir,final_dir):
+        general_info,endpoint=P.config.boostrap(end_url,fdir)
+        # tudo para as estruturas totais:
+        general_info=self.detailedGeneral(end_url,general_info)
+        topological_info=self.topologicalMeasures(end_url,general_info)
+        textual_info=self.textualMeasures(end_url,general_info, topological_info)
+        temporal_info=self.temporalMeasures(end_url,general_info, topological_info)
+        unitary_info=self.unitaryRoot(end_url,general_info, topological_info)
+        scalefree_info=self.scaleFreeTest(end_url,general_info, topological_info)
+        # explore different scales
+        multiscale_info=self.multiScale(end_url,general_info)
+    def detailedGeneral(self): pass
+    def topologicalMeasures(self): pass
+    def textualMeasures(self): pass
+    def temporalMeasures(self): pass
+    def unitaryRoot(self): pass
+    def scaleFreeTest(self): pass
+    def bootstrapFuseki(endpoint_url,data_dir="/disco/data/",fdir="/root/r/repos/documentation/"):
+        """If fdir=None, don't render latex tables"""
+        # varre arquivos procurando "Meta"
+        metafiles=getMetas(datadir)
+        # adiciona ao endpoint grafo com nome via regra de formacao de URI ou URI de snapshot
+        addToEndpoint(metafiles)
+        # analisa com os nomes, quantidades, proveniencias e demais infos do Meta
+        oi=getOverallInfos(metafiles)
+        # ESCREVE TABELA
+        writeOverallTable(oi)
+        # escrita de resumo no grafo de discovery principal
+        writeOverallEndpoint(oi)
+        # carrega translates nos grafos de nomes apropriados (tentar usar uris de snapshots)
+        translates=writeOverallEndpoint(oi)
+        # análise geral dos grafos, quais atributos, datas, etc
+        analysis=overallAnalysis(oi)
+        # ESCREVE TABELA
+        writeOverallTable2(analysis)
+        # TERMINA BOOTSTRAP
+        # mais um resumo total?
+        return general_info, endpoint
+        # análise de estabilidade e texto
+        # teste de raiz unitária, medida de proximidade da livre de escala, expansão do pca, casos com múltiplas escalas
+
+
 def rdfUnitsTable(end_url,fdir="./tables/",fname="rdfUnits.tex",nrows=None):
     fname_=fdir+fname
     q="SELECT DISTINCT ?{} WHERE {{ GRAPH ?g {{ }} }}"; v="g"
     graphs=[i[0] for i in P.utils.mQuery(end_url,q,v)]
     if nrows:
         graphs=graphs[:nrows]
+    graphs=sorted(graphs)
     mres=[]
     mress=[]
     mresp=[]

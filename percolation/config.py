@@ -1,6 +1,31 @@
 # routines to deliver configuration files for open linked social data
 import percolation as P
 c=P.utils.check
+
+
+def bootstrapFuseki(endpoint_url,data_dir="/disco/data/",fdir="/root/r/repos/documentation/"):
+    """If fdir=None, don't render latex tables"""
+    # varre arquivos procurando "Meta"
+    metafiles=getMetas(datadir)
+    # adiciona ao endpoint grafo com nome via regra de formacao de URI ou URI de snapshot
+    addToEndpoint(metafiles)
+    # analisa com os nomes, quantidades, proveniencias e demais infos do Meta
+    oi=getOverallInfos(metafiles)
+    # ESCREVE TABELA
+    writeOverallTable(oi)
+    # escrita de resumo no grafo de discovery principal
+    writeOverallEndpoint(oi)
+    # carrega translates nos grafos de nomes apropriados (tentar usar uris de snapshots)
+    translates=writeOverallEndpoint(oi)
+    # análise geral dos grafos, quais atributos, datas, etc
+    analysis=overallAnalysis(oi)
+    # ESCREVE TABELA
+    writeOverallTable2(analysis)
+    # TERMINA BOOTSTRAP
+    # mais um resumo total?
+    return general_info, endpoint
+    # análise de estabilidade e texto
+    # teste de raiz unitária, medida de proximidade da livre de escala, expansão do pca, casos com múltiplas escalas
 def makeFusekiConfig(names0=["labMacambiraLaleniaLog3","labMacambiraLaleniaLog2","foradoeixo","gmane-linux-audio-users","gmane-linux-audio-devel","gmane-politics-organizations-metareciclagem","arenaNETmundial_tw","matehackers"],names1=[("music_tw",15),("obama_tw",3),("porn_tw",8),("god_tw",2),("art_tw",6)],names2=["participabr","cidadedemocratica","aa","gmane-comp-gcc-libstdcPP-devel"],empty=True,names0_=[],names1_=[],names2_=[]):
     """Makes a apache/jena/fuseki configuration file.
 
