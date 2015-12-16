@@ -1,11 +1,16 @@
 import percolation as P
 c=P.utils.check
 class Bootstrap:
-    def __init__(self,endpoint_uri,data_dir="/disco/data/",fdir="/root/r/repos/documentation/"):
+    def __init__(self,endpoint_url,data_dir="/disco/data/",fdir="/root/r/repos/documentation/"):
         """If fdir=None, don't render latex tables"""
-        metafiles=P.utils.getFiles(datadir)
-        foo=P.utils.addToEndpoint(metafiles)
-        oi=self.getOverallInfos(metafiles)
+        self.res=[]
+        metafiles=P.utils.getFiles(data_dir)[:3]
+        metagnames=[P.utils.urifyFilename(i) for i in metafiles]
+        c("got metafiles")
+        foo=P.utils.addToEndpoint(endpoint_url,metafiles)
+        c("added them to endpoint")
+        oi=self.getOverallInfos(endpoint_url,metagnames)
+    def extra(self):
         self.writeOverallTable(oi)
         # escrita de resumo no grafo de discovery principal
         self.writeOverallEndpoint(oi)
@@ -18,9 +23,21 @@ class Bootstrap:
         self.oi=oi
         self.translates=translates
         self.analysis=analysis
-    def getOverallInfos(self,endpoint_url,metafiles):
-        # analisa com os nomes, quantidades, proveniencias e demais infos do Meta
-        pass
+    def getOverallInfos(self,endpoint_url,metagnames):
+        """analisa com os nomes, quantidades, proveniencias e demais infos do Meta"""
+        for gname in metagnames:
+            # faz query para saber a proveniencia
+            # pega alguns dados basicos
+            # pega endereco dos translates
+            qq="SELECT ?{}  WHERE {{ GRAPH <"+ gname +"> {{ ?s <"+str(P.rdf.ns.po.socialProtocol)+"> ?n . }} }}"
+            plat=P.utils.mQuery(endpoint_url,qq,("n",))[0][0]
+            if plat.endswith("Facebook"):
+                c("YEY")
+                qq="SELECT ?{} ?{} WHERE {{ GRAPH <"+ gname +"> {{ ?s <"+str(P.rdf.ns.fb.nFriends)+"> ?n . ?s <"+str(P.rdf.ns.fb.nFriendships)+">  ?n2 }} }}"
+                nf,nfs=P.utils.mQuery(endpoint_url,qq,("n","n2"))[0]
+                c("{}, {}".format(nf,nfs))
+                #self.res+=[P.utils.mQuery(endpoint_url,qq,("n",))]
+                self.qq=qq
     def writeOverallTable(self,oi,fdir):
         pass
     def overallAnalysis(self,translates):
@@ -28,7 +45,7 @@ class Bootstrap:
     def writeOverallTable2(self,analysis,fdir):
         pass
 class Analyses:
-    def __init__(self,bootstrap_instance,graphids):
+    def __init__(self,bootstrap_instance,graphids=[]):
         aa=[]
         for gid in graphids:
             aa+=Analysis(bootstrap,gid)
@@ -36,36 +53,40 @@ class Analyses:
     def overallMeasures(self,graphids):
         pass
 class Analysis:
-    def __init__(self,bootstrap_instance,graphid):
-        self.boot=bootstrap
+    def __init__(self,bootstrap_instance,graphid=None):
+        self.boot=bootstrap_instance
         # tudo para as estruturas totais:
         general_info=self.detailedGeneral()
         self.network=self.makeNetwork()
-        self.users_sectors=self.getErdosSectorUsers()
+        self.users_sectors=self.getErdosSectorsUsers()
         topological_info=self.topologicalMeasures()
         textual_info=self.textualMeasures()
         temporal_info=self.temporalMeasures()
         scalefree_info=self.scaleFreeTest()
         # explore different scales
+    def makeNetwork(self): pass
+    def getErdosSectorsUsers(self): pass
     def detailedGeneral(self): pass
     def topologicalMeasures(self): pass
     def textualMeasures(self): pass
     def temporalMeasures(self): pass
     def scaleFreeTest(self): pass
-class TimelineAnalysis:
+class TimelineAnalysis(Analyses):
     # make Analyses with input graphids
     # plot timelines
     # calculate unitary roots
     # make tables
-    def unitaryRoot(self): pass
+    def init():
         unitary_info=self.unitaryRoot()
-class MultiscaleAnalysis:
+    def unitaryRoot(self): pass
+class MultiscaleAnalysis(Analyses):
     # make Analyses with input graphids
     # find bet fit to scale free
     # plot some variables with respect to graphsize
     # render tables
-    def multiScale(self): pass
+    def init():
         multiscale_info=self.multiScale()
+    def multiScale(self): pass
 
 def rdfUnitsTable(end_url,fdir="./tables/",fname="rdfUnits.tex",nrows=None):
     fname_=fdir+fname

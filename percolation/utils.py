@@ -14,28 +14,22 @@ def getFiles(datadir,ext=".owl"):
         for datasetdir in datasetdirs_:
             rdfdir="{}/{}/rdf/".format(umbrelladir,datasetdir)
             files=os.listdir(rdfdir)
+            files=[i for i in files if "Meta" in i]
+            files=[i for i in files if i.endswith(".owl")]
             for tfile in files:
-                time.sleep(0.1)
-                #c("typein 'qq' to quit loop")
-                #key, o, e =select.select([sys.stdin],[],[],0.1)
-                #if key=="qq":
-                #    break
-                if tfile.endswith(ext):
-                    tfile_=rdfdir+tfile
-                    aa+=[tfile_]
-                    # pegar do Meta o nome do snapshot para o tgraph
-                    #tgraph="http://{}".format(tfile.replace("_","").lower())
-                    #cmd="s-put {} {} {}".format(end_url, tgraph, tfile_)
-                    #c(cmd)
-                    #aa+=[os.system(cmd)]; c("pos")
+                tfile_=rdfdir+tfile
+                aa+=[tfile_]
     return aa
+def urifyFilename(fname):
+    return "http://{}".format(fname.split("/")[-1].replace("_","").lower())
 def addToEndpoint(end_url,tfiles):
     aa=[]
     for tfile in tfiles:
-        tgraph="http://{}".format(tfile.split("/")[-1].replace("_","").lower())
-        cmd="s-put {} {} {}".format(end_url, tgraph, tfile_)
-        c(cmd)
-        aa+=[os.system(cmd)]; c("pos")
+        time.sleep(.1)
+        tgraph=urifyFilename(tfile)
+        cmd="s-put {} {} {}".format(end_url, tgraph, tfile)
+        check(cmd)
+        aa+=[os.system(cmd)]; check("pos")
 
 def testRdfs(path,end_url,do_query=True,write_back=True):
     files=os.listdir(path)
