@@ -4,18 +4,25 @@ class Bootstrap:
     def __init__(self,endpoint_url,data_dir="/disco/data/",fdir="/root/r/repos/documentation/"):
         """If fdir=None, don't render latex tables"""
         self.res=[]
-        metafiles=P.utils.getFiles(data_dir)[:3]
+        metafiles=P.utils.getFiles(data_dir)[:7]
         metagnames=[P.utils.urifyFilename(i) for i in metafiles]
-        #foo=P.utils.addToEndpoint(endpoint_url,metafiles)
+        foo=P.utils.addToEndpoint(endpoint_url,metafiles)
         oi=self.getOverallInfos(endpoint_url,metagnames)
         dirnames=[os.path.dirname(i) for i in metafiles]
         self.metagnames=metagnames
         self.d={"metafiles":metafiles}
         self.writeOverallTable()
     def writeOverallTable(self):
-        labels=[self.odict[i]["label"].split(" ")[-1] for i in self.metagnames]
+        labels=[self.odict[i]["label"].split(" ")[-1] for i in self.metagnames]+["TOTAL"]
         labelsh="label","participants","iparticipants","interactions","relations","from","ego","friendship","anon","interaction","anon"
         data=[[self.odict[i][avar] for avar in ("nf","nfi","ni","nfs","ca","ego","f","fa","i","ia")] for i in self.metagnames]
+        total=[0,0,0,0,0,0,0,0,0,0]
+        for dt in data:
+            for i in range(4):
+                total[i]+=int(dt[i])
+            for i in range(5,10):
+                total[i]+=(dt[i]=="true")
+        data+=[[str(i) for i in total[:4]]+["-"]+["{}/{}".format(i,len(data)) for i in total[5:]]]
         caption="overview of social datasets"
         P.tableHelpers.lTable(labels,labelsh,data,caption,"tryMe2TT.tex",ttype="strings")
         P.tableHelpers.doubleColumn("tryMe2TT.tex")
@@ -39,8 +46,11 @@ class Bootstrap:
             # faz query para saber a proveniencia
             # pega alguns dados basicos
             # pega endereco dos translates
-            qq="SELECT ?{}  WHERE {{ GRAPH <"+ gname +"> {{ ?s <"+str(P.rdf.ns.po.socialProtocol)+"> ?n . }} }}"
-            plat=P.utils.mQuery(endpoint_url,qq,("n",))[0][0]
+            if "gmane" in gname:
+                plat="Gmane"
+            else:
+                qq="SELECT ?{}  WHERE {{ GRAPH <"+ gname +"> {{ ?s <"+str(P.rdf.ns.po.socialProtocol)+"> ?n . }} }}"
+                plat=P.utils.mQuery(endpoint_url,qq,("n",))[0][0]
             if plat.endswith("Facebook"):
                 qq="SELECT "+"?{} "*13+"WHERE \
                  {{ GRAPH <"+ gname +"> {{            \
