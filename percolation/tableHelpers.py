@@ -176,6 +176,8 @@ def makeTables(labels,data,two_decimal=False,ttype=None):
     else:
         if ttype in ("textCorr","textPCA"):
             data="".join([str(labels[i])+((" & %.2f "*(len(datarow))+"\\\\\\hline\n")%tuple(datarow)) for i, datarow in enumerate(data)])
+        elif ttype=="strings":
+            data="".join([str(labels[i])+((" & %s "*(len(datarow))+"\\\\\\hline\n")%tuple(datarow)) for i, datarow in enumerate(data)])
         elif labels[0]=="$cc$" and len(labels)>10:
             data="".join([((labels[i]+" & %.2f "*len(datarow)+"\\\\\\hline\n")%tuple(datarow)) if labels[i] in ("$cc$","$bt$") else (((labels[i]+" & %.2f "*len(datarow)+"\\\\\n")%tuple(datarow)) if labels[i] != "$\\sigma_{dis}$" else ((labels[i]+" & %.2f "*len(datarow)+"\\\\\\hline\\hline\n")%tuple(datarow))) for i, datarow in enumerate(data)])
         elif ttype=="textGeral_":

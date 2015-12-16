@@ -1,4 +1,4 @@
-import percolation as P
+import percolation as P, os
 c=P.utils.check
 class Bootstrap:
     def __init__(self,endpoint_url,data_dir="/disco/data/",fdir="/root/r/repos/documentation/"):
@@ -6,12 +6,21 @@ class Bootstrap:
         self.res=[]
         metafiles=P.utils.getFiles(data_dir)[:3]
         metagnames=[P.utils.urifyFilename(i) for i in metafiles]
-        c("got metafiles")
-        foo=P.utils.addToEndpoint(endpoint_url,metafiles)
-        c("added them to endpoint")
+        #foo=P.utils.addToEndpoint(endpoint_url,metafiles)
         oi=self.getOverallInfos(endpoint_url,metagnames)
+        dirnames=[os.path.dirname(i) for i in metafiles]
+        self.metagnames=metagnames
+        self.d={"metafiles":metafiles}
+        self.writeOverallTable()
+    def writeOverallTable(self):
+        labels=[self.odict[i]["label"].split(" ")[-1] for i in self.metagnames]
+        labelsh="label","participants","iparticipants","interactions","relations","from","ego","friendship","anon","interaction","anon"
+        data=[[self.odict[i][avar] for avar in ("nf","nfi","ni","nfs","ca","ego","f","fa","i","ia")] for i in self.metagnames]
+        caption="overview of social datasets"
+        P.tableHelpers.lTable(labels,labelsh,data,caption,"tryMe2TT.tex",ttype="strings")
+        P.tableHelpers.doubleColumn("tryMe2TT.tex")
+
     def extra(self):
-        self.writeOverallTable(oi)
         # escrita de resumo no grafo de discovery principal
         self.writeOverallEndpoint(oi)
         # carrega translates nos grafos de nomes apropriados (tentar usar uris de snapshots)
@@ -25,6 +34,7 @@ class Bootstrap:
         self.analysis=analysis
     def getOverallInfos(self,endpoint_url,metagnames):
         """analisa com os nomes, quantidades, proveniencias e demais infos do Meta"""
+        self.odict={}
         for gname in metagnames:
             # faz query para saber a proveniencia
             # pega alguns dados basicos
@@ -32,15 +42,35 @@ class Bootstrap:
             qq="SELECT ?{}  WHERE {{ GRAPH <"+ gname +"> {{ ?s <"+str(P.rdf.ns.po.socialProtocol)+"> ?n . }} }}"
             plat=P.utils.mQuery(endpoint_url,qq,("n",))[0][0]
             if plat.endswith("Facebook"):
-                c("YEY")
-                qq="SELECT ?{} ?{} WHERE {{ GRAPH <"+ gname +"> {{ ?s <"+str(P.rdf.ns.fb.nFriends)+"> ?n . ?s <"+str(P.rdf.ns.fb.nFriendships)+">  ?n2 }} }}"
-                nf,nfs=P.utils.mQuery(endpoint_url,qq,("n","n2"))[0]
-                c("{}, {}".format(nf,nfs))
-                #self.res+=[P.utils.mQuery(endpoint_url,qq,("n",))]
-                self.qq=qq
-    def writeOverallTable(self,oi,fdir):
-        pass
+                qq="SELECT "+"?{} "*13+"WHERE \
+                 {{ GRAPH <"+ gname +"> {{            \
+                        ?s <"+str(P.rdf.ns.po.createdAt)+">  ?ca .        \
+                        ?s <"+str(P.rdf.ns.fb.ego)+">  ?ego .        \
+                        ?s <"+str(P.rdf.ns.fb.friendship)+">  ?f .        \
+                        ?s <"+str(P.rdf.ns.fb.fAnon)+">  ?fa .        \
+                        ?s <"+str(P.rdf.ns.fb.interaction)+">  ?i .        \
+                        ?s <"+str(P.rdf.ns.fb.iAnon)+">  ?ia .        \
+                        ?s <"+str(P.rdf.ns.rdfs.label)+">  ?label .        \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.nFriends)+"> ?nf .            }} . \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.nFriendships)+">  ?nfs .      }} . \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.nInteractions)+">  ?ni .     }} . \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.nFriendsInteracted)+">  ?nfi .}} . \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.nFriendsInteracted)+">  ?nfi .}} . \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.po.friendshipXMLFile)+">  ?ffile .}} . \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.po.interactionXMLFile)+">  ?ifile .}} . \
+                 }} }}"
+                keys="nf","nfs","ni","nfi","ca","ego","f","fa","i","ia","ffile","ifile","label"
+                vals=P.utils.mQuery(endpoint_url,qq,keys)[0]
+                bdict={i:j for i,j in zip(keys,vals)}
+                self.odict[gname]=bdict
     def overallAnalysis(self,translates):
+        qq="SELECT "+"(COUNT(?s) as ?{}) (COUNT(DISTINCT ?s) as ?{}) (COUNT(DISTINCT ?p) as ?{}) (COUNT(DISTINCT ?o) as ?{}) WHERE \
+         {{ GRAPH <"+ gname +"> {{            \
+                ?s ?p ?o .        \
+         }} }}"
+        keys="ntrip","nsubj","npred","nobj"
+        vals=P.utils.mQuery(endpoint_url,qq,keys)[0]
+        bdict={i:j for i,j in zip(keys,vals)}
         pass
     def writeOverallTable2(self,analysis,fdir):
         pass
