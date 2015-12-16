@@ -1,17 +1,62 @@
 import percolation as P, os
+from SPARQLWrapper import SPARQLWrapper, JSON
 c=P.utils.check
 class Bootstrap:
     def __init__(self,endpoint_url,data_dir="/disco/data/",fdir="/root/r/repos/documentation/"):
         """If fdir=None, don't render latex tables"""
         self.res=[]
-        metafiles=P.utils.getFiles(data_dir)[:7]
+        metafiles=P.utils.getFiles(data_dir)[:1]
         metagnames=[P.utils.urifyFilename(i) for i in metafiles]
         foo=P.utils.addToEndpoint(endpoint_url,metafiles)
         oi=self.getOverallInfos(endpoint_url,metagnames)
         dirnames=[os.path.dirname(i) for i in metafiles]
         self.metagnames=metagnames
-        self.d={"metafiles":metafiles}
+        self.metafiles=metafiles
         self.writeOverallTable()
+        self.writeOverallEndpoint(endpoint_url)
+    def writeOverallEndpoint(self,endpoint_url):
+        """Write to po:discovery graph"""
+        # faz query dos snapshots, pega os TranslationXML
+        # cgt
+        disc_graph=P.rdf.ns.po.DiscoveryGraph+"#"+"Foo"
+        for gname,fname in zip(self.metagnames,self.metafiles):
+            # insert the metafile in the discovery foo
+            cmd="s-put {} {} {}".format(endpoint_url, disc_graph, fname)
+            os.system(cmd)
+            snapshot=P.rdf.ns.po.Snapshot+"#"+fname.split("/rdf/")[0].split("/")[-1]
+            # link snapshot to local adresses of discovery and translation
+            # and to the smaller preffered label
+            # add totals to the sparql discovery
+            fdir=os.path.dirname(fname)
+            files=os.listdir(fdir)
+            files=["{}/{}".format(fdir,i) for i in files if ((("Interaction" in i) or ("Friendship" in i) or ("Translate" in i)) and i.endswith(".owl"))]
+            tgnames=[]
+            for tfile in files:
+                tgname=P.utils.urifyFilename(tfile,digits=False)
+                cmd="s-put {} {} {}".format(endpoint_url, tgname, tfile)
+                os.system(cmd)
+                tgnames+=[tgname]
+            ss=""
+            for afile in files:
+                ss+='<%s> <%s> "%s" . '%(snapshot,P.rdf.ns.po.localTranslationFile,afile)
+            for tgname in tgnames:
+                ss+='<%s> <%s> "%s" . '%(snapshot,P.rdf.ns.po.translationGraph,tgname)
+            queryString = 'INSERT DATA { GRAPH <%s> { \
+                           <%s> <%s> "%s" . \
+                           <%s> <%s> "%s" . \
+                             %s \
+                            } }'%(
+                                    disc_graph,
+                                   snapshot,P.rdf.ns.po.localDiscoveryFile,fname,
+                                   snapshot,P.rdf.ns.po.discoveryGraph,gname,
+                                   ss
+                                 )
+            sparql = SPARQLWrapper(endpoint_url)
+
+            sparql.setQuery(queryString) 
+            sparql.method = 'POST'
+            sparql.query()
+            # adicionar o proprio meta no discovery
     def writeOverallTable(self):
         labels=[self.odict[i]["label"].split(" ")[-1] for i in self.metagnames]+["TOTAL"]
         labelsh="label","participants","iparticipants","interactions","relations","from","ego","friendship","anon","interaction","anon"
@@ -29,7 +74,6 @@ class Bootstrap:
 
     def extra(self):
         # escrita de resumo no grafo de discovery principal
-        self.writeOverallEndpoint(oi)
         # carrega translates nos grafos de nomes apropriados (tentar usar uris de snapshots)
         translates=self.loadTranslates(oi)
         # análise geral dos grafos, quais atributos, datas, etc

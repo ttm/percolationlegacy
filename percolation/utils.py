@@ -1,4 +1,4 @@
-import time, pickle, os, zipfile
+import time, pickle, os, zipfile, string
 import builtins as B
 from SPARQLWrapper import SPARQLWrapper, JSON
 TT=time.time()
@@ -20,7 +20,9 @@ def getFiles(datadir,ext=".owl"):
                 tfile_=rdfdir+tfile
                 aa+=[tfile_]
     return aa
-def urifyFilename(fname):
+def urifyFilename(fname,digits=True):
+    if not digits:
+        fname="".join(i for i in fname if i not in string.digits)
     return "http://{}".format(fname.split("/")[-1].replace("_","").lower())
 def addToEndpoint(end_url,tfiles):
     aa=[]
