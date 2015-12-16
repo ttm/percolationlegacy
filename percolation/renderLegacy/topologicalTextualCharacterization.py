@@ -1,48 +1,71 @@
 import percolation as P
 c=P.utils.check
-
+class Bootstrap:
+    def __init__(self,endpoint_uri,data_dir="/disco/data/",fdir="/root/r/repos/documentation/"):
+        """If fdir=None, don't render latex tables"""
+        metafiles=P.utils.getFiles(datadir)
+        foo=P.utils.addToEndpoint(metafiles)
+        oi=self.getOverallInfos(metafiles)
+        self.writeOverallTable(oi)
+        # escrita de resumo no grafo de discovery principal
+        self.writeOverallEndpoint(oi)
+        # carrega translates nos grafos de nomes apropriados (tentar usar uris de snapshots)
+        translates=self.loadTranslates(oi)
+        # análise geral dos grafos, quais atributos, datas, etc
+        analysis=self.overallAnalysis(translates)
+        # ESCREVE TABELA
+        self.writeOverallTable2(analysis)
+        self.oi=oi
+        self.translates=translates
+        self.analysis=analysis
+    def getOverallInfos(self,endpoint_url,metafiles):
+        # analisa com os nomes, quantidades, proveniencias e demais infos do Meta
+        pass
+    def writeOverallTable(self,oi,fdir):
+        pass
+    def overallAnalysis(self,translates):
+        pass
+    def writeOverallTable2(self,analysis,fdir):
+        pass
+class Analyses:
+    def __init__(self,bootstrap_instance,graphids):
+        aa=[]
+        for gid in graphids:
+            aa+=Analysis(bootstrap,gid)
+        self.aa=aa
+    def overallMeasures(self,graphids):
+        pass
 class Analysis:
-    def __init__(self,endpoint_url,data_dir,final_dir):
-        general_info,endpoint=P.config.boostrap(end_url,fdir)
+    def __init__(self,bootstrap_instance,graphid):
+        self.boot=bootstrap
         # tudo para as estruturas totais:
-        general_info=self.detailedGeneral(end_url,general_info)
-        topological_info=self.topologicalMeasures(end_url,general_info)
-        textual_info=self.textualMeasures(end_url,general_info, topological_info)
-        temporal_info=self.temporalMeasures(end_url,general_info, topological_info)
-        unitary_info=self.unitaryRoot(end_url,general_info, topological_info)
-        scalefree_info=self.scaleFreeTest(end_url,general_info, topological_info)
+        general_info=self.detailedGeneral()
+        self.network=self.makeNetwork()
+        self.users_sectors=self.getErdosSectorUsers()
+        topological_info=self.topologicalMeasures()
+        textual_info=self.textualMeasures()
+        temporal_info=self.temporalMeasures()
+        scalefree_info=self.scaleFreeTest()
         # explore different scales
-        multiscale_info=self.multiScale(end_url,general_info)
     def detailedGeneral(self): pass
     def topologicalMeasures(self): pass
     def textualMeasures(self): pass
     def temporalMeasures(self): pass
-    def unitaryRoot(self): pass
     def scaleFreeTest(self): pass
-    def bootstrapFuseki(endpoint_url,data_dir="/disco/data/",fdir="/root/r/repos/documentation/"):
-        """If fdir=None, don't render latex tables"""
-        # varre arquivos procurando "Meta"
-        metafiles=getMetas(datadir)
-        # adiciona ao endpoint grafo com nome via regra de formacao de URI ou URI de snapshot
-        addToEndpoint(metafiles)
-        # analisa com os nomes, quantidades, proveniencias e demais infos do Meta
-        oi=getOverallInfos(metafiles)
-        # ESCREVE TABELA
-        writeOverallTable(oi)
-        # escrita de resumo no grafo de discovery principal
-        writeOverallEndpoint(oi)
-        # carrega translates nos grafos de nomes apropriados (tentar usar uris de snapshots)
-        translates=writeOverallEndpoint(oi)
-        # análise geral dos grafos, quais atributos, datas, etc
-        analysis=overallAnalysis(oi)
-        # ESCREVE TABELA
-        writeOverallTable2(analysis)
-        # TERMINA BOOTSTRAP
-        # mais um resumo total?
-        return general_info, endpoint
-        # análise de estabilidade e texto
-        # teste de raiz unitária, medida de proximidade da livre de escala, expansão do pca, casos com múltiplas escalas
-
+class TimelineAnalysis:
+    # make Analyses with input graphids
+    # plot timelines
+    # calculate unitary roots
+    # make tables
+    def unitaryRoot(self): pass
+        unitary_info=self.unitaryRoot()
+class MultiscaleAnalysis:
+    # make Analyses with input graphids
+    # find bet fit to scale free
+    # plot some variables with respect to graphsize
+    # render tables
+    def multiScale(self): pass
+        multiscale_info=self.multiScale()
 
 def rdfUnitsTable(end_url,fdir="./tables/",fname="rdfUnits.tex",nrows=None):
     fname_=fdir+fname

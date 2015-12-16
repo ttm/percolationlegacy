@@ -20,5 +20,8 @@ ddit="/disco/data/"
 #multiscale_info=P.renderLegacy.topologicalTextualCharacterization.multiScale(end_url,general_info)
 
 # ou 
-analysis=P.renderLegacy.topologicalTextualCharacterization.Analysis(end_url,ddir,fdir)
-
+boot=P.renderLegacy.topologicalTextualCharacterization.Bootstrap(end_url,ddir,fdir)
+analysis=P.renderLegacy.topologicalTextualCharacterization.Analysis(boot)
+analyses=P.renderLegacy.topologicalTextualCharacterization.Analyses(boot)
+tl_analysis=P.renderLegacy.topologicalTextualCharacterization.TimelineAnalysis(boot)
+ms_analysis=P.renderLegacy.topologicalTextualCharacterization.MultiscaleAnalysis(boot)

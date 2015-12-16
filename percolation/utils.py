@@ -3,6 +3,40 @@ import builtins as B
 from SPARQLWrapper import SPARQLWrapper, JSON
 TT=time.time()
 
+def getFiles(datadir,ext=".owl"):
+    dirs=os.listdir(datadir)
+    aa=[]
+    for tdir in dirs:
+        umbrelladir=datadir+tdir
+        datasetdirs=os.listdir(umbrelladir)
+        datasetdirs_=[i for i in datasetdirs if os.path.isdir("{}/{}".format(umbrelladir,i))]
+        datasetdirs_=[i for i in datasetdirs_ if not i.startswith(".")]
+        for datasetdir in datasetdirs_:
+            rdfdir="{}/{}/rdf/".format(umbrelladir,datasetdir)
+            files=os.listdir(rdfdir)
+            for tfile in files:
+                time.sleep(0.1)
+                #c("typein 'qq' to quit loop")
+                #key, o, e =select.select([sys.stdin],[],[],0.1)
+                #if key=="qq":
+                #    break
+                if tfile.endswith(ext):
+                    tfile_=rdfdir+tfile
+                    aa+=[tfile_]
+                    # pegar do Meta o nome do snapshot para o tgraph
+                    #tgraph="http://{}".format(tfile.replace("_","").lower())
+                    #cmd="s-put {} {} {}".format(end_url, tgraph, tfile_)
+                    #c(cmd)
+                    #aa+=[os.system(cmd)]; c("pos")
+    return aa
+def addToEndpoint(end_url,tfiles):
+    aa=[]
+    for tfile in tfiles:
+        tgraph="http://{}".format(tfile.split("/")[-1].replace("_","").lower())
+        cmd="s-put {} {} {}".format(end_url, tgraph, tfile_)
+        c(cmd)
+        aa+=[os.system(cmd)]; c("pos")
+
 def testRdfs(path,end_url,do_query=True,write_back=True):
     files=os.listdir(path)
     for afile in files:
