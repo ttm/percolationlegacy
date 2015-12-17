@@ -5,7 +5,8 @@ class Bootstrap:
     def __init__(self,endpoint_url,data_dir="/disco/data/",fdir="/root/r/repos/documentation/"):
         """If fdir=None, don't render latex tables"""
         self.res=[]
-        metafiles=P.utils.getFiles(data_dir)[:1]
+        self.trans={}
+        metafiles=P.utils.getFiles(data_dir)[:10]
         metagnames=[P.utils.urifyFilename(i) for i in metafiles]
         foo=P.utils.addToEndpoint(endpoint_url,metafiles)
         oi=self.getOverallInfos(endpoint_url,metagnames)
@@ -14,6 +15,53 @@ class Bootstrap:
         self.metafiles=metafiles
         self.writeOverallTable()
         self.writeOverallEndpoint(endpoint_url)
+        translates=self.loadTranslates(endpoint_url)
+#        analysis=self.overallAnalysis(endpoint_url)
+    def extra(self):
+        # ESCREVE TABELA
+        self.writeOverallTable2(analysis)
+        self.oi=oi
+        self.translates=translates
+        self.analysis=analysis
+    def overallAnalysis(self,endpoint_url):
+        """Withour use for now"""
+        # análise geral dos grafos, quais atributos, datas, etc
+        qq="SELECT "+"(COUNT(?s) as ?{}) (COUNT(DISTINCT ?s) as ?{}) (COUNT(DISTINCT ?p) as ?{}) (COUNT(DISTINCT ?o) as ?{}) WHERE \
+         {{ GRAPH <"+ gname +"> {{            \
+                ?s ?p ?o .        \
+         }} }}"
+        keys="ntrip","nsubj","npred","nobj"
+        vals=P.utils.mQuery(endpoint_url,qq,keys)[0]
+        bdict={i:j for i,j in zip(keys,vals)}
+
+
+
+    def loadTranslates(self,endpoint_url):
+        """Load each of the translate files into appropriate graphs"""
+        c("LT")
+        for gname,fname in zip(self.metagnames,self.metafiles):
+            c("LT %s %s"%(gname,fname))
+            qq="SELECT "+"?{} "*2+"WHERE \
+                 {{ GRAPH <"+ gname +"> {{            \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.po.interactionXMLFile)+">  ?if .}} . \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.po.friendshipXMLFile)+">  ?ff .}} . \
+                 }} }}"
+            keys="if","ff"
+            vals=P.utils.mQuery(endpoint_url,qq,keys)[0]
+            vals=[i for i in vals if i]
+            for val in vals:
+                c("LT val %s "%(val,))
+                fname_=val.split("/")[-1]
+                dname=os.path.dirname(fname)
+                fname2="{}/{}".format(dname,fname_)
+                guri=P.utils.urifyFilename(fname_)
+                cmd="s-put {} {} {}".format(endpoint_url, guri, fname2)
+                c(cmd)
+                os.system(cmd)
+                if guri in self.trans.keys():
+                    self.trans[guri]+=[val]
+                else:
+                    self.trans[guri]=[val]
     def writeOverallEndpoint(self,endpoint_url):
         """Write to po:discovery graph"""
         # faz query dos snapshots, pega os TranslationXML
@@ -58,7 +106,7 @@ class Bootstrap:
             sparql.query()
             # adicionar o proprio meta no discovery
     def writeOverallTable(self):
-        labels=[self.odict[i]["label"].split(" ")[-1] for i in self.metagnames]+["TOTAL"]
+        labels=[self.odict[i]["label"].split(" ")[-1].replace("_","\_") for i in self.metagnames]+["TOTAL"]
         labelsh="label","participants","iparticipants","interactions","relations","from","ego","friendship","anon","interaction","anon"
         data=[[self.odict[i][avar] for avar in ("nf","nfi","ni","nfs","ca","ego","f","fa","i","ia")] for i in self.metagnames]
         total=[0,0,0,0,0,0,0,0,0,0]
@@ -72,17 +120,7 @@ class Bootstrap:
         P.tableHelpers.lTable(labels,labelsh,data,caption,"tryMe2TT.tex",ttype="strings")
         P.tableHelpers.doubleColumn("tryMe2TT.tex")
 
-    def extra(self):
-        # escrita de resumo no grafo de discovery principal
-        # carrega translates nos grafos de nomes apropriados (tentar usar uris de snapshots)
-        translates=self.loadTranslates(oi)
-        # análise geral dos grafos, quais atributos, datas, etc
-        analysis=self.overallAnalysis(translates)
-        # ESCREVE TABELA
-        self.writeOverallTable2(analysis)
-        self.oi=oi
-        self.translates=translates
-        self.analysis=analysis
+
     def getOverallInfos(self,endpoint_url,metagnames):
         """analisa com os nomes, quantidades, proveniencias e demais infos do Meta"""
         self.odict={}
@@ -117,15 +155,7 @@ class Bootstrap:
                 vals=P.utils.mQuery(endpoint_url,qq,keys)[0]
                 bdict={i:j for i,j in zip(keys,vals)}
                 self.odict[gname]=bdict
-    def overallAnalysis(self,translates):
-        qq="SELECT "+"(COUNT(?s) as ?{}) (COUNT(DISTINCT ?s) as ?{}) (COUNT(DISTINCT ?p) as ?{}) (COUNT(DISTINCT ?o) as ?{}) WHERE \
-         {{ GRAPH <"+ gname +"> {{            \
-                ?s ?p ?o .        \
-         }} }}"
-        keys="ntrip","nsubj","npred","nobj"
-        vals=P.utils.mQuery(endpoint_url,qq,keys)[0]
-        bdict={i:j for i,j in zip(keys,vals)}
-        pass
+
     def writeOverallTable2(self,analysis,fdir):
         pass
 class Analyses:
