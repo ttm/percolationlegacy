@@ -1,4 +1,4 @@
-import percolation as P, os
+import percolation as P, networkx as x, os, re
 from SPARQLWrapper import SPARQLWrapper, JSON
 c=P.utils.check
 class Bootstrap:
@@ -6,7 +6,7 @@ class Bootstrap:
         """If fdir=None, don't render latex tables"""
         self.res=[]
         self.trans={}
-        metafiles=P.utils.getFiles(data_dir)[:10]
+        metafiles=P.utils.getFiles(data_dir)[:1]
         metagnames=[P.utils.urifyFilename(i) for i in metafiles]
         foo=P.utils.addToEndpoint(endpoint_url,metafiles)
         oi=self.getOverallInfos(endpoint_url,metagnames)
@@ -16,6 +16,7 @@ class Bootstrap:
         self.writeOverallTable()
         self.writeOverallEndpoint(endpoint_url)
         translates=self.loadTranslates(endpoint_url)
+        self.endpoint_url=endpoint_url
 #        analysis=self.overallAnalysis(endpoint_url)
     def extra(self):
         # ESCREVE TABELA
@@ -159,28 +160,133 @@ class Bootstrap:
     def writeOverallTable2(self,analysis,fdir):
         pass
 class Analyses:
+    """Calculate unit roots, PCA averages and deviations and best fit to scale-free"""
     def __init__(self,bootstrap_instance,graphids=[]):
+        if not graphids:
+            graphids=list(bootstrap_instance.trans.keys())
         aa=[]
         for gid in graphids:
-            aa+=Analysis(bootstrap,gid)
+            aa+=[Analysis(bootstrap_instance,gid)]
         self.aa=aa
     def overallMeasures(self,graphids):
         pass
 class Analysis:
+    """The analysis of one and only network.
+    The rendering of tables and figures is left for the Analyses class
+    """
     def __init__(self,bootstrap_instance,graphid=None):
+        if graphid==None:
+            graphid=list(bootstrap_instance.trans.keys())[0]
+        self.graphid=graphid
         self.boot=bootstrap_instance
         # tudo para as estruturas totais:
-        general_info=self.detailedGeneral()
         self.network=self.makeNetwork()
+        general_info=self.detailedGeneral()
         self.users_sectors=self.getErdosSectorsUsers()
         topological_info=self.topologicalMeasures()
         textual_info=self.textualMeasures()
         temporal_info=self.temporalMeasures()
         scalefree_info=self.scaleFreeTest()
         # explore different scales
-    def makeNetwork(self): pass
+    def makeNetwork(self):
+        """Build network from endpoint through simple criteria."""
+        # see what procedence: FB, TW, IRC, Email, etc
+        ftype=re.findall(r"\d+fb(friendship|interaction)",self.graphid)
+        if ftype:
+            plat="Facebook"
+            if ftype[0]=="interaction":
+                query= "SELECT ?{} ?{} ?{} WHERE \
+                 {{ GRAPH <"+ self.graphid +"> {{            \
+                 ?s fb:iFrom ?from .        \
+                 ?s fb:iTo ?to .        \
+                 ?s fb:weight ?weight .        \
+                 }} }}"
+                keys="from","to","weight"
+
+            if ftype[0]=="friendship":
+                query= "SELECT ?{} ?{} WHERE \
+                 {{ GRAPH <"+ self.graphid +"> {{            \
+                 ?f1 fb:friend ?f2 .        \
+                 }} }}"
+                keys="f1","f2"
+        vals=P.utils.mQuery(self.boot.endpoint_url,query,keys)
+        if len(vals[0])==3:
+            gg=x.DiGraph()
+            for val in vals:
+                gg.add_edge(val[0],val[1],weight=int(val[2]))
+            gg_=P.utils.toUndirected(gg)
+            comp=x.weakly_connected_component_subgraphs(gg)[0]
+            comp_=x.connected_component_subgraphs(gg_)[0]
+        else:
+            gg=x.Graph()
+            for val in vals:
+                gg.add_edge(val[0],val[1])
+            comp=x.connected_component_subgraphs(gg)[0]
+            gg_=gg
+            comp_=comp
+        self.gg=gg
+        self.gg_=gg_
+        self.comp=comp
+        self.comp_=comp_
+    def detailedGeneral(self):
+        """A detailed info about one and only graph.
+
+        Information about date, number of friends, friendships,
+        interactions, etc.
+        Average degree, average clustering, etc.
+        ToDo: implement homophily
+        """
+        # clustering, weighted clustering (ou só transitivity)
+        # average clustering e square clustering
+        degrees=self.gg.degree()
+        strengths=self.gg.degree(weight="weight")
+        aclustering=x.average_clustering(self.gg_)
+        aclustering_w=x.average_clustering(self.gg_,weight="weight")
+        square_clustering=x.square_clustering( self.gg)
+        transitivity=x.transitivity(self.gg)
+        transitivity_u=x.transitivity(self.gg_)
+        closeness=x.closeness_centrality(self.gg)
+        # eccentricity
+        eccentricity=x.closeness_centrality(self.gg_)
+        # diameter/radius
+        diameter=x.diameter(self.comp_)
+        radius=x.radius(    self.comp_)
+        # nperiphery ncenter
+        nperiphery=x.periphery(self.comp_)
+        ncenter=x.center(self.comp_)
+        size_component=self.comp_.number_of_nodes()
+        # average shortest path
+        ashort_path=x.average_shortest_path_length(   self.comp)
+        ashort_path_w=x.average_shortest_path_length( self.comp,weight="weight")
+        ashort_path_u=x.average_shortest_path_length( self.comp_)
+        ashort_path_uw=x.average_shortest_path_length(self.comp_,weight="weight")
+        # nnodes, nedges, frac nodes/edges, frac edge_weight/edge
+        nnodes=self.gg.number_of_nodes()
+        nedges=self.gg.number_of_edges()
+
+        nodes_edge =100*nnodes/nedges
+        # fraction of participants in the largest component
+        # and strongly connected components
+        frac_weakly_connected=   100*self.comp.number_of_nodes()/nnodes
+        frac_connected=100*self.comp_.number_of_nodes()/nnodes
+        if self.gg.is_directed():
+            total_weight=sum([i[2]["weight"] for i in self.gg.edges(data=True)])
+            frac_strongly_connected=   100*x.strongly_connected_component_subgraphs(self.gg)[0].number_of_nodes()/nnodes
+        else:
+            total_weight=nedges
+            frac_strongly_connected=  frac_connected
+        weight_edge=100*total_weight/nedges
+        mvars=("frac_connected","frac_strongly_connected","weight_edge",
+              "nodes_edge","nnodes","nedges",
+              "ashort_path","ashort_path_u","ashort_path_w","ashort_path_uw",
+              "nperiphery","ncenter","diameter","radius","eccentricity",
+              "closeness","square_clustering","aclustering","aclustering_w",
+              "strengths","degrees","transitivity","transitivity_u","size_component")
+        self.topm_dict={}
+        ll=locals()
+        for mvar in mvars:
+            self.topm_dict[mvar] = ll[mvar]
     def getErdosSectorsUsers(self): pass
-    def detailedGeneral(self): pass
     def topologicalMeasures(self): pass
     def textualMeasures(self): pass
     def temporalMeasures(self): pass

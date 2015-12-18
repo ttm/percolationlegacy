@@ -1,8 +1,15 @@
-import time, pickle, os, zipfile, string
+import time, pickle, os, zipfile, string, networkx as x
 import builtins as B
 from SPARQLWrapper import SPARQLWrapper, JSON
 TT=time.time()
 
+def toUndirected(xgraph):
+    gg=x.Graph()
+    gg.add_edges_from(xgraph.edges_iter(), weight=0)
+
+    for u, v, d in xgraph.edges_iter(data=True):
+            gg[u][v]['weight'] += d['weight']
+    return gg
 def getFiles(datadir,ext=".owl"):
     dirs=os.listdir(datadir)
     aa=[]
