@@ -1,22 +1,24 @@
-import percolation as P, networkx as x, numpy as n, os, re
+import percolation as P, networkx as x, numpy as n, os, re, powerlaw
 from scipy import stats
 from SPARQLWrapper import SPARQLWrapper, JSON
 c=P.utils.check
 class Bootstrap:
-    def __init__(self,endpoint_url,data_dir="/disco/data/",fdir="/root/r/repos/documentation/"):
+    def __init__(self,endpoint_url,data_dir="/disco/data/",fdir="/root/r/repos/documentation/",update=False,write_tables=False):
         """If fdir=None, don't render latex tables"""
         self.res=[]
         self.trans={}
-        metafiles=P.utils.getFiles(data_dir)[:1]
+        metafiles=P.utils.getFiles(data_dir)[:5]
         metagnames=[P.utils.urifyFilename(i) for i in metafiles]
-        foo=P.utils.addToEndpoint(endpoint_url,metafiles)
+        if update:
+            foo=P.utils.addToEndpoint(endpoint_url,metafiles)
         oi=self.getOverallInfos(endpoint_url,metagnames)
         dirnames=[os.path.dirname(i) for i in metafiles]
         self.metagnames=metagnames
         self.metafiles=metafiles
-        self.writeOverallTable()
-        self.writeOverallEndpoint(endpoint_url)
-        translates=self.loadTranslates(endpoint_url)
+        if write_tables:
+            self.writeOverallTable()
+            self.writeOverallEndpoint(endpoint_url)
+        translates=self.loadTranslates(endpoint_url,update)
         self.endpoint_url=endpoint_url
 #        analysis=self.overallAnalysis(endpoint_url)
     def extra(self):
@@ -38,7 +40,7 @@ class Bootstrap:
 
 
 
-    def loadTranslates(self,endpoint_url):
+    def loadTranslates(self,endpoint_url,update):
         """Load each of the translate files into appropriate graphs"""
         c("LT")
         for gname,fname in zip(self.metagnames,self.metafiles):
@@ -57,9 +59,10 @@ class Bootstrap:
                 dname=os.path.dirname(fname)
                 fname2="{}/{}".format(dname,fname_)
                 guri=P.utils.urifyFilename(fname_)
-                cmd="s-put {} {} {}".format(endpoint_url, guri, fname2)
-                c(cmd)
-                os.system(cmd)
+                if update:
+                    cmd="s-put {} {} {}".format(endpoint_url, guri, fname2)
+                    c(cmd)
+                    os.system(cmd)
                 if guri in self.trans.keys():
                     self.trans[guri]+=[val]
                 else:
@@ -162,20 +165,66 @@ class Bootstrap:
         pass
 class Analyses:
     """Calculate unit roots, PCA averages and deviations and best fit to scale-free"""
-    def __init__(self,bootstrap_instance,graphids=[]):
+    def __init__(self,bootstrap_instance,graphids=[],tables=False):
         if not graphids:
             graphids=list(bootstrap_instance.trans.keys())
         aa=[]
         for gid in graphids:
             aa+=[Analysis(bootstrap_instance,gid)]
         self.aa=aa
-    def overallMeasures(self,graphids):
+        if tables:
+            self.renderTables()
+    def renderTables(self):
+        for analysis in self.aa:
+            # make a line for the table or for each table
+            # a table for powelaw fits
+            # a table for the topological measures
+            pass
+        self.renderPowerlawTable()
+        self.renderTopologicalTable()
+        self.renderTextTable()
+        self.renderTimeTable()
+    def renderPowerlawTable(self):
+        #labels=[i.graphid for i in self.aa]
+        labelsh=["id","alpha","xmin","D","sigma","noisy"]
+        labelsh+=["R","p"]*5
+        labels=[]
+        dists=list(self.aa[0].power_res.supported_distributions.keys())
+        dists.remove("power_law")
+        lines=[]
+        for anal in self.aa:
+            labels.append(anal.graphid)
+            data=[anal.power_res.alpha,anal.power_res.xmin,anal.power_res.D,anal.power_res.sigma,anal.power_res.noise_flag]
+            dcomp=[]
+            for dist in dists:
+                dcomp+=list(anal.power_res.distribution_compare("power_law",dist))
+            data+=dcomp
+            lines.append(data)
+            if anal.gg.is_directed():
+                labels.append(anal.graphid+"*")
+                data=[anal.power_res.alpha,anal.power_res.xmin,anal.power_res.D,anal.power_res.sigma,anal.power_res.noise_flag]
+                dcomp=[]
+                for dist in dists:
+                    dcomp+=list(anal.power_res_.distribution_compare("power_law",dist))
+                data+=dcomp
+                lines.append(data)
+
+        caption="Fit of network connectivity to power-law distributions"
+        fname_="aqui.tex"
+        P.tableHelpers.lTable(labels,labelsh,lines,caption,fname_,ttype="allFloat")
+        P.tableHelpers.doubleColumn(fname_)
+    def renderTopologicalTable(self):
+        pass
+
+    def renderTextTable(self):
+        pass
+    def renderTimeTable(self):
         pass
 class Analysis:
     """The analysis of one and only network.
     The rendering of tables and figures is left for the Analyses class
     """
-    def __init__(self,bootstrap_instance,graphid=None):
+    def __init__(self,bootstrap_instance,graphid=None, do_text=False,do_time=False):
         if graphid==None:
             graphid=list(bootstrap_instance.trans.keys())[0]
         self.graphid=graphid
@@ -184,9 +233,10 @@ class Analysis:
         self.network=self.makeNetwork()
         general_info=self.detailedGeneral()
         self.users_sectors=self.getErdosSectorsUsers()
-        topological_info=self.topologicalMeasures()
-        textual_info=self.textualMeasures()
-        temporal_info=self.temporalMeasures()
+        if do_text:
+            textual_info=self.textualMeasures()
+        if do_time:
+            temporal_info=self.temporalMeasures()
         scalefree_info=self.scaleFreeTest()
         # explore different scales
     def makeNetwork(self):
@@ -203,7 +253,6 @@ class Analysis:
                  ?s fb:weight ?weight .        \
                  }} }}"
                 keys="from","to","weight"
-
             if ftype[0]=="friendship":
                 query= "SELECT ?{} ?{} WHERE \
                  {{ GRAPH <"+ self.graphid +"> {{            \
@@ -242,6 +291,7 @@ class Analysis:
         degrees=self.gg.degree()
         degrees_=list(degrees.values())
         strengths=self.gg.degree(weight="weight")
+        strengths_=list(strengths.values())
         aclustering=x.average_clustering(self.gg_)
         aclustering_w=x.average_clustering(self.gg_,weight="weight")
         square_clustering=x.square_clustering( self.gg)
@@ -283,7 +333,7 @@ class Analysis:
               "ashort_path","ashort_path_u","ashort_path_w","ashort_path_uw",
               "nperiphery","ncenter","diameter","radius","eccentricity",
               "closeness","square_clustering","aclustering","aclustering_w",
-              "strengths","degrees","transitivity","transitivity_u","size_component","degrees_")
+              "strengths","strengths_","degrees","transitivity","transitivity_u","size_component","degrees_")
         self.topm_dict={}
         ll=locals()
         for mvar in mvars:
@@ -377,14 +427,23 @@ class Analysis:
         for degree in incident_degrees_:
             empirical_distribution.append(incident_degrees.count(degree)/N)
         return empirical_distribution
-    def topologicalMeasures(self): pass
-    def textualMeasures(self): pass
+    def textualMeasures(self): 
+        raise NotImplementedError("Text processing must be implemented")
     def temporalMeasures(self): pass
-    def scaleFreeTest(self): pass
+    def scaleFreeTest(self):
+        """Under the framework developed at: http://arxiv.org/abs/1305.0215"""
+        self.power_res=powerlaw.Fit(self.topm_dict["degrees_"],discrete=True)
+        if self.gg.is_directed():
+            self.power_res_=powerlaw.Fit(self.topm_dict["strengths_"],discrete=True)
+        else:
+            self.power_res_=self.power_res
 class TimelineAnalysis(Analyses):
     # make Analyses with input graphids
     # plot timelines
-    # calculate unitary roots
+    # calculate unit roots
+    # http://conference.scipy.org/proceedings/scipy2011/pdfs/statsmodels.pdf
+    # http://arch.readthedocs.org/en/latest/unitroot/tests.html
+    # https://pypi.python.org/pypi/arch/
     # make tables
     def init():
         unitary_info=self.unitaryRoot()

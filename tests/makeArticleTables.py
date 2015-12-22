@@ -23,11 +23,11 @@ ddir="/disco/data/"
 
 # ou 
 c("preboot")
-boot=P.renderLegacy.topologicalTextualCharacterization.Bootstrap(end_url,ddir,fdir)
+boot=P.renderLegacy.topologicalTextualCharacterization.Bootstrap(end_url,ddir,fdir,update=False,write_tables=False)
 c("preanal")
-analysis=P.renderLegacy.topologicalTextualCharacterization.Analysis(boot)
-c("preanals")
-analyses=P.renderLegacy.topologicalTextualCharacterization.Analyses(boot)
+#analysis=P.renderLegacy.topologicalTextualCharacterization.Analysis(boot)
+#c("preanals")
+analyses=P.renderLegacy.topologicalTextualCharacterization.Analyses(boot,[],True)
 c("pretlanals")
 tl_analysis=P.renderLegacy.topologicalTextualCharacterization.TimelineAnalysis(boot)
 c("premsanals")

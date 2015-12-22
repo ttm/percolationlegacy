@@ -118,7 +118,7 @@ def markEntries(table,marker):
     return lines
 def encapsulateTable(string_table,column_labels, caption,ttype=None):
     """Uses the output of makeTables to render a complete latex table"""
-    if ttype in ("kolmDiff3","kolmDiff3_","kolmSamp_","kolmSamp","textCorr"):
+    if ttype in ("kolmDiff3","kolmDiff3_","kolmSamp_","kolmSamp","textCorr","allFloat"):
         header="\\begin{table*}[h!]\n\\begin{center}\n\\begin{tabular}{| l |"+" c |"*(string_table.split("hline")[0].count("&")) +"}\\hline\n"
     elif ttype=="audioDistances":
         header="\\begin{table*}[h!]\n\\begin{center}\n\\begin{tabular}{| l |"+" c |"*(string_table.split("hline")[0].count("&")) +"}\\hline\n"
@@ -134,7 +134,7 @@ def encapsulateTable(string_table,column_labels, caption,ttype=None):
     if "tag" in dir(B):
         caption+=" TAG: {}".format(B.tag)
     caption_="\\caption{{{}}}\n".format(caption)
-    if ttype in ("kolmDiff3","kolmDiff3_","kolmSamp_","kolmSamp","textCorr"):
+    if ttype in ("kolmDiff3","kolmDiff3_","kolmSamp_","kolmSamp","textCorr","allFloat"):
         footer="\\end{{tabular}}\n{}\\end{{center}}\n\\end{{table*}}".format(caption_)
     elif ttype=="audioDistances":
         footer="\\end{{tabular}}\n{}\\end{{center}}\n\\end{{table*}}".format(caption_)
@@ -174,7 +174,7 @@ def makeTables(labels,data,two_decimal=False,ttype=None):
     if not two_decimal:
         data="".join([(labels[i]+" & {} "*len(datarow)+"\\\\\\hline\n").format(*datarow) for i, datarow in enumerate(data)])
     else:
-        if ttype in ("textCorr","textPCA"):
+        if ttype in ("textCorr","textPCA","allFloat"):
             data="".join([str(labels[i])+((" & %.2f "*(len(datarow))+"\\\\\\hline\n")%tuple(datarow)) for i, datarow in enumerate(data)])
         elif ttype=="strings":
             data="".join([str(labels[i])+((" & %s "*(len(datarow))+"\\\\\\hline\n")%tuple(datarow)) for i, datarow in enumerate(data)])
