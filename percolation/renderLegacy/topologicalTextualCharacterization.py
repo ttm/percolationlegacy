@@ -193,7 +193,7 @@ class Analyses:
         dists.remove("power_law")
         lines=[]
         for anal in self.aa:
-            labels.append(anal.graphid)
+            self.labels.append(anal.graphid)
             data=[anal.power_res.alpha,anal.power_res.xmin,anal.power_res.D,anal.power_res.sigma,anal.power_res.noise_flag]
             dcomp=[]
             for dist in dists:
@@ -201,7 +201,7 @@ class Analyses:
             data+=dcomp
             lines.append(data)
             if anal.gg.is_directed():
-                labels.append(anal.graphid+"*")
+                self.labels.append(anal.graphid+"*")
                 data=[anal.power_res.alpha,anal.power_res.xmin,anal.power_res.D,anal.power_res.sigma,anal.power_res.noise_flag]
                 dcomp=[]
                 for dist in dists:
@@ -214,7 +214,47 @@ class Analyses:
         P.tableHelpers.lTable(labels,labelsh,lines,caption,fname_,ttype="allFloat")
         P.tableHelpers.doubleColumn(fname_)
     def renderTopologicalTable(self):
-        pass
+        # self.labels tem os labels
+        for anal in self.aa:
+            # tem as medidas topologicas, organizar em 1 ou + tabelas
+            # renderizar em paisagem ou nem assim?
+            # fazer papel grande, deixar que de zoom pq eh digital
+            line=[
+                    anal.topm_dict["nnodes"],
+                    anal.topm_dict["nedges"],
+                    anal.topm_dict["nodes_edge"],
+                    anal.topm_dict["weight_edge"],
+                    anal.topm_dict["prob"], # anotar em ocorrências por mil ou milhões etc
+                    anal.topm_dict["strengths_"],
+                    anal.topm_dict["degrees_"],
+                    anal.topm_dict["max_degree_empirical"],
+                    anal.topm_dict["aclustering"],
+                    anal.topm_dict["aclustering_w"],
+                    anal.topm_dict["square_clustering"],
+                    anal.topm_dict["closeness"],
+                    anal.topm_dict["eccentricity"],
+                    anal.topm_dict["transitivity"],
+                    anal.topm_dict["transitivity_u"],
+                    anal.topm_dict["diameter"],
+                    anal.topm_dict["radius"],
+                    anal.topm_dict["frac_connected"],
+                    anal.topm_dict["size_component"],
+                    anal.topm_dict["ashort_path"],
+                    anal.topm_dict["ashort_path_u"],
+                    anal.topm_dict["ashort_path_w"],
+                    anal.topm_dict["ashort_path_uw"],
+                    anal.topm_dict["ncenter"],
+                    anal.topm_dict["nperiphery"],
+                    anal.topm_dict["hubs"],
+                    anal.topm_dict["intermediary"],
+                    anal.topm_dict["peripherals"],
+                    anal.topm_dict["sectorialized_agents__"],
+                    anal.topm_dict["sectorialized_degrees__"],
+                    anal.topm_dict["frac_strongly_connected"],
+                    anal.topm_dict["frac_weakly_connected"],
+                ]
+
+            pass
 
     def renderTextTable(self):
         pass
