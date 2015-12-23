@@ -222,17 +222,36 @@ class Analyses:
             line=[
                     anal.topm_dict["nnodes"],
                     anal.topm_dict["nedges"],
-                    anal.topm_dict["nodes_edge"],
-                    anal.topm_dict["weight_edge"],
+                    #anal.topm_dict["nodes_edge"], correlated to degree
                     anal.topm_dict["prob"], # anotar em ocorrências por mil ou milhões etc
-                    anal.topm_dict["strengths_"],
-                    anal.topm_dict["degrees_"],
+                    n.mean(anal.topm_dict["degrees_"]),
+                    n.std(anal.topm_dict["degrees_"]),
+                    n.mean(anal.topm_dict["strengths_"]),
+                    n.std(anal.topm_dict["strengths_"]),
+                    n.mean(anal.topm_dict["weights"]),
+                    n.std(anal.topm_dict["weights"]),
+                    n.mean(anal.topm_dict["eccentricity_"]             ),
+                    n.std(anal.topm_dict["eccentricity_"]             ),
+                    n.mean(anal.topm_dict["clustering_"]               ),
+                    n.std(anal.topm_dict["clustering_"]               ),
+                    n.mean(anal.topm_dict["clustering_w_"]             ),
+                    n.std(anal.topm_dict["clustering_w_"]             ),
+                    n.mean(anal.topm_dict["closeness_"]                ),
+                    n.std(anal.topm_dict["closeness_"]                ),
+                    n.mean(anal.topm_dict["sectorialized_degress__"][0]), # periphery
+                    n.std(anal.topm_dict["sectorialized_degress__"][0]), # periphery
+                    n.mean(anal.topm_dict["sectorialized_degress__"][1]), # intermediary
+                    n.std(anal.topm_dict["sectorialized_degress__"][1]), # intermediary
+                    n.mean(anal.topm_dict["sectorialized_degress__"][2]), # hubs
+                    n.std(anal.topm_dict["sectorialized_degress__"][2]), # hubs
+
+                    anal.topm_dict["sectorialized_nagents"][0], # periphery
+                    anal.topm_dict["sectorialized_nagents"][1], # intermediary
+                    anal.topm_dict["sectorialized_nagents"][2], # hubs
                     anal.topm_dict["max_degree_empirical"],
-                    anal.topm_dict["aclustering"],
-                    anal.topm_dict["aclustering_w"],
+                    anal.topm_dict["max_strength"],
+                    anal.topm_dict["max_weight"],
                     anal.topm_dict["square_clustering"],
-                    anal.topm_dict["closeness"],
-                    anal.topm_dict["eccentricity"],
                     anal.topm_dict["transitivity"],
                     anal.topm_dict["transitivity_u"],
                     anal.topm_dict["diameter"],
@@ -245,11 +264,8 @@ class Analyses:
                     anal.topm_dict["ashort_path_uw"],
                     anal.topm_dict["ncenter"],
                     anal.topm_dict["nperiphery"],
-                    anal.topm_dict["hubs"],
-                    anal.topm_dict["intermediary"],
-                    anal.topm_dict["peripherals"],
-                    anal.topm_dict["sectorialized_agents__"],
-                    anal.topm_dict["sectorialized_degrees__"],
+#                    anal.topm_dict["sectorialized_agents__"],
+#                    anal.topm_dict["sectorialized_degrees__"],
                     anal.topm_dict["frac_strongly_connected"],
                     anal.topm_dict["frac_weakly_connected"],
                 ]
@@ -332,14 +348,19 @@ class Analysis:
         degrees_=list(degrees.values())
         strengths=self.gg.degree(weight="weight")
         strengths_=list(strengths.values())
-        aclustering=x.average_clustering(self.gg_)
-        aclustering_w=x.average_clustering(self.gg_,weight="weight")
+        clustering=x.clustering( an.gg_ )
+        clustering_=list(clustering.values())
+        clustering_w=x.clustering( an.gg_,weight="weight" )
+        clustering_w_=list(clustering_w.keys())
+#        aclustering=x.average_clustering(self.gg_)
+#        aclustering_w=x.average_clustering(self.gg_,weight="weight")
         square_clustering=x.square_clustering( self.gg)
         transitivity=x.transitivity(self.gg)
         transitivity_u=x.transitivity(self.gg_)
         closeness=x.closeness_centrality(self.gg)
-        # eccentricity
+        closeness_=list(closeness.values())
         eccentricity=x.closeness_centrality(self.gg_)
+        eccentricity_=list(eccentricity.keys())
         # diameter/radius
         diameter=x.diameter(self.comp_)
         radius=x.radius(    self.comp_)
@@ -356,19 +377,24 @@ class Analysis:
         nnodes=self.gg.number_of_nodes()
         nedges=self.gg.number_of_edges()
 
-        nodes_edge =100*nnodes/nedges
+        #nodes_edge =100*nnodes/nedges
         # fraction of participants in the largest component
         # and strongly connected components
         frac_weakly_connected=   100*self.comp.number_of_nodes()/nnodes
         frac_connected=100*self.comp_.number_of_nodes()/nnodes
         if self.gg.is_directed():
-            total_weight=sum([i[2]["weight"] for i in self.gg.edges(data=True)])
+            weights=[i[2]["weight"] for i in self.gg.edges(data=True)]
             frac_strongly_connected=   100*x.strongly_connected_component_subgraphs(self.gg)[0].number_of_nodes()/nnodes
+            frac_weakly_connected=   100*x.weakly_connected_component_subgraphs(self.gg)[0].number_of_nodes()/nnodes
+            # make weakly connected
         else:
-            total_weight=nedges
+            weights=[1]*nedges
             frac_strongly_connected=  frac_connected
         weight_edge=total_weight/nedges
-        mvars=("frac_connected","frac_strongly_connected","weight_edge",
+        mvars=("frac_connected",
+                "frac_strongly_connected",
+                "frac_weakly_connected",
+                "weight_edge",
               "nodes_edge","nnodes","nedges",
               "ashort_path","ashort_path_u","ashort_path_w","ashort_path_uw",
               "nperiphery","ncenter","diameter","radius","eccentricity",
@@ -393,6 +419,7 @@ class Analysis:
               max_degree_empirical,minimum_incidence,t["nnodes"])
         sectorialized_agents__= self.sectorializeAgents(
              sectorialized_degrees__, t["degrees"])
+        sectorialized_nagents__=[len(i) for i in sectorialized_agents__]
         mvars=("prob","max_degree_empirical","sectorialized_degrees__","sectorialized_agents__")
         ll=locals()
         for mvar in mvars:
