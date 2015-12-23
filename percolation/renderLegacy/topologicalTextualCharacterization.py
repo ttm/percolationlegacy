@@ -7,7 +7,7 @@ class Bootstrap:
         """If fdir=None, don't render latex tables"""
         self.res=[]
         self.trans={}
-        metafiles=P.utils.getFiles(data_dir)[:5]
+        metafiles=P.utils.getFiles(data_dir)[:2]
         metagnames=[P.utils.urifyFilename(i) for i in metafiles]
         if update:
             foo=P.utils.addToEndpoint(endpoint_url,metafiles)
@@ -342,42 +342,33 @@ class Analysis:
         Average degree, average clustering, etc.
         ToDo: implement homophily
         """
-        # clustering, weighted clustering (ou só transitivity)
-        # average clustering e square clustering
         degrees=self.gg.degree()
         degrees_=list(degrees.values())
         strengths=self.gg.degree(weight="weight")
         strengths_=list(strengths.values())
-        clustering=x.clustering( an.gg_ )
+        clustering=x.clustering( self.gg_ )
         clustering_=list(clustering.values())
-        clustering_w=x.clustering( an.gg_,weight="weight" )
+        clustering_w=x.clustering( self.gg_,weight="weight" )
         clustering_w_=list(clustering_w.keys())
-#        aclustering=x.average_clustering(self.gg_)
-#        aclustering_w=x.average_clustering(self.gg_,weight="weight")
         square_clustering=x.square_clustering( self.gg)
         transitivity=x.transitivity(self.gg)
         transitivity_u=x.transitivity(self.gg_)
         closeness=x.closeness_centrality(self.gg)
         closeness_=list(closeness.values())
         eccentricity=x.closeness_centrality(self.gg_)
-        eccentricity_=list(eccentricity.keys())
-        # diameter/radius
         diameter=x.diameter(self.comp_)
         radius=x.radius(    self.comp_)
-        # nperiphery ncenter
         nperiphery=x.periphery(self.comp_)
         ncenter=x.center(self.comp_)
         size_component=self.comp_.number_of_nodes()
-        # average shortest path
         ashort_path=x.average_shortest_path_length(   self.comp)
         ashort_path_w=x.average_shortest_path_length( self.comp,weight="weight")
         ashort_path_u=x.average_shortest_path_length( self.comp_)
         ashort_path_uw=x.average_shortest_path_length(self.comp_,weight="weight")
-        # nnodes, nedges, frac nodes/edges, frac edge_weight/edge
         nnodes=self.gg.number_of_nodes()
         nedges=self.gg.number_of_edges()
 
-        #nodes_edge =100*nnodes/nedges
+        # nodes_edge =100*nnodes/nedges # correlated to degree
         # fraction of participants in the largest component
         # and strongly connected components
         frac_weakly_connected=   100*self.comp.number_of_nodes()/nnodes
@@ -385,25 +376,12 @@ class Analysis:
         if self.gg.is_directed():
             weights=[i[2]["weight"] for i in self.gg.edges(data=True)]
             frac_strongly_connected=   100*x.strongly_connected_component_subgraphs(self.gg)[0].number_of_nodes()/nnodes
-            frac_weakly_connected=   100*x.weakly_connected_component_subgraphs(self.gg)[0].number_of_nodes()/nnodes
+            frac_weakly_connected2=   100*x.weakly_connected_component_subgraphs(self.gg)[0].number_of_nodes()/nnodes
             # make weakly connected
         else:
             weights=[1]*nedges
             frac_strongly_connected=  frac_connected
-        weight_edge=total_weight/nedges
-        mvars=("frac_connected",
-                "frac_strongly_connected",
-                "frac_weakly_connected",
-                "weight_edge",
-              "nodes_edge","nnodes","nedges",
-              "ashort_path","ashort_path_u","ashort_path_w","ashort_path_uw",
-              "nperiphery","ncenter","diameter","radius","eccentricity",
-              "closeness","square_clustering","aclustering","aclustering_w",
-              "strengths","strengths_","degrees","transitivity","transitivity_u","size_component","degrees_")
-        self.topm_dict={}
-        ll=locals()
-        for mvar in mvars:
-            self.topm_dict[mvar] = ll[mvar]
+        self.topm_dict=locals()
     def getErdosSectorsUsers(self,minimum_incidence=2):
         t=self.topm_dict
         max_degree_empirical=max(t["degrees_"])
@@ -411,19 +389,20 @@ class Analysis:
         self.max_degree_possible=2*(t["nnodes"]-1) # max d given N
         d_=list(set(t["degrees_"]))
         d_.sort()
-        empirical_distribution = self.makeEmpiricalDistribution(
-            t["degrees_"], d_, t["nnodes"] )
-        binomial=stats.binom(self.max_degree_possible,prob)
         sectorialized_degrees__= self.newerSectorializeDegrees(
-              empirical_distribution, binomial, d_,
-              max_degree_empirical,minimum_incidence,t["nnodes"])
+                                      self.makeEmpiricalDistribution(
+                                        t["degrees_"], d_, t["nnodes"] ),
+              stats.binom(self.max_degree_possible,prob),
+              d_,
+              max_degree_empirical,
+              minimum_incidence,t["nnodes"])
         sectorialized_agents__= self.sectorializeAgents(
              sectorialized_degrees__, t["degrees"])
         sectorialized_nagents__=[len(i) for i in sectorialized_agents__]
-        mvars=("prob","max_degree_empirical","sectorialized_degrees__","sectorialized_agents__")
+        #mvars=("prob","max_degree_empirical","sectorialized_degrees__","sectorialized_agents__")
         ll=locals()
-        for mvar in mvars:
-            self.topm_dict[mvar] = ll[mvar]
+        del ll["t"]
+        self.topm_dict.update(ll)
     def sectorializeAgents(self,sectorialized_degrees,agent_degrees):
         periphery=[x for x in agent_degrees
                      if agent_degrees[x] in sectorialized_degrees[0]]
