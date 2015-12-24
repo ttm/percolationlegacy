@@ -1,4 +1,5 @@
-import percolation as P, networkx as x, numpy as n, os, re, powerlaw
+import percolation as P, networkx as x, numpy as n, powerlaw
+import os, re, random
 from scipy import stats
 from SPARQLWrapper import SPARQLWrapper, JSON
 c=P.utils.check
@@ -7,7 +8,11 @@ class Bootstrap:
         """If fdir=None, don't render latex tables"""
         self.res=[]
         self.trans={}
-        metafiles=P.utils.getFiles(data_dir)[:2]
+        #metafiles=P.utils.getFiles(data_dir)[:1]
+        metafiles=P.utils.getFiles(data_dir)
+        #metafiles=[i for i in metafiles if ("_fb" in i) and ("gml" not in i)]
+        metafiles=[i for i in metafiles if "_fb" in i]
+        metafiles = random.sample(metafiles, 10)
         metagnames=[P.utils.urifyFilename(i) for i in metafiles]
         if update:
             foo=P.utils.addToEndpoint(endpoint_url,metafiles)
@@ -20,9 +25,7 @@ class Bootstrap:
             self.writeOverallEndpoint(endpoint_url)
         translates=self.loadTranslates(endpoint_url,update)
         self.endpoint_url=endpoint_url
-#        analysis=self.overallAnalysis(endpoint_url)
-    def extra(self):
-        # ESCREVE TABELA
+    def extra(self): # DEPRECATED
         self.writeOverallTable2(analysis)
         self.oi=oi
         self.translates=translates
@@ -146,8 +149,8 @@ class Bootstrap:
                         ?s <"+str(P.rdf.ns.fb.friendship)+">  ?f .        \
                         ?s <"+str(P.rdf.ns.fb.fAnon)+">  ?fa .        \
                         ?s <"+str(P.rdf.ns.fb.interaction)+">  ?i .        \
-                        ?s <"+str(P.rdf.ns.fb.iAnon)+">  ?ia .        \
                         ?s <"+str(P.rdf.ns.rdfs.label)+">  ?label .        \
+               OPTIONAL {{  ?s <"+str(P.rdf.ns.fb.iAnon)+">  ?ia .          }} . \
                OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.nFriends)+"> ?nf .            }} . \
                OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.nFriendships)+">  ?nfs .      }} . \
                OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.nInteractions)+">  ?ni .     }} . \
@@ -160,7 +163,6 @@ class Bootstrap:
                 vals=P.utils.mQuery(endpoint_url,qq,keys)[0]
                 bdict={i:j for i,j in zip(keys,vals)}
                 self.odict[gname]=bdict
-
     def writeOverallTable2(self,analysis,fdir):
         pass
 class Analyses:
@@ -193,7 +195,8 @@ class Analyses:
         dists.remove("power_law")
         lines=[]
         for anal in self.aa:
-            self.labels.append(anal.graphid)
+            labels.append(anal.graphid)
+            c("power: "+labels[-1])
             data=[anal.power_res.alpha,anal.power_res.xmin,anal.power_res.D,anal.power_res.sigma,anal.power_res.noise_flag]
             dcomp=[]
             for dist in dists:
@@ -201,57 +204,61 @@ class Analyses:
             data+=dcomp
             lines.append(data)
             if anal.gg.is_directed():
-                self.labels.append(anal.graphid+"*")
+                labels.append(anal.graphid+"*")
                 data=[anal.power_res.alpha,anal.power_res.xmin,anal.power_res.D,anal.power_res.sigma,anal.power_res.noise_flag]
                 dcomp=[]
                 for dist in dists:
                     dcomp+=list(anal.power_res_.distribution_compare("power_law",dist))
                 data+=dcomp
                 lines.append(data)
-
         caption="Fit of network connectivity to power-law distributions"
         fname_="aqui.tex"
         P.tableHelpers.lTable(labels,labelsh,lines,caption,fname_,ttype="allFloat")
         P.tableHelpers.doubleColumn(fname_)
+        self.labels=labels
     def renderTopologicalTable(self):
         # self.labels tem os labels
+        lines=[]
+        labels=[]
         for anal in self.aa:
+            labels+=[anal.graphid]
             # tem as medidas topologicas, organizar em 1 ou + tabelas
             # renderizar em paisagem ou nem assim?
             # fazer papel grande, deixar que de zoom pq eh digital
             line=[
-                    anal.topm_dict["nnodes"],
+                    anal.topm_dict["nnodes"], 
                     anal.topm_dict["nedges"],
                     #anal.topm_dict["nodes_edge"], correlated to degree
                     anal.topm_dict["prob"], # anotar em ocorrências por mil ou milhões etc
+                    anal.topm_dict["max_degree_empirical"],
+                    max(anal.topm_dict["strengths_"]),
+                    max(anal.topm_dict["weights"]),
                     n.mean(anal.topm_dict["degrees_"]),
                     n.std(anal.topm_dict["degrees_"]),
                     n.mean(anal.topm_dict["strengths_"]),
                     n.std(anal.topm_dict["strengths_"]),
                     n.mean(anal.topm_dict["weights"]),
                     n.std(anal.topm_dict["weights"]),
-                    n.mean(anal.topm_dict["eccentricity_"]             ),
-                    n.std(anal.topm_dict["eccentricity_"]             ),
                     n.mean(anal.topm_dict["clustering_"]               ),
                     n.std(anal.topm_dict["clustering_"]               ),
                     n.mean(anal.topm_dict["clustering_w_"]             ),
                     n.std(anal.topm_dict["clustering_w_"]             ),
+                    n.mean(anal.topm_dict["square_clustering_"]),
+                    n.std( anal.topm_dict["square_clustering_"]),
                     n.mean(anal.topm_dict["closeness_"]                ),
                     n.std(anal.topm_dict["closeness_"]                ),
-                    n.mean(anal.topm_dict["sectorialized_degress__"][0]), # periphery
-                    n.std(anal.topm_dict["sectorialized_degress__"][0]), # periphery
-                    n.mean(anal.topm_dict["sectorialized_degress__"][1]), # intermediary
-                    n.std(anal.topm_dict["sectorialized_degress__"][1]), # intermediary
-                    n.mean(anal.topm_dict["sectorialized_degress__"][2]), # hubs
-                    n.std(anal.topm_dict["sectorialized_degress__"][2]), # hubs
+                    n.mean(anal.topm_dict["eccentricity_"]             ),
+                    n.std(anal.topm_dict["eccentricity_"]             ),
+                    n.mean(anal.topm_dict["sectorialized_degrees__"][0]), # periphery
+                    n.std(anal.topm_dict["sectorialized_degrees__"][0]), # periphery
+                    n.mean(anal.topm_dict["sectorialized_degrees__"][1]), # intermediary
+                    n.std(anal.topm_dict["sectorialized_degrees__"][1]), # intermediary
+                    n.mean(anal.topm_dict["sectorialized_degrees__"][2]), # hubs
+                    n.std(anal.topm_dict["sectorialized_degrees__"][2]), # hubs
 
-                    anal.topm_dict["sectorialized_nagents"][0], # periphery
-                    anal.topm_dict["sectorialized_nagents"][1], # intermediary
-                    anal.topm_dict["sectorialized_nagents"][2], # hubs
-                    anal.topm_dict["max_degree_empirical"],
-                    anal.topm_dict["max_strength"],
-                    anal.topm_dict["max_weight"],
-                    anal.topm_dict["square_clustering"],
+                    anal.topm_dict["sectorialized_nagents__"][0], # periphery
+                    anal.topm_dict["sectorialized_nagents__"][1], # intermediary
+                    anal.topm_dict["sectorialized_nagents__"][2], # hubs
                     anal.topm_dict["transitivity"],
                     anal.topm_dict["transitivity_u"],
                     anal.topm_dict["diameter"],
@@ -269,9 +276,19 @@ class Analyses:
                     anal.topm_dict["frac_strongly_connected"],
                     anal.topm_dict["frac_weakly_connected"],
                 ]
-
-            pass
-
+            lines+=[line]
+        labelsh=["$N$","$E$","$p$","$k_{max}$","$s_{max}$","$w_{max}$",
+                 "$\mu(k)$","$\sigma(k)$","$\mu(s)$","$\std(s)$","$\mu(w)$","$\std(w)$",
+                 "$\mu(cc)$","$\std(cc)$","$\mu(cc_w)$","$\std(cc_w)$","$\mu(sc)$","$\std(sc)$",
+                 "$\mu(cl)$","$\std(cl)$","$\mu(ec)$","$\std(ec)$",
+                 "$\mu(k_P)$","$\std(k_P)$","$\mu(k_I)$","$\std(k_I)$","$\mu(k_H)$","$\std(k_H)$",
+                 "$P$","$I$","$H$","$t$","$t_u$","$D$","$R$","$con$","$comp$",
+                 "$\mu(sp)$","$\mu(sp_u)$","$\mu(sp_w)$","$\mu(sp_{uw})$",
+                 "$C*$","$P*$","$W$","$S$"]
+        caption="Fit of network connectivity to power-law distributions"
+        fname_="aqui2.tex"
+        P.tableHelpers.lTable(labels,labelsh,lines,caption,fname_,ttype="allFloat")
+        P.tableHelpers.doubleColumn(fname_)
     def renderTextTable(self):
         pass
     def renderTimeTable(self):
@@ -298,7 +315,7 @@ class Analysis:
     def makeNetwork(self):
         """Build network from endpoint through simple criteria."""
         # see what procedence: FB, TW, IRC, Email, etc
-        ftype=re.findall(r"\d+fb(friendship|interaction)",self.graphid)
+        ftype=re.findall(r"\d+[gml]*fb(friendship|interaction)",self.graphid)
         if ftype:
             plat="Facebook"
             if ftype[0]=="interaction":
@@ -349,17 +366,19 @@ class Analysis:
         clustering=x.clustering( self.gg_ )
         clustering_=list(clustering.values())
         clustering_w=x.clustering( self.gg_,weight="weight" )
-        clustering_w_=list(clustering_w.keys())
+        clustering_w_=list(clustering_w.values())
         square_clustering=x.square_clustering( self.gg)
+        square_clustering_=list(square_clustering.values())
         transitivity=x.transitivity(self.gg)
         transitivity_u=x.transitivity(self.gg_)
         closeness=x.closeness_centrality(self.gg)
         closeness_=list(closeness.values())
         eccentricity=x.closeness_centrality(self.gg_)
+        eccentricity_=list(eccentricity.values())
         diameter=x.diameter(self.comp_)
         radius=x.radius(    self.comp_)
-        nperiphery=x.periphery(self.comp_)
-        ncenter=x.center(self.comp_)
+        nperiphery=len(x.periphery(self.comp_))
+        ncenter=   len(x.center(self.comp_)   )
         size_component=self.comp_.number_of_nodes()
         ashort_path=x.average_shortest_path_length(   self.comp)
         ashort_path_w=x.average_shortest_path_length( self.comp,weight="weight")

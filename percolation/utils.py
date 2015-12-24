@@ -138,7 +138,17 @@ def mQuery(spql_endpoint,query,mvars=None):
         results = spql_endpoint.query().convert()
         res=[]
         for result in results["results"]["bindings"]:
-            res.append([result[i]['value'] for i in mvars])
+            res+=[[]]
+            for i in mvars:
+                rr=result.get(i)
+                if rr:
+                    res[-1]+=[rr["value"]]
+                else:
+                    res[-1]+=[0]
+#            print(res)
+            #res.append([result[i]['value'] for i in mvars])
+        #for result in results["results"]["bindings"]:
+        #    res.append([result[i]['value'] for i in mvars])
         return res
 def zipdir(path, ziph):
     # ziph is zipfile handle
