@@ -13,6 +13,16 @@ class Bootstrap:
         #metafiles=[i for i in metafiles if ("_fb" in i) and ("gml" not in i)]
         metafiles=[i for i in metafiles if "_fb" in i]
         metafiles = random.sample(metafiles, 10)
+        metafiles=['/disco/data/fbEgoGML/VilsonVieira18022013_gml_fb/rdf/VilsonVieira18022013_gml_fbMeta.owl',
+                '/disco/data/fbEgoGML/RitaWu08042013_gml_fb/rdf/RitaWu08042013_gml_fbMeta.owl',
+                '/disco/data/fbGroups/DemocraciaPura06042013_fb/rdf/DemocraciaPura06042013_fbMeta.owl',
+                '/disco/data/fbEgo/MarceloSaldanha19112014_fb/rdf/MarceloSaldanha19112014_fbMeta.owl',
+                '/disco/data/fbEgo/PedroPauloRocha10032013_fb/rdf/PedroPauloRocha10032013_fbMeta.owl',
+                '/disco/data/fbEgo/VJPixel23052014_fb/rdf/VJPixel23052014_fbMeta.owl',
+                '/disco/data/fbGroups/Tecnoxamanismo15032014_fb/rdf/Tecnoxamanismo15032014_fbMeta.owl',
+                '/disco/data/fbGroups/PartidoPirata23032013_fb/rdf/PartidoPirata23032013_fbMeta.owl',
+                '/disco/data/fbEgo/RicardoPoppi18032014_fb/rdf/RicardoPoppi18032014_fbMeta.owl',
+                '/disco/data/fbEgoGML/LailaManuelle17012013_0258_gml_fb/rdf/LailaManuelle17012013_0258_gml_fbMeta.owl']
         metagnames=[P.utils.urifyFilename(i) for i in metafiles]
         if update:
             foo=P.utils.addToEndpoint(endpoint_url,metafiles)
@@ -200,6 +210,7 @@ class Analyses:
             data=[anal.power_res.alpha,anal.power_res.xmin,anal.power_res.D,anal.power_res.sigma,anal.power_res.noise_flag]
             dcomp=[]
             for dist in dists:
+                c("plaw compare: "+ dist)
                 dcomp+=list(anal.power_res.distribution_compare("power_law",dist))
             data+=dcomp
             lines.append(data)
@@ -333,7 +344,7 @@ class Analysis:
                  }} }}"
                 keys="f1","f2"
         vals=P.utils.mQuery(self.boot.endpoint_url,query,keys)
-        if len(vals[0])==3:
+        if vals and (len(vals[0])==3):
             gg=x.DiGraph()
             for val in vals:
                 gg.add_edge(val[0],val[1],weight=int(val[2]))
@@ -498,8 +509,10 @@ class Analysis:
     def scaleFreeTest(self):
         """Under the framework developed at: http://arxiv.org/abs/1305.0215"""
         self.power_res=powerlaw.Fit(self.topm_dict["degrees_"],discrete=True)
+        c("degree fit of" + self.graphid)
         if self.gg.is_directed():
             self.power_res_=powerlaw.Fit(self.topm_dict["strengths_"],discrete=True)
+            c("strength fit of " + self.graphid)
         else:
             self.power_res_=self.power_res
 class TimelineAnalysis(Analyses):
