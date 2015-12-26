@@ -1,4 +1,4 @@
-import numpy as n, calendar, datetime
+import numpy as n, calendar, datetime, dateutil.parser as DT#, datetime as DT
 
 def circularStatistics(population, period):
     pop=n.array(population)
@@ -28,13 +28,16 @@ def circularStatistics(population, period):
             std_unity_radius=std_unity_radius,
             circular_dispersion=circular_dispersion)
 
-class TimeStatistics:
-    def __init__(self,list_datastructures=None):
-        if not list_datastructures:
+class TemporalStatistics:
+    def __init__(self,list_datastructures=[],datetimestrings=[]):
+        if (not list_datastructures) and (not datetimestrings):
             print("input datastructures, please")
         datetimes=[]
-        for datetime in list_datastructures.raw_clean_dates:
-            datetimes.append(datetime[1])
+        if list_datastructures:
+            for datetime in list_datastructures.raw_clean_dates:
+                datetimes.append(datetime[1])
+        for datetime in datetimestrings:
+            datetimes.append(DT.parse(datetime))
         self.datetimes=datetimes
         self.n_observations=len(datetimes)
         self.bad_datetimes=[]

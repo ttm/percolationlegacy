@@ -217,12 +217,15 @@ class Bootstrap:
         pass
 class Analyses:
     """Calculate unit roots, PCA averages and deviations and best fit to scale-free"""
-    def __init__(self,bootstrap_instance,graphids=[],tables=False):
+    def __init__(self,bootstrap_instance,graphids=[],tables=False,do_network=False, \
+                 do_topology=False,do_power=False, \
+                 do_text=False,do_time=False):
         if not graphids:
             graphids=list(bootstrap_instance.trans.keys())
+        self.options=locals()
         aa=[]
         for gid in graphids:
-            aa+=[Analysis(bootstrap_instance,gid)]
+            aa+=[Analysis(bootstrap_instance,gid,self.options)]
         self.aa=aa
         if tables:
             self.renderTables()
@@ -232,10 +235,14 @@ class Analyses:
             # a table for powelaw fits
             # a table for the topological measures
             pass
-        self.renderPowerlawTable()
-        self.renderTopologicalTable()
-        self.renderTextTable()
-        self.renderTimeTable()
+        if self.options["do_power"]:
+            self.renderPowerlawTable()
+        if self.options["do_topology"]:
+            self.renderTopologicalTable()
+        if self.options["do_text"]:
+            self.renderTextTable()
+        if self.options["do_time"]:
+            self.renderTimeTable()
     def renderPowerlawTable(self):
         #labels=[i.graphid for i in self.aa]
         labelsh=["id","alpha","xmin","D","sigma","noisy"]
@@ -343,25 +350,30 @@ class Analyses:
     def renderTextTable(self):
         pass
     def renderTimeTable(self):
+        c("IMPORTANT ::: make Time tables TTM")
         pass
 class Analysis:
     """The analysis of one and only network.
     The rendering of tables and figures is left for the Analyses class
     """
-    def __init__(self,bootstrap_instance,graphid=None, do_text=False,do_time=False):
+    def __init__(self,bootstrap_instance,graphid=None,options={}):
         if graphid==None:
             graphid=list(bootstrap_instance.trans.keys())[0]
         self.graphid=graphid
         self.boot=bootstrap_instance
         # tudo para as estruturas totais:
-        self.network=self.makeNetwork()
-        general_info=self.detailedGeneral()
-        self.users_sectors=self.getErdosSectorsUsers()
-        if do_time:
-            temporal_info=self.temporalMeasures()
-        if do_text:
-            textual_info=self.textualMeasures()
-        scalefree_info=self.scaleFreeTest()
+        if options.get("do_network"):
+            self.makeNetwork()
+        if options.get("do_topology"):
+            self.topologicalMeasures()
+        if options.get("do_sectors"):
+            self.getErdosSectorsUsers()
+        if options.get("do_time"):
+            self.temporalMeasures()
+        if options.get("do_text"):
+            self.textualMeasures()
+        if options.get("do_power"):
+            scalefree_info=self.scaleFreeTest()
         # explore different scales
     def makeNetwork(self):
         """Build network from endpoint through simple criteria."""
@@ -432,7 +444,7 @@ class Analysis:
         self.gg_=gg_
         self.comp=comp
         self.comp_=comp_
-    def detailedGeneral(self):
+    def topologicalMeasures(self):
         """A detailed info about one and only graph.
 
         Information about date, number of friends, friendships,
@@ -576,8 +588,18 @@ class Analysis:
     def textualMeasures(self): 
         raise NotImplementedError("Text processing must be implemented")
     def temporalMeasures(self):
-        if self.provenance == "Facebook":
+        if self.boot.provenance == "Facebook":
             print("Try making RDF of .tab so to render temporal measures")
+            return
+        query= "SELECT ?mdatetime WHERE \
+         {{ GRAPH <"+ self.graphid +"> {{            \
+           OPTIONAL {{ ?s <"+str(P.rdf.ns.gmane.sentAt)+">    ?mdatetime .  }} .          \n \
+           OPTIONAL {{ ?s <"+str(P.rdf.ns.tw.sentAt)+">       ?mdatetime .  }} .          \n \
+         }} }}"
+        keys=("mdatetime",)
+        vals=[i[0]for i in P.utils.mQuery(self.boot.endpoint_url,query,keys)]
+        self.time_statistics=P.temporalStats.TemporalStatistics(datetimestrings=vals)
+
     def scaleFreeTest(self):
         """Under the framework developed at: http://arxiv.org/abs/1305.0215"""
         self.power_res=powerlaw.Fit(self.topm_dict["degrees_"],discrete=True)

@@ -3,6 +3,7 @@ importlib.reload(P.tableHelpers)
 importlib.reload(P.utils)
 importlib.reload(P.renderLegacy)
 importlib.reload(P.renderLegacy.topologicalTextualCharacterization)
+importlib.reload(P.temporalStats)
 c=P.utils.check
 end_url="http://200.144.255.210:8082/dsfoo"
 fdir="/root/repos/documentation/tables/"
@@ -24,11 +25,11 @@ ddir="/disco/data/"
 # ou 
 c("preboot")
 #boot=P.renderLegacy.topologicalTextualCharacterization.Bootstrap(end_url,ddir,fdir,update=False,write_tables=False)
-boot=P.renderLegacy.topologicalTextualCharacterization.Bootstrap(end_url,ddir,fdir,update=True,write_tables=False)
+boot=P.renderLegacy.topologicalTextualCharacterization.Bootstrap(end_url,ddir,fdir,update=False,write_tables=False)
 c("preanal")
 #analysis=P.renderLegacy.topologicalTextualCharacterization.Analysis(boot)
 #c("preanals")
-analyses=P.renderLegacy.topologicalTextualCharacterization.Analyses(boot,graphids=[],tables=True)
+analyses=P.renderLegacy.topologicalTextualCharacterization.Analyses(boot,graphids=[],tables=True,do_time=True)
 ##analyses=P.renderLegacy.topologicalTextualCharacterization.Analyses(boot,[],False)
 #c("pretlanals")
 #tl_analysis=P.renderLegacy.topologicalTextualCharacterization.TimelineAnalysis(boot)
