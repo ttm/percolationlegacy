@@ -28,7 +28,7 @@ boot=P.renderLegacy.topologicalTextualCharacterization.Bootstrap(end_url,ddir,fd
 c("preanal")
 #analysis=P.renderLegacy.topologicalTextualCharacterization.Analysis(boot)
 #c("preanals")
-analyses=P.renderLegacy.topologicalTextualCharacterization.Analyses(boot,[],True)
+analyses=P.renderLegacy.topologicalTextualCharacterization.Analyses(boot,graphids=[],tables=True)
 ##analyses=P.renderLegacy.topologicalTextualCharacterization.Analyses(boot,[],False)
 #c("pretlanals")
 #tl_analysis=P.renderLegacy.topologicalTextualCharacterization.TimelineAnalysis(boot)

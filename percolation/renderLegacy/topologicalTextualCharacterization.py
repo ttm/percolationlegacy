@@ -24,6 +24,7 @@ class Bootstrap:
 #                '/disco/data/fbEgoGML/LailaManuelle17012013_0258_gml_fb/rdf/LailaManuelle17012013_0258_gml_fbMeta.owl']
         metafiles=P.utils.getFiles(data_dir)
         #metafiles=metafiles[:1]+metafiles[-1:]
+        metafiles=[i for i in metafiles if "_tw" in i]
         metafiles=metafiles[-2:-1]
         #metafiles=metafiles[:1]
         metagnames=[P.utils.urifyFilename(i) for i in metafiles]
@@ -85,7 +86,9 @@ class Bootstrap:
                 fname2="{}/{}".format(dname,fname_)
                 guri=P.utils.urifyFilename(fname_)
                 if update:
-                    cmd="s-put {} {} {}".format(endpoint_url, guri, fname2)
+                    cmd="s-post {} {} {}".format(endpoint_url, guri, fname2)
+                    #cmd="s-put {} {} {}".format(endpoint_url, guri, fname2)
+                    #cmd="s-update --service {}?graph={} --file={}".format(endpoint_url, guri, fname2)
                     c(cmd)
                     os.system(cmd)
                 if guri in self.trans.keys():
@@ -364,12 +367,6 @@ class Analysis:
         if ftype:
             # get correct filenames
             # get responses
-            query= "SELECT ?from ?to (COUNT(DISTINCT ?m2) as ?weight) WHERE \
-             {{ GRAPH <"+ self.graphid +"> {{            \
-             ?m2 gmane:responseTo ?m1 .        \
-             ?m1 gmane:author ?from .        \
-             ?m2 gmane:author ?to .        \
-             }} }} GROUP BY ?from ?to"
             query= "SELECT ?from ?to (COUNT(DISTINCT ?m2) as ?weight) WHERE \
              {{ GRAPH <"+ self.graphid +"> {{            \
              ?m2 gmane:responseTo ?m1 .        \
