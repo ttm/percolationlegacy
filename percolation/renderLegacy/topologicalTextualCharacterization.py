@@ -1,5 +1,5 @@
 import percolation as P, networkx as x, numpy as n, powerlaw
-import os, re, random
+import os, re, random, sys
 from scipy import stats
 from SPARQLWrapper import SPARQLWrapper, JSON
 c=P.utils.check
@@ -8,21 +8,24 @@ class Bootstrap:
         """If fdir=None, don't render latex tables"""
         self.res=[]
         self.trans={}
-        #metafiles=P.utils.getFiles(data_dir)[:1]
+#        metafiles=P.utils.getFiles(data_dir)
+#        #metafiles=[i for i in metafiles if ("_fb" in i) and ("gml" not in i)]
+#        metafiles=[i for i in metafiles if "_fb" in i]
+#        metafiles = random.sample(metafiles, 10)
+#        metafiles=['/disco/data/fbEgoGML/VilsonVieira18022013_gml_fb/rdf/VilsonVieira18022013_gml_fbMeta.owl',
+#                '/disco/data/fbEgoGML/RitaWu08042013_gml_fb/rdf/RitaWu08042013_gml_fbMeta.owl',
+#                '/disco/data/fbGroups/DemocraciaPura06042013_fb/rdf/DemocraciaPura06042013_fbMeta.owl',
+#                '/disco/data/fbEgo/MarceloSaldanha19112014_fb/rdf/MarceloSaldanha19112014_fbMeta.owl',
+#                '/disco/data/fbEgo/PedroPauloRocha10032013_fb/rdf/PedroPauloRocha10032013_fbMeta.owl',
+#                '/disco/data/fbEgo/VJPixel23052014_fb/rdf/VJPixel23052014_fbMeta.owl',
+#                '/disco/data/fbGroups/Tecnoxamanismo15032014_fb/rdf/Tecnoxamanismo15032014_fbMeta.owl',
+#                '/disco/data/fbGroups/PartidoPirata23032013_fb/rdf/PartidoPirata23032013_fbMeta.owl',
+#                '/disco/data/fbEgo/RicardoPoppi18032014_fb/rdf/RicardoPoppi18032014_fbMeta.owl',
+#                '/disco/data/fbEgoGML/LailaManuelle17012013_0258_gml_fb/rdf/LailaManuelle17012013_0258_gml_fbMeta.owl']
         metafiles=P.utils.getFiles(data_dir)
-        #metafiles=[i for i in metafiles if ("_fb" in i) and ("gml" not in i)]
-        metafiles=[i for i in metafiles if "_fb" in i]
-        metafiles = random.sample(metafiles, 10)
-        metafiles=['/disco/data/fbEgoGML/VilsonVieira18022013_gml_fb/rdf/VilsonVieira18022013_gml_fbMeta.owl',
-                '/disco/data/fbEgoGML/RitaWu08042013_gml_fb/rdf/RitaWu08042013_gml_fbMeta.owl',
-                '/disco/data/fbGroups/DemocraciaPura06042013_fb/rdf/DemocraciaPura06042013_fbMeta.owl',
-                '/disco/data/fbEgo/MarceloSaldanha19112014_fb/rdf/MarceloSaldanha19112014_fbMeta.owl',
-                '/disco/data/fbEgo/PedroPauloRocha10032013_fb/rdf/PedroPauloRocha10032013_fbMeta.owl',
-                '/disco/data/fbEgo/VJPixel23052014_fb/rdf/VJPixel23052014_fbMeta.owl',
-                '/disco/data/fbGroups/Tecnoxamanismo15032014_fb/rdf/Tecnoxamanismo15032014_fbMeta.owl',
-                '/disco/data/fbGroups/PartidoPirata23032013_fb/rdf/PartidoPirata23032013_fbMeta.owl',
-                '/disco/data/fbEgo/RicardoPoppi18032014_fb/rdf/RicardoPoppi18032014_fbMeta.owl',
-                '/disco/data/fbEgoGML/LailaManuelle17012013_0258_gml_fb/rdf/LailaManuelle17012013_0258_gml_fbMeta.owl']
+        #metafiles=metafiles[:1]+metafiles[-1:]
+        metafiles=metafiles[-2:-1]
+        #metafiles=metafiles[:1]
         metagnames=[P.utils.urifyFilename(i) for i in metafiles]
         if update:
             foo=P.utils.addToEndpoint(endpoint_url,metafiles)
@@ -61,15 +64,24 @@ class Bootstrap:
             qq="SELECT "+"?{} "*2+"WHERE \
                  {{ GRAPH <"+ gname +"> {{            \
                OPTIONAL {{ ?s <"+str(P.rdf.ns.po.interactionXMLFile)+">  ?if .}} . \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.po.rdfFile)+">  ?if .}} . \
                OPTIONAL {{ ?s <"+str(P.rdf.ns.po.friendshipXMLFile)+">  ?ff .}} . \
                  }} }}"
             keys="if","ff"
             vals=P.utils.mQuery(endpoint_url,qq,keys)[0]
             vals=[i for i in vals if i]
+            dname=os.path.dirname(fname)
+            vals_=[]
+            for val in vals:
+                if "gmane" in val:
+                    files=os.listdir(dname)
+                    files=[i for i in files if ("Translate" in i) and i.endswith(".owl")]
+                    vals_+=files
+            vals=[i for i in vals if "gmane" not in i]
+            vals+=vals_
             for val in vals:
                 c("LT val %s "%(val,))
                 fname_=val.split("/")[-1]
-                dname=os.path.dirname(fname)
                 fname2="{}/{}".format(dname,fname_)
                 guri=P.utils.urifyFilename(fname_)
                 if update:
@@ -146,30 +158,35 @@ class Bootstrap:
             # faz query para saber a proveniencia
             # pega alguns dados basicos
             # pega endereco dos translates
-            if "gmane" in gname:
-                plat="Gmane"
-            else:
-                qq="SELECT ?{}  WHERE {{ GRAPH <"+ gname +"> {{ ?s <"+str(P.rdf.ns.po.socialProtocol)+"> ?n . }} }}"
-                plat=P.utils.mQuery(endpoint_url,qq,("n",))[0][0]
-            if plat.endswith("Facebook"):
-                qq="SELECT "+"?{} "*13+"WHERE \
-                 {{ GRAPH <"+ gname +"> {{            \
-                        ?s <"+str(P.rdf.ns.po.createdAt)+">  ?ca .        \
-                        ?s <"+str(P.rdf.ns.fb.ego)+">  ?ego .        \
-                        ?s <"+str(P.rdf.ns.fb.friendship)+">  ?f .        \
-                        ?s <"+str(P.rdf.ns.fb.fAnon)+">  ?fa .        \
-                        ?s <"+str(P.rdf.ns.fb.interaction)+">  ?i .        \
-                        ?s <"+str(P.rdf.ns.rdfs.label)+">  ?label .        \
-               OPTIONAL {{  ?s <"+str(P.rdf.ns.fb.iAnon)+">  ?ia .          }} . \
-               OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.nFriends)+"> ?nf .            }} . \
-               OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.nFriendships)+">  ?nfs .      }} . \
-               OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.nInteractions)+">  ?ni .     }} . \
-               OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.nFriendsInteracted)+">  ?nfi .}} . \
-               OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.nFriendsInteracted)+">  ?nfi .}} . \
-               OPTIONAL {{ ?s <"+str(P.rdf.ns.po.friendshipXMLFile)+">  ?ffile .}} . \
-               OPTIONAL {{ ?s <"+str(P.rdf.ns.po.interactionXMLFile)+">  ?ifile .}} . \
+            qq="SELECT ?{} ?{} WHERE {{ \
+                        GRAPH <"+ gname +"> {{ \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.po.socialProtocol)+"> ?n .    }} . \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.gmane.gmaneID)+">  ?gid .      }} . \
+                    }} }}"
+            plat,gid=P.utils.mQuery(endpoint_url,qq,("n","gid"))[0]
+            if gid or plat.endswith("Facebook"):
+                qq="SELECT "+"?{} "*13+"WHERE                                                \n \
+                 {{ GRAPH <"+ gname +"> {{                                                   \n \
+                           ?s <"+str(P.rdf.ns.po.createdAt)+">  ?ca .                        \n \
+                           ?s <"+str(P.rdf.ns.rdfs.label)+">  ?label .                       \n \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.po.friendshipXMLFile)+">  ?ffile .   }} . # FB \n \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.po.rdfFile)+">  ?ffile .   }} . # GMANE        \n \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.po.interactionXMLFile)+">  ?ifile .  }} . # FB \n \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.ego)+">  ?ego .                   }} .      \n \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.friendship)+">  ?f .              }} .      \n \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.fAnon)+">  ?fa .                  }} .      \n \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.interaction)+">  ?i .             }} .      \n \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.iAnon)+">  ?ia .                  }} .      \n \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.nFriends)+"> ?nf .                }} .      \n \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.nFriendships)+">  ?nfs .          }} .      \n \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.nInteractions)+">  ?ni .          }} .      \n \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.nFriendsInteracted)+">  ?nfi .    }} .      \n \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.gmane.nParticipants)+">  ?nfi .  }} .          \n \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.gmane.nCharacters)+">  ?nchars .  }} .         \n \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.gmane.nMessages)+">    ?nmsgs .  }} .          \n \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.gmane.nResponses)+">   ?nresp .  }} .          \n \
                  }} }}"
-                keys="nf","nfs","ni","nfi","ca","ego","f","fa","i","ia","ffile","ifile","label"
+                keys="nf","nfs","ni","nfi","ca","ego","f","fa","i","ia","ffile","ifile","label","nchars","nmsgs","nresp"
                 vals=P.utils.mQuery(endpoint_url,qq,keys)[0]
                 bdict={i:j for i,j in zip(keys,vals)}
                 self.odict[gname]=bdict
@@ -343,7 +360,26 @@ class Analysis:
                  ?f1 fb:friend ?f2 .        \
                  }} }}"
                 keys="f1","f2"
+        ftype=re.findall(r"//(gmane)-.*",self.graphid)
+        if ftype:
+            # get correct filenames
+            # get responses
+            query= "SELECT ?from ?to (COUNT(DISTINCT ?m2) as ?weight) WHERE \
+             {{ GRAPH <"+ self.graphid +"> {{            \
+             ?m2 gmane:responseTo ?m1 .        \
+             ?m1 gmane:author ?from .        \
+             ?m2 gmane:author ?to .        \
+             }} }} GROUP BY ?from ?to"
+            query= "SELECT ?from ?to (COUNT(DISTINCT ?m2) as ?weight) WHERE \
+             {{ GRAPH <"+ self.graphid +"> {{            \
+             ?m2 gmane:responseTo ?m1 .        \
+             ?m1 gmane:author ?from .        \
+             ?m2 gmane:author ?to .        \
+             }} }} GROUP BY ?from ?to"
+            keys="from","to","weight"
+            pass
         vals=P.utils.mQuery(self.boot.endpoint_url,query,keys)
+        c([i[2] for i in vals])
         if vals and (len(vals[0])==3):
             gg=x.DiGraph()
             for val in vals:

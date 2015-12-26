@@ -28,7 +28,7 @@ def getFiles(datadir,ext=".owl"):
                 aa+=[tfile_]
     return aa
 def urifyFilename(fname,digits=True):
-    if not digits:
+    if digits:
         fname="".join(i for i in fname if i not in string.digits)
     return "http://{}".format(fname.split("/")[-1].replace("_","").lower())
 def addToEndpoint(end_url,tfiles):
@@ -131,10 +131,9 @@ def mQuery(spql_endpoint,query,mvars=None):
         #spql_endpoint.method = 'POST'
         spql_endpoint.method = 'PUT'
         spql_endpoint.setQuery(query)
-    #if "update" in se: # or if not mvars
-    if not mvars: # or if not mvars
         return spql_endpoint.query().convert()
-    else:
+    #if "update" in se: # or if not mvars
+    if mvars:
         results = spql_endpoint.query().convert()
         res=[]
         for result in results["results"]["bindings"]:
