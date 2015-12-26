@@ -24,7 +24,10 @@ class Bootstrap:
 #                '/disco/data/fbEgoGML/LailaManuelle17012013_0258_gml_fb/rdf/LailaManuelle17012013_0258_gml_fbMeta.owl']
         metafiles=P.utils.getFiles(data_dir)
         #metafiles=metafiles[:1]+metafiles[-1:]
-        metafiles=[i for i in metafiles if "_tw" in i]
+        #metafiles=[i for i in metafiles if "_tw" in i]
+        #metafiles=[i for i in metafiles if (("_tw" not in i) and ("_fb" not in i) and ("gmane-" not in i))]
+        # exclude IRC for now
+        metafiles=[i for i in metafiles if (("_tw" in i) or ("_fb" in i) or ("gmane-" in i))]
         metafiles=metafiles[-2:-1]
         #metafiles=metafiles[:1]
         metagnames=[P.utils.urifyFilename(i) for i in metafiles]
@@ -78,7 +81,7 @@ class Bootstrap:
             vals_=[]
             #asd=asd
             for val in vals:
-                if "gmane" in val:
+                if self.provenance in ("Gmane","IRC"):
                     files=os.listdir(dname)
                     files=[i for i in files if ("Translate" in i) and i.endswith(".owl")]
                     vals_+=files
@@ -177,8 +180,10 @@ class Bootstrap:
                 self.provenance="Gmane"
             elif twnmsgs:
                 self.provenance="Twitter"
-            elif plat.endswith("Facebook"):
+            elif plat and plat.endswith("Facebook"):
                 self.provenance="Facebook"
+            else:
+                self.provenance="IRC"
             qq="SELECT "+"?{} "*13+"WHERE                                                \n \
                  {{ GRAPH <"+ gname +"> {{                                                   \n \
                            ?s <"+str(P.rdf.ns.po.createdAt)+">  ?ca .                        \n \
@@ -352,10 +357,10 @@ class Analysis:
         self.network=self.makeNetwork()
         general_info=self.detailedGeneral()
         self.users_sectors=self.getErdosSectorsUsers()
-        if do_text:
-            textual_info=self.textualMeasures()
         if do_time:
             temporal_info=self.temporalMeasures()
+        if do_text:
+            textual_info=self.textualMeasures()
         scalefree_info=self.scaleFreeTest()
         # explore different scales
     def makeNetwork(self):
@@ -398,7 +403,15 @@ class Analysis:
              ?m2 tw:author ?to .        \
              }} }} GROUP BY ?from ?to"
             keys="from","to","weight"
-
+        if self.boot.provenance=="IRC":
+            query= "SELECT ?from ?to (COUNT(DISTINCT ?m1) as ?weight) WHERE \
+             {{ GRAPH <"+ self.graphid +"> {{            \
+             ?m1 irc:author ?from2 .        \
+             ?m1 irc:directedTo ?to2 .        \
+             ?from2 irc:nick ?from .        \
+             ?to2 irc:nick ?to .        \
+             }} }} GROUP BY ?from ?to"
+            keys="from","to","weight"
         vals=P.utils.mQuery(self.boot.endpoint_url,query,keys)
         c([i[2] for i in vals])
         if vals and (len(vals[0])==3):
@@ -562,7 +575,9 @@ class Analysis:
         return empirical_distribution
     def textualMeasures(self): 
         raise NotImplementedError("Text processing must be implemented")
-    def temporalMeasures(self): pass
+    def temporalMeasures(self):
+        if self.provenance == "Facebook":
+            print("Try making RDF of .tab so to render temporal measures")
     def scaleFreeTest(self):
         """Under the framework developed at: http://arxiv.org/abs/1305.0215"""
         self.power_res=powerlaw.Fit(self.topm_dict["degrees_"],discrete=True)
