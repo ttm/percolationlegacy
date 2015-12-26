@@ -1,5 +1,5 @@
 import percolation as P, networkx as x, numpy as n, powerlaw
-import os, re, random, sys
+import os, re, random, sys, itertools
 from scipy import stats
 from SPARQLWrapper import SPARQLWrapper, JSON
 c=P.utils.check
@@ -69,10 +69,14 @@ class Bootstrap:
                OPTIONAL {{ ?s <"+str(P.rdf.ns.po.friendshipXMLFile)+">  ?ff .}} . \
                  }} }}"
             keys="if","ff"
-            vals=P.utils.mQuery(endpoint_url,qq,keys)[0]
+            #vals=P.utils.mQuery(endpoint_url,qq,keys)[0]
+            #vals=[i for i in vals if i]
+            vals=P.utils.mQuery(endpoint_url,qq,keys)
+            vals=list(itertools.chain(*vals))
             vals=[i for i in vals if i]
             dname=os.path.dirname(fname)
             vals_=[]
+            #asd=asd
             for val in vals:
                 if "gmane" in val:
                     files=os.listdir(dname)
@@ -161,14 +165,21 @@ class Bootstrap:
             # faz query para saber a proveniencia
             # pega alguns dados basicos
             # pega endereco dos translates
-            qq="SELECT ?{} ?{} WHERE {{ \
+            qq="SELECT ?{} ?{} ?{} WHERE {{ \
                         GRAPH <"+ gname +"> {{ \
                OPTIONAL {{ ?s <"+str(P.rdf.ns.po.socialProtocol)+"> ?n .    }} . \
                OPTIONAL {{ ?s <"+str(P.rdf.ns.gmane.gmaneID)+">  ?gid .      }} . \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.tw.nMessages)+">  ?twnmsgs .      }} . \
                     }} }}"
-            plat,gid=P.utils.mQuery(endpoint_url,qq,("n","gid"))[0]
-            if gid or plat.endswith("Facebook"):
-                qq="SELECT "+"?{} "*13+"WHERE                                                \n \
+            plat,gid,twnmsgs=P.utils.mQuery(endpoint_url,qq,("n","gid","twnmsgs"))[0]
+            #if gid or twnmsgs or plat.endswith("Facebook"):
+            if gid:
+                self.provenance="Gmane"
+            elif twnmsgs:
+                self.provenance="Twitter"
+            elif plat.endswith("Facebook"):
+                self.provenance="Facebook"
+            qq="SELECT "+"?{} "*13+"WHERE                                                \n \
                  {{ GRAPH <"+ gname +"> {{                                                   \n \
                            ?s <"+str(P.rdf.ns.po.createdAt)+">  ?ca .                        \n \
                            ?s <"+str(P.rdf.ns.rdfs.label)+">  ?label .                       \n \
@@ -185,14 +196,18 @@ class Bootstrap:
                OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.nInteractions)+">  ?ni .          }} .      \n \
                OPTIONAL {{ ?s <"+str(P.rdf.ns.fb.nFriendsInteracted)+">  ?nfi .    }} .      \n \
                OPTIONAL {{ ?s <"+str(P.rdf.ns.gmane.nParticipants)+">  ?nfi .  }} .          \n \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.tw.nParticipants)+">  ?nfi .  }} .          \n \
                OPTIONAL {{ ?s <"+str(P.rdf.ns.gmane.nCharacters)+">  ?nchars .  }} .         \n \
                OPTIONAL {{ ?s <"+str(P.rdf.ns.gmane.nMessages)+">    ?nmsgs .  }} .          \n \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.tw.nMessages)+">    ?nmsgs .  }} .          \n \
                OPTIONAL {{ ?s <"+str(P.rdf.ns.gmane.nResponses)+">   ?nresp .  }} .          \n \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.tw.nReplies)+">   ?nresp .  }} .          \n \
+               OPTIONAL {{ ?s <"+str(P.rdf.ns.tw.nReTweets)+">   ?nretw .  }} .          \n \
                  }} }}"
-                keys="nf","nfs","ni","nfi","ca","ego","f","fa","i","ia","ffile","ifile","label","nchars","nmsgs","nresp"
-                vals=P.utils.mQuery(endpoint_url,qq,keys)[0]
-                bdict={i:j for i,j in zip(keys,vals)}
-                self.odict[gname]=bdict
+            keys="nf","nfs","ni","nfi","ca","ego","f","fa","i","ia","ffile","ifile","label","nchars","nmsgs","nresp","nretw"
+            vals=P.utils.mQuery(endpoint_url,qq,keys)[0]
+            bdict={i:j for i,j in zip(keys,vals)}
+            self.odict[gname]=bdict
     def writeOverallTable2(self,analysis,fdir):
         pass
 class Analyses:
@@ -346,9 +361,10 @@ class Analysis:
     def makeNetwork(self):
         """Build network from endpoint through simple criteria."""
         # see what procedence: FB, TW, IRC, Email, etc
-        ftype=re.findall(r"\d+[gml]*fb(friendship|interaction)",self.graphid)
-        if ftype:
-            plat="Facebook"
+#        ftype=re.findall(r"\d+[gml]*fb(friendship|interaction)",self.graphid)
+#        if ftype:
+#            plat="Facebook"
+        if self.boot.provenance=="Facebook":
             if ftype[0]=="interaction":
                 query= "SELECT ?{} ?{} ?{} WHERE \
                  {{ GRAPH <"+ self.graphid +"> {{            \
@@ -363,10 +379,9 @@ class Analysis:
                  ?f1 fb:friend ?f2 .        \
                  }} }}"
                 keys="f1","f2"
-        ftype=re.findall(r"//(gmane)-.*",self.graphid)
-        if ftype:
-            # get correct filenames
-            # get responses
+        #ftype=re.findall(r"//(gmane)-.*",self.graphid)
+        #if ftype:
+        if self.boot.provenance=="Gmane":
             query= "SELECT ?from ?to (COUNT(DISTINCT ?m2) as ?weight) WHERE \
              {{ GRAPH <"+ self.graphid +"> {{            \
              ?m2 gmane:responseTo ?m1 .        \
@@ -374,7 +389,16 @@ class Analysis:
              ?m2 gmane:author ?to .        \
              }} }} GROUP BY ?from ?to"
             keys="from","to","weight"
-            pass
+        ftype=re.findall(r"//(gmane)-.*",self.graphid)
+        if self.boot.provenance=="Twitter":
+            query= "SELECT ?from ?to (COUNT(DISTINCT ?m2) as ?weight) WHERE \
+             {{ GRAPH <"+ self.graphid +"> {{            \
+             ?m2 tw:retweetOf ?m1 .        \
+             ?m1 tw:author ?from .        \
+             ?m2 tw:author ?to .        \
+             }} }} GROUP BY ?from ?to"
+            keys="from","to","weight"
+
         vals=P.utils.mQuery(self.boot.endpoint_url,query,keys)
         c([i[2] for i in vals])
         if vals and (len(vals[0])==3):
