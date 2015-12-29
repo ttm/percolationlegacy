@@ -247,3 +247,42 @@ def cred(twc_class):
     return [t.tak,t.taks,t.tat,t.tats]
 def breakMe():
     a=oasijdaoisjdoiasjdoiasjdoiajsdoiajsdoiajsd
+def perc(alist):
+    if type(alist) in (type([1,2]), type((2,4))):
+        return [100*i/sum(alist) for i in alist]
+    else:
+        return 100*alist/alist.sum()
+def mkName(tdir,fname,tag):
+    return tdir+fname.replace(".tex","{}.tex".format(tag))
+
+class RegexpReplacer(object):
+    """Replaces contractions with full words"""
+    replacement_patterns = [
+    (r'won\'t', 'will not'),
+    (r'can\'t', 'can not'),
+    (r'i\'m', 'i am'),
+    (r'ain\'t', 'is not'),
+    (r'(\w+)\'ll', '\g<1> will'),
+    (r'(\w+)n\'t', '\g<1> not'),
+    (r'(\w+)\'ve', '\g<1> have'),
+    (r'(\w+)\'s', '\g<1> is'),
+    (r'(\w+)\'re', '\g<1> are'),
+    (r'(\w+)\'d', '\g<1> would')
+    ]
+    def __init__(self, patterns=self.replacement_patterns):
+        self.patterns = [(re.compile(regex), repl) for (regex, repl) in patterns]
+    def replace(self, text):
+        s = text
+        count_=0
+        for (pattern, repl) in self.patterns:
+            (s, count) = re.subn(pattern, repl, s)
+            count_+=count
+        return s, count_
+REPLACER=RegexpReplacer()
+del RegexReplacer
+def chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    ll=[]
+    for i in range(0, len(l), n):
+        ll.append(l[i:i+n])
+    return ll

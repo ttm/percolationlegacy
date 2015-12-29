@@ -5,3 +5,4 @@ from . import config
 from . import tableHelpers
 from . import renderLegacy
 from . import temporalStats
+from . import textualStats
