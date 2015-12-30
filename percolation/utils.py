@@ -2,7 +2,14 @@ import time, pickle, os, zipfile, string, networkx as x
 import builtins as B
 from SPARQLWrapper import SPARQLWrapper, JSON
 TT=time.time()
-
+def min3(narray):
+    narray_=n.array(narray)
+    args=narray_.argsort()
+    return narray_[args[:3]]
+def max3(narray):
+    narray_=n.array(narray)
+    args=narray_.argsort()
+    return narray_[args[-3:]]
 def toUndirected(xgraph):
     gg=x.Graph()
     gg.add_edges_from(xgraph.edges_iter(), weight=0)
