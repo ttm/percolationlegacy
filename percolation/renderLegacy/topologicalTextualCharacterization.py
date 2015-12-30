@@ -396,10 +396,6 @@ class Analysis:
         raise NotImplementedError("Write back must be implemented")
     def makeNetwork(self):
         """Build network from endpoint through simple criteria."""
-        # see what procedence: FB, TW, IRC, Email, etc
-#        ftype=re.findall(r"\d+[gml]*fb(friendship|interaction)",self.graphid)
-#        if ftype:
-#            plat="Facebook"
         if self.boot.provenance=="Facebook":
             if ftype[0]=="interaction":
                 query= "SELECT ?{} ?{} ?{} WHERE \
@@ -415,8 +411,6 @@ class Analysis:
                  ?f1 fb:friend ?f2 .        \
                  }} }}"
                 keys="f1","f2"
-        #ftype=re.findall(r"//(gmane)-.*",self.graphid)
-        #if ftype:
         if self.boot.provenance=="Gmane":
             query= "SELECT ?from ?to (COUNT(DISTINCT ?m2) as ?weight) WHERE \
              {{ GRAPH <"+ self.graphid +"> {{            \
@@ -444,165 +438,8 @@ class Analysis:
              }} }} GROUP BY ?from ?to"
             keys="from","to","weight"
         vals=P.utils.mQuery(self.boot.endpoint_url,query,keys)
-        c([i[2] for i in vals])
-        if vals and (len(vals[0])==3):
-            gg=x.DiGraph()
-            for val in vals:
-                gg.add_edge(val[0],val[1],weight=int(val[2]))
-            gg_=P.utils.toUndirected(gg)
-            comp=x.weakly_connected_component_subgraphs(gg)[0]
-            comp_=x.connected_component_subgraphs(gg_)[0]
-        else:
-            gg=x.Graph()
-            for val in vals:
-                gg.add_edge(val[0],val[1])
-            comp=x.connected_component_subgraphs(gg)[0]
-            gg_=gg
-            comp_=comp
-        self.gg=gg
-        self.gg_=gg_
-        self.comp=comp
-        self.comp_=comp_
-    def topologicalMeasures(self):
-        """A detailed info about one and only graph.
+        self.topm_dict.update(P.topology.makeNetwork.makeNetwork(vals))
 
-        Information about date, number of friends, friendships,
-        interactions, etc.
-        Average degree, average clustering, etc.
-        ToDo: implement homophily
-        """
-        degrees=self.gg.degree()
-        degrees_=list(degrees.values())
-        strengths=self.gg.degree(weight="weight")
-        strengths_=list(strengths.values())
-        clustering=x.clustering( self.gg_ )
-        clustering_=list(clustering.values())
-        clustering_w=x.clustering( self.gg_,weight="weight" )
-        clustering_w_=list(clustering_w.values())
-        square_clustering=x.square_clustering( self.gg)
-        square_clustering_=list(square_clustering.values())
-        transitivity=x.transitivity(self.gg)
-        transitivity_u=x.transitivity(self.gg_)
-        closeness=x.closeness_centrality(self.gg)
-        closeness_=list(closeness.values())
-        eccentricity=x.closeness_centrality(self.gg_)
-        eccentricity_=list(eccentricity.values())
-        diameter=x.diameter(self.comp_)
-        radius=x.radius(    self.comp_)
-        nperiphery=len(x.periphery(self.comp_))
-        ncenter=   len(x.center(self.comp_)   )
-        size_component=self.comp_.number_of_nodes()
-        ashort_path=x.average_shortest_path_length(   self.comp)
-        ashort_path_w=x.average_shortest_path_length( self.comp,weight="weight")
-        ashort_path_u=x.average_shortest_path_length( self.comp_)
-        ashort_path_uw=x.average_shortest_path_length(self.comp_,weight="weight")
-        nnodes=self.gg.number_of_nodes()
-        nedges=self.gg.number_of_edges()
-
-        # nodes_edge =100*nnodes/nedges # correlated to degree
-        # fraction of participants in the largest component
-        # and strongly connected components
-        frac_weakly_connected=   100*self.comp.number_of_nodes()/nnodes
-        frac_connected=100*self.comp_.number_of_nodes()/nnodes
-        if self.gg.is_directed():
-            weights=[i[2]["weight"] for i in self.gg.edges(data=True)]
-            frac_strongly_connected=   100*x.strongly_connected_component_subgraphs(self.gg)[0].number_of_nodes()/nnodes
-            frac_weakly_connected2=   100*x.weakly_connected_component_subgraphs(self.gg)[0].number_of_nodes()/nnodes
-            # make weakly connected
-        else:
-            weights=[1]*nedges
-            frac_strongly_connected=  frac_connected
-        self.topm_dict=locals()
-    def getErdosSectorsUsers(self,minimum_incidence=2):
-        t=self.topm_dict
-        max_degree_empirical=max(t["degrees_"])
-        prob=t["nedges"]/(t["nnodes"]*(t["nnodes"]-1)) # edge probability
-        self.max_degree_possible=2*(t["nnodes"]-1) # max d given N
-        d_=list(set(t["degrees_"]))
-        d_.sort()
-        sectorialized_degrees__= self.newerSectorializeDegrees(
-                                      self.makeEmpiricalDistribution(
-                                        t["degrees_"], d_, t["nnodes"] ),
-              stats.binom(self.max_degree_possible,prob),
-              d_,
-              max_degree_empirical,
-              minimum_incidence,t["nnodes"])
-        sectorialized_agents__= self.sectorializeAgents(
-             sectorialized_degrees__, t["degrees"])
-        sectorialized_nagents__=[len(i) for i in sectorialized_agents__]
-        #mvars=("prob","max_degree_empirical","sectorialized_degrees__","sectorialized_agents__")
-        del t
-        self.topm_dict.update(locals())
-    def sectorializeAgents(self,sectorialized_degrees,agent_degrees):
-        periphery=[x for x in agent_degrees
-                     if agent_degrees[x] in sectorialized_degrees[0]]
-        intermediary=[x for x in agent_degrees
-                     if agent_degrees[x] in sectorialized_degrees[1]]
-        hubs=[x for x in agent_degrees
-                     if agent_degrees[x] in sectorialized_degrees[2]]
-        return locals()
-    def newerSectorializeDegrees(self,empirical_distribution,binomial,incident_degrees_,max_degree_empirical,minimum_count,num_agents):
-        # compute bins [start, end]
-        prob_min=minimum_count/num_agents
-        llimit=0
-        rlimit=0
-        self.bins=bins=[]
-        self.empirical_probs=empirical_probs=[]
-        while (rlimit < len(incident_degrees_)):
-            if (sum(empirical_distribution[llimit:])>prob_min):
-                prob_empirical=0
-                while True:
-                    prob_empirical=sum(
-                         empirical_distribution[llimit:rlimit+1] )
-                    if prob_empirical >= prob_min:
-                        break
-                    else:
-                        rlimit+=1
-                bins.append((llimit,rlimit))
-                empirical_probs.append(prob_empirical)
-                rlimit+=1
-                llimit=rlimit
-            else: # last bin
-                print("last bin less probable than prob_min")
-                rlimit=len(incident_degrees_)-1
-                bins.append((llimit,rlimit))
-                prob_empirical=sum(
-                     empirical_distribution[llimit:rlimit+1] )
-                empirical_probs.append(prob_empirical)
-                rlimit+=1
-
-        binomial_probs=[]
-        for i, bin_ in enumerate(bins):
-            llimit=bin_[0]
-            rlimit=bin_[1]
-            ldegree=incident_degrees_[llimit]-1
-            rdegree=incident_degrees_[rlimit]
-            binomial_prob=binomial.cdf(rdegree)-binomial.cdf(ldegree)
-            binomial_probs.append(binomial_prob)
-
-        # calcula probabilidades em cada bin
-        # compara as probabilidades
-        distribution_compare = list(n.array(empirical_probs) < n.array(binomial_probs))
-        self.binomial_probs=binomial_probs
-        self.distribution_compare0=distribution_compare
-        if sum(distribution_compare):
-            tindex= distribution_compare.index(True)
-            tindex2=distribution_compare[::-1].index(True)
-            periphery_degrees=incident_degrees_[:tindex]
-            intermediary_degrees=incident_degrees_[tindex:-tindex2]
-            hub_degrees=         incident_degrees_[-tindex2:]
-        else:
-            periphery_degrees=incident_degrees_[:]
-            intermediary_degrees=[]
-            hub_degrees=[]
-
-        return periphery_degrees, intermediary_degrees, hub_degrees
-
-    def makeEmpiricalDistribution(self, incident_degrees, incident_degrees_, N):
-        empirical_distribution=[]
-        for degree in incident_degrees_:
-            empirical_distribution.append(incident_degrees.count(degree)/N)
-        return empirical_distribution
     def temporalMeasures(self):
         if self.boot.provenance == "Facebook":
             print("Try making RDF of .tab so to render temporal measures")

@@ -1,6 +1,6 @@
 __doc__="auxiliary functions for text analysis routines"
 
-def 
+def textFomSectors(author_messages,
 def auxAnalysis(texts):
     """Textual analysis that did not fit anywhere else"""
     return {"tfIdf":P.text.analysis.tfIdf(texts)}
