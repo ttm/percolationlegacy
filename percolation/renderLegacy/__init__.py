@@ -1,1 +1,1 @@
-from . import topologicalTextualCharacterization
+from . import topologicalTextualCharacterization, kolmogorovSmirnovBenchmarks
