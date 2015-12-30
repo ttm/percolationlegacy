@@ -1,6 +1,6 @@
 __doc__="functions for analysis of text by isolated functionalities \
         or analysis and rendering roadmaps"
-
+from sklearn.feature_extraction.text import TfidfVectorizer
 def tfIdf(texts):
     """Returns distance matrix for the texts TTM"""
     vect = TfidfVectorizer(min_df=1)

@@ -2,6 +2,23 @@ import time, pickle, os, zipfile, string, networkx as x
 import builtins as B
 from SPARQLWrapper import SPARQLWrapper, JSON
 TT=time.time()
+def mediaDesvio(tids=("astring","bstring"),adict={"stringkey":"tokens"}):
+    """Para facilitar nas medidas de média e desvio TTM"""
+    fdict={}
+    for tid in tids:
+        tid_=tid+"_"
+        toks=[len(i) for i in adict[tid]]
+        mtid=n.mean(toks)
+        dtid=n.std(toks)
+        fdict["m"+tid]=mtid
+        fdict["d"+tid]=dtid
+        if tid_ in adict.keys():
+            toks_=[len(i) for i in adict[tid_]]
+            mtid_=n.mean(toks_)
+            dtid_= n.std(toks_)
+            fdict["m"+tid_]=mtid_
+            fdict["d"+tid_]=dtid_
+    return fdict
 def min3(narray):
     narray_=n.array(narray)
     args=narray_.argsort()
