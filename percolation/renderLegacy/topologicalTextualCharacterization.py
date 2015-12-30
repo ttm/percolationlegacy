@@ -207,7 +207,7 @@ class Analyses:
     """Calculate unit roots, PCA averages and deviations and best fit to scale-free"""
     def __init__(self,bootstrap_instance,graphids=[],tables=False,do_network=False, \
                  do_topology=False,do_power=False, \
-                 do_text=False,do_time=False):
+                 do_text=False,do_time=False,write_back=False):
         if not graphids:
             graphids=list(bootstrap_instance.trans.keys())
         self.options=locals()
@@ -342,14 +342,15 @@ class Analyses:
         pass
 class Analysis:
     """The analysis of one and only network.
-    The rendering of tables and figures is left for the Analyses class
+
+    The rendering of tables and figures is left for the Analyses class,
+    which can be directly called and calls initializes many of this class.
     """
     def __init__(self,bootstrap_instance,graphid=None,options={}):
         if graphid==None:
             graphid=list(bootstrap_instance.trans.keys())[0]
         self.graphid=graphid
         self.boot=bootstrap_instance
-        # tudo para as estruturas totais:
         if options.get("do_network"):
             self.makeNetwork()
         if options.get("do_topology"):
@@ -361,8 +362,38 @@ class Analysis:
         if options.get("do_text"):
             self.textualMeasures()
         if options.get("do_power"):
-            scalefree_info=self.scaleFreeTest()
+            self.scaleFreeTest()
+        if options.get("do_pca"):
+            self.pcaAnalysis()
+        if options.get("write_back"):
+            scalefree_info=self.writeBack()
         # explore different scales
+
+    def pcaAnalysis(self):
+        # choose some case collections of measures with wich to make PCA analysis
+        # at least one for topological measures
+        # another for textual measures
+        # another with both
+        raise NotImplementedError("PCA analysis must be implemented")
+    def textualMeasures(self):
+        # get textual content related to each user
+        query= "SELECT ?{} ?{} WHERE \
+                {{ GRAPH <"+ self.graphid +"> {{                 }} .   \
+                   OPTIONAL {{  ?s tw:author ?from .             }} .   \
+                   OPTIONAL {{  ?s gmane:author ?from .          }} .   \
+                   OPTIONAL {{  ?s tw:messageContent ?text .     }} .   \
+                   OPTIONAL {{  ?s gmane:body ?text .            }} .   \
+                }} }}"
+        author_texts=P.utils.mQuery(self.boot.endpoint_url,query,("from","text")))
+        texts=P.text.aux.textFromSectors(author_texts,self.topm_dict["sectorialized_agents"])
+        sector_text_analysis=P.text.analysis.analyseAll(texts)
+        author_text_analysis=P.text.analysis.analyseAll(texts)
+        del query, texts
+        self.topm_dict.update(locals())
+        raise NotImplementedError("Text processing must be implemented")
+    def writeBack(self):
+        """Write analysis info back to the endpoint"""
+        raise NotImplementedError("Write back must be implemented")
     def makeNetwork(self):
         """Build network from endpoint through simple criteria."""
         # see what procedence: FB, TW, IRC, Email, etc
@@ -500,9 +531,8 @@ class Analysis:
              sectorialized_degrees__, t["degrees"])
         sectorialized_nagents__=[len(i) for i in sectorialized_agents__]
         #mvars=("prob","max_degree_empirical","sectorialized_degrees__","sectorialized_agents__")
-        ll=locals()
-        del ll["t"]
-        self.topm_dict.update(ll)
+        del t
+        self.topm_dict.update(locals())
     def sectorializeAgents(self,sectorialized_degrees,agent_degrees):
         periphery=[x for x in agent_degrees
                      if agent_degrees[x] in sectorialized_degrees[0]]
@@ -510,7 +540,7 @@ class Analysis:
                      if agent_degrees[x] in sectorialized_degrees[1]]
         hubs=[x for x in agent_degrees
                      if agent_degrees[x] in sectorialized_degrees[2]]
-        return periphery, intermediary, hubs
+        return locals()
     def newerSectorializeDegrees(self,empirical_distribution,binomial,incident_degrees_,max_degree_empirical,minimum_count,num_agents):
         # compute bins [start, end]
         prob_min=minimum_count/num_agents
@@ -573,8 +603,6 @@ class Analysis:
         for degree in incident_degrees_:
             empirical_distribution.append(incident_degrees.count(degree)/N)
         return empirical_distribution
-    def textualMeasures(self): 
-        raise NotImplementedError("Text processing must be implemented")
     def temporalMeasures(self):
         if self.boot.provenance == "Facebook":
             print("Try making RDF of .tab so to render temporal measures")

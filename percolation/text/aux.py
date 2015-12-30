@@ -1,5 +1,10 @@
 __doc__="auxiliary functions for text analysis routines"
 
+def 
+def auxAnalysis(texts):
+    """Textual analysis that did not fit anywhere else"""
+    return {"tfIdf":P.text.analysis.tfIdf(texts)}
+
 def makeText_(ds,pr):
     """Get text in all sectors TTM"""
     foo=[P.utils.REPLACER.replace(i) for i in texts]

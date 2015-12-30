@@ -1,6 +1,7 @@
 __doc__="functions for analysis of text by isolated functionalities \
         or analysis and rendering roadmaps"
 from sklearn.feature_extraction.text import TfidfVectorizer
+
 def tfIdf(texts):
     """Returns distance matrix for the texts TTM"""
     vect = TfidfVectorizer(min_df=1)
@@ -99,4 +100,32 @@ def makeTable(lid,es,TOTAL,TDIR,FDIR,tag,offset=0):
     pDump(vdict,TDIR+"vdict-{}.pickle".format(tag))
     check("escrito pickle, {}, {}".format(lid, TDIR))
     del B.tag
+
+def generalMeasures(ds,np,ts):
+    """Return overall measures from list datastructures and network partitioning Deprecated? TTM"""
+    # mensagens por setor TTM
+    Ms=[sum([len(ds.author_messages[i]) for i in j])
+        for j in np.sectorialized_agents__]
+    Ms_=perc(Ms)
+    NM=N/M # usuarios / mensagem TTM
+    NM_=100*NM 
+    NMs=[i/j if j!=0 else n.inf for i,j in zip(Ns,Ms)] # por setor TTM
+    NMs_=perc(NMs)
+    # Threads por setor TTM
+    # pegar mensagens que possui ao menos uma resposta
+    Gammas=[sum([len([i for i in ds.author_messages[aid] if i[1]==None])
+           for aid in sa]) for sa in np.sectorialized_agents__]
+    Gammas_=perc(Gammas)
+    G_=[100*i/j for i,j in zip(Gammas,Ms)]
+
+    # montante escrito por cada setor
+    tlength_sectors=[]
+    tlength_sector.append(lsector) # quantidade de texto nas mensagens de cada setor TTM
+
+    mt=[n.mean(i) for i in tlength_sectors]
+    st=[n.std(i) for i in tlength_sectors]
+    tls=[i for j in tlength_sectors for i in j]
+    mt_ =n.mean(tls)
+    st_ =n.std(tls)
+    return locals()
 
