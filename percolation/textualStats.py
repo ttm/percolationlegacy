@@ -418,63 +418,23 @@ def medidasSentencas(T):
     return medidas
 def medidasTamanhosSentencas(T,medidas_tokens):
     """Medidas dos tamanhos das sentenças TTM"""
-    MT=medidas_tokens
-    ############
-    # medidas de sentencas
     TS=k.sent_tokenize(T)
-    # media e desvio de numero de caracteres por sentenca
-    tTS=[len(i) for i in TS]
-    mtTS=n.mean(tTS) #
-    dtTS=n.std(tTS) #
-    
-    # media e desvio do tamanho das sentencas em tokens
     sTS=[k.tokenize.wordpunct_tokenize(i) for i in TS] ### Para os POS tags
+    # numero de caracteres por sentenca
+    tTS=[len(i) for i in TS]
+    # tamanho das sentencas em tokens
     tsTS=[len(i) for i in sTS]
-    mtsTS=n.mean(tsTS) #
-    dtsTS=n.std(tsTS) #
-
-    # media e desvio do tamanho das sentencas em palavras conhecidas
-    kw_=MT["kw_"]
+    # tamanho das sentencas em palavras conhecidas
+    kw_=medidas_tokens["kw_"]
     tsTSkw=[len([ii for ii in i if ii in kw_]) for i in sTS]
-    mtsTSkw=n.mean(tsTSkw) #
-    dtsTSkw=n.std(tsTSkw) #
-
-    # media e desvio do tamanho das sentencas em palavras que retornam synsets e nao sao stopwords
-    pv_=MT["kwssnsw_"]
-    tsTSpv=[len([ii for ii in i if ii in pv_]) for i in sTS]
-    mtsTSpv=n.mean(tsTSpv) #
-    dtsTSpv=n.std(tsTSpv) #
-
-    mvars=("mtTS","dtTS","mtsTS","dtsTS","mtsTSkw","dtsTSkw",
-           "mtsTSpv","dtsTSpv","sTS")
-    vdict={}
-    for mvar in mvars:
-        vdict[mvar] = locals()[mvar]
-    return vdict
-def medidasTamanhosMensagens(ds, tids=None):
-    if not tids:
-        mT=[ds.messages[i][3] for i in ds.message_ids]
-    else:
-        mT=[ds.messages[i][3] for i in tids]
-
+    medidas=mediaDesvio(("tsTS","tTS","tsTSkw"),locals())
+    medidas.update({"sTS",sTS})
+    return medidas
+def medidasTamanhosMensagens(mT, tids=None):
     tmT=[len(t) for t in mT] # chars
     ttmT=[len(k.tokenize.wordpunct_tokenize(t)) for t in mT] # tokens
     tsmT=[len(k.sent_tokenize(t)) for t in mT] # sentences
-
-    mtmT=n.mean(tmT)
-    dtmT=n.std(tmT)
-    mttmT=n.mean(ttmT)
-    dttmT=n.std(ttmT)
-    mtsmT=n.mean(tsmT)
-    dtsmT=n.std(tsmT)
-    mvars=("mtmT","dtmT","mttmT","dttmT","mtsmT","dtsmT")
-    vdict={}
-    for mvar in mvars:
-        vdict[mvar] = locals()[mvar]
-    return vdict
-def medidasPOS_(list_of_list_of_sentences_tokenized):
-    # [i["tokens_sentences"] for i in sent_measures]
-    return [medidasPOS(i) for i in list_of_list_of_sentences_tokenized]
+    return mediaDesvio(("tmT""ttmT""tsmT"),locals())
 def medidasPOS(sentences_tokenized):
     """Measures of POS tags
 
@@ -512,15 +472,13 @@ def medidasPOS(sentences_tokenized):
         htags_={}
         for i in htags.keys(): htags_[i]=htags[i]*factor    
         htags__=c.OrderedDict(sorted(htags_.items(), key=lambda x: -x[1]))
-    mvars=("htags__","tags")
-    vdict={}
-    for mvar in mvars:
-        vdict[mvar] = locals()[mvar]
-    return vdict
+    del tags_,tags__,htags,htags_,factor
+    return locals()
 
-def S(acounter):
-    return sorted(acounter.items(),key=lambda x: -x[1])
 def auxWnTb(tt,level,tabfname,wn_dict_list):
+    """Make table of the counted wordnet synsets TTM"""
+    def S(acounter):
+        return sorted(acounter.items(),key=lambda x: -x[1])
     tt_=[S(i) for i in tt]
     labels=[i[0] for i in tt_[0][:12]]
     if labels:
@@ -531,9 +489,6 @@ def auxWnTb(tt,level,tabfname,wn_dict_list):
         else:
             caption=r"""Counts for the most incident synsets {} step from the semantic roots in each Erd\"os sector ({{\bf p.}} for periphery, {{\bf i.}} for intermediary, {{\bf h.}} for hubs).""".format(level)
         # normalizar este data com relação às colunas
-        B.me.append(wms_)
-        B.tt_.append(tt_)
-        B.tt.append(tt)
         data=n.array(wms_)
         data=100*data/data.sum(axis=0)
         data=data[:12]
@@ -546,31 +501,28 @@ def auxWnTb(tt,level,tabfname,wn_dict_list):
         print(tabfname.split("/")[-1], "No labels:",labels,
                 "\nProbably no hypernyms:",
               len(wn_dict_list[0]["top_hypernyms"]))
-
-
 def makeWordnetTable2a(wn_dict_list, table_dir="/home/r/repos/artigoTextoNasRedes/tables/",fname="wnInline2a.tex"):
-    """Table about the most incident roots"""
+    """Table about the most incident roots TTM"""
     t0=[c.Counter([i[0].name() for i in j["top_hypernyms"]]) for j in wn_dict_list]
     auxWnTb(t0,"root",table_dir+fname,wn_dict_list)
 def makeWordnetTable2b(wn_dict_list, table_dir="/home/r/repos/artigoTextoNasRedes/tables/",fname="wnInline2b.tex"):
-    """Table about the most incident roots"""
+    """Table about the most incident synsets a step from root TTM"""
     t1=[c.Counter([i[1].name() for i in j["top_hypernyms"] if len(i)>1]) for j in wn_dict_list]
     #auxWnTb(labels,labelsh,data,level,tabfname)
     auxWnTb(t1,"one",table_dir+fname,wn_dict_list)
 def makeWordnetTable2c(wn_dict_list, table_dir="/home/r/repos/artigoTextoNasRedes/tables/",fname="wnInline2c.tex"):
-    """Table about the most incident roots"""
+    """Table about the most incident synsets three steps from root TTM"""
     t2=[c.Counter([i[2].name() for i in j["top_hypernyms"] if len(i)>2]) for j in wn_dict_list]
     auxWnTb(t2,"two",table_dir+fname,wn_dict_list)
 def makeWordnetTable2d(wn_dict_list, table_dir="/home/r/repos/artigoTextoNasRedes/tables/",fname="wnInline2d.tex"):
-    """Table about the most incident roots"""
+    """Table about the most incident synsets four steps from root TTM"""
     t3=[c.Counter([i[3].name() for i in j["top_hypernyms"] if len(i)>3]) for j in wn_dict_list]
     auxWnTb(t3,"three",table_dir+fname,wn_dict_list)
 def makeWordnetPOSTable(wn_dict_list, table_dir="/home/r/repos/artigoTextoNasRedes/tables/",fname="wnPOSInline.tex",tag=None):
+    """Make table of counted wordnet POS tags TTM"""
     wms=wn_dict_list
     labels=["N","ADJ","VERB","ADV","POS","POS!"]
     data=[[wms[i]["ftags"][j] for i in range(4)] for j in range(4)]
-    # incluir % com relação aas palavras totais etiquetadas
-    # variaveis [posok WL_ e posnok
     data+=[[100*len(wms[i]["posok"])/len(wms[i]["WT_"]) for i in range(4)]]
     data+=[[100*(len(wms[i]["posok"])/(len(wms[i]["posok"])+len(wms[i]["posnok"]))) for i in range(4)]]
     caption=r"""Percentage of synsets with each of the POS tags used by Wordnet. The last lines give the percentage of words considered from all of the tokens (POS) and from the words with synset (POS!). The tokens not considered are punctuations, unrecognized words, words without synsets, stopwords and words for which Wordnet has no synset  tagged with POS tags . Values for each Erd\"os sectors are in the columns {{\bf p.}} for periphery, {{\bf i.}} for intermediary, {{\bf h.}} for hubs."""
@@ -580,11 +532,13 @@ def makeWordnetPOSTable(wn_dict_list, table_dir="/home/r/repos/artigoTextoNasRed
     ME(fname_[:-4],"\\bf",[(0,i) for i in range(1,5)])
     DL(fname_[:-4]+"_",[1,-4],[1])
 def medidasWordnet2_POS(wn_measures,poss=("n","as","v","r")):
+    """Make specific measures to each POS tag found TTM"""
     wn_measures2={}
     for pos in poss:
         wn_measures2[pos]=g.textUtils.medidasWordnet2_(wn_measures,pos)
     return wn_measures2
 def makeWordnetTables2_POS(wn_dict_pos, table_dir="/home/r/repos/artigoTextoNasRedes/tables/",fname="wnPOSInline2",poss=("n","as","v","r"),tag=None):
+    """Make wordnet tables of each pos tag TTM"""
     TDIR=table_dir
     for pos in poss:
         wn_measures2=wn_dict_pos[pos]
@@ -605,6 +559,7 @@ def makeWordnetTables2_POS(wn_dict_pos, table_dir="/home/r/repos/artigoTextoNasR
                 tx+=open(name_).read()
     g.writeTex(tx,TDIR+fname+".tex")
 def makeWordnetTable(wn_dict_list, table_dir="/home/r/repos/artigoTextoNasRedes/tables/",fname="wnInline.tex"):
+    """Make wordnet measures table TTM"""
     wms=wn_dict_list
     mvars=("mmind","dmind",
            "mmaxd","dmaxd",
@@ -639,13 +594,9 @@ def makeWordnetTable(wn_dict_list, table_dir="/home/r/repos/artigoTextoNasRedes/
     ME(table_dir+fname[:-4],"\\bf",[(0,i) for i in range(1,5)])
     DL(table_dir+fname[:-4]+"_",[1],[1],[2,4,6,8,10,12,14,16,18,20,22])
 
-
-
 def makePOSTable(posMensagens_dict, table_dir="/home/r/repos/artigoTextoNasRedes/tables/",fname="posInline.tex",tag=None):
+    """Make POS tags measures table TTM"""
     pms=posMensagens_dict
-#    pms_=[list(i["htags__"].items()) for i in pms]
-    #mvars=[list(i["htags__"].keys()) for i in pms]
-    #mvars=list(pms[0]["htags__"].keys())
     mvars=['NOUN', 'X', 'ADP', 'DET', 'VERB', 'ADJ', 'ADV', 'PRT', 'PRON', 'NUM', 'CONJ',"."]
     pms__=[[pms[j]["htags__"][i] if (i in pms[j]["htags__"].keys()) else 0 for j in range(4)] for i in mvars]
     labelsh=("","g.","p.","i.","h.")
@@ -665,20 +616,13 @@ def makePOSTable(posMensagens_dict, table_dir="/home/r/repos/artigoTextoNasRedes
     X - other: foreign words, typos, abbreviations;
     PUNCT - punctuation.
 """
-    #data=list(map(list, zip(*tms_)))
     data=pms__
-    #nmsgs=data[0]
-    #nmsgs_=perc_(nmsgs)
-    #data=n.array(data[1:])
-    #data=n.vstack((nmsgs,nmsgs_,data))
     fname_=mkName(table_dir,fname,tag)
     g.lTable(labels,labelsh,data,caption,fname_,"textGeral_")
     ME(fname_[:-4],"\\bf",[(0,i) for i in range(1,5)])
     DL(fname_[:-4]+"_",[1],[1],[2,4,7,9,10,11,12])
-
-
 def filtro(wt_):
-    # faz separação dos tokens para analise com wordnet
+    """faz separação dos tokens para analise com wordnet TTM"""
     sword_sem_synset=[]
     sword_com_synset=[]
     word_com_synset=[]
@@ -692,7 +636,6 @@ def filtro(wt_):
                 sword_com_synset.append(wt)
             else:
                 word_com_synset.append((wt[0],wt[1],ss))
-        #elif wt[0] in puncts:
         elif sum([tt in puncts for tt in wt[0]])==len(wt[0]):
             pontuacao.append(wt)
         elif wt[0] in stopwords:
@@ -701,12 +644,10 @@ def filtro(wt_):
             word_sem_synset.append(wt)
         else:
             token_exotico.append(wt)
-    mvars=("sword_sem_synset","sword_com_synset","word_com_synset","word_sem_synset","pontuacao","token_exotico")
-    vdict={}
-    for mvar in mvars:
-        vdict[mvar] = locals()[mvar]
-    return vdict
+    del wt,ss,wt_
+    return locals()
 def traduzPOS(astring):
+    """Traduz as POS tags usadas para a convenção do Wordnet TTM"""
     if astring in ("NOUN","NNS","NN","NUM"):
         return wn.NOUN
     elif astring in ("VERB","VBG"):
@@ -718,17 +659,14 @@ def traduzPOS(astring):
     else:
         return "NOPOS"
         
-def medidasWordnet_(list_words_with_pos_tags):
-    return [medidasWordnet(i) for i in list_words_with_pos_tags]
-def medidasWordnet2_(list_wn_stuff,pos):
-    return [medidasWordnet2(i,pos) for i in list_wn_stuff]
 def medidasWordnet(words_with_pos_tags):
+    """Medidas gerais sobre a aplicação da Wordnet TTM"""
     WT=words_with_pos_tags
-    WT_=[(i[0].lower(),i[1]) for j in WT for i in j]
-    wlists=filtro(WT_)
+    WT_=[(i[0].lower(),i[1]) for j in WT for i in j] #
+    wlists=filtro(WT_) #
     wl=wlists["word_com_synset"]
-    posok=[]
-    posnok=[]
+    posok=[] #
+    posnok=[] #
     for ww in wl:
         pos = traduzPOS(ww[1])
         ss=ww[2]
@@ -744,15 +682,13 @@ def medidasWordnet(words_with_pos_tags):
     # quais as tags?
     posok_=[i[1].pos() for i in posok]
     ftags_=[100*posok_.count(i)/len(posok_) for i in ('n', 's','a', 'r', 'v')]
-    ftags=ftags_[0:2]+ftags_[3:]
+    ftags=ftags_[0:2]+ftags_[3:] #
     ftags[1]+=ftags_[2]
-    mvars=("WT_","wlists","posok","posnok","ftags")
-    vdict={}
-    for mvar in mvars:
-        vdict[mvar] = locals()[mvar]
-    return vdict
+    del WT,wl,ww,pp,pos,ss,poss,fposs,tindex,posok_,ftags_
+    return locals()
+
 def medidasWordnet2(wndict,pos=None):
-    """pos={'r', 'as', 'n', 'v'}"""
+    """Medidas das categorias da Wordnet sobre os verbetes TTM"""
     sss=wndict["posok"]
     if pos:
         sss_=[i[1] for i in sss if i[1].pos() in pos]
@@ -798,23 +734,17 @@ def medidasWordnet2(wndict,pos=None):
     nsimilar=[    len(i.similar_tos()) for i in sss_]
     nverb_groups=[len(i.verb_groups()) for i in sss_]
 
-    mvars=list(locals().keys()); mvars.remove("wndict")
-    mvars_=mvars[:]
-    mvars_.remove("sss_");       mvars_.remove("sss");
-    mvars_.remove("top_hypernyms")
-    mvars_.remove("pos")
-    mvars_.remove("hyperpaths"); mvars_.remove("lexnames")
-    vdict={}
-    #mvars=("nmero_part",)
+    del wndict
+    mvars_=[i for i in locals.keys() if i not in ("sss","sss_","top_hypernyms","pos","hyperpaths","lexnames")]
     locals_=locals()
+    medidas=mediaDesvio(mvars_,locals_)
     for mvar in mvars:
-        if mvar not in mvars_:
-            vdict[mvar] = locals_[mvar]
-        else:
-            vdict["m"+mvar]=n.mean(locals_[mvar])
-            vdict["d"+mvar]=n.std(locals_[mvar])
-    return vdict
+        del locals_[mvar]
+    medidas.update(locals_)
+    return medidas
+
 def medidasParticipante(dict_auth_text):
+    """Medidas de texto por autor TTM"""
     medidas_autor={}
     for author in dict_auth_text:
         text=dict_auth_text[author]
@@ -826,11 +756,11 @@ def medidasParticipante(dict_auth_text):
             medidas_autor[author]=medidas
     return medidas_autor
 
-
 def medidasPCA2_(ds,nm,authors_lists=None):
     mall=medidasPCA2(ds,nm)
     return [mall]+[medidasPCA2(ds,nm,authors) for authors in authors_lists]
 def medidasPCA2(ds,nm,authors=None):
+    """PCA para as medidas de cada participante TTM"""
     textosP= textosParticipante(ds,authors)
     medidasP=medidasParticipante(textosP)
     medidas_autor=g.textUtils.medidasPCA(medidasP,nm)
@@ -844,6 +774,7 @@ def medidasPCA2(ds,nm,authors=None):
         vdict[mvar] = locals()[mvar]
     return vdict
 def medidasPCA(medidas_participante_dict,network_measures):
+    """PCA simples para as medidas de cada participante TTM"""
     nm,mp=network_measures,medidas_participante_dict
     for author in mp:
         mp[author]["degree"]=nm.degrees[author]
@@ -851,6 +782,7 @@ def medidasPCA(medidas_participante_dict,network_measures):
         mp[author]["clustering"]=nm.clusterings[author]
     return mp
 def textosParticipante(ds,authors=None):
+    """Medidas de texto de cada participante TTM"""
     texts={}
     if not authors:
         authors=ds.author_messages
@@ -863,6 +795,7 @@ def textosParticipante(ds,authors=None):
             B.LANG+=[langid.classify(text)]
     return texts
 def makePCATable_(medidas_pca,table_dir,fname="pcaInline.tex",tag=None):
+    """Faz tabela com as medidas do PCA TTM"""
     vecs=[i["pca"].feature_vec_.real for i in medidas_pca]
     vals=[i["pca"].eig_values_.real for i in medidas_pca]
     labelsh=[""]+["PC{}".format(i+1) for i in range(vecs[0].shape[1])]
@@ -891,28 +824,9 @@ def makePCATable_(medidas_pca,table_dir,fname="pcaInline.tex",tag=None):
                                          34,35,36,
                                          38,39,40])
 
-def makePCATable(vecs,vals,labs,table_dir,fname="pcaInline.tex"):
-    labelsh=[""]+["PC{}".format(i+1) for i in range(vecs.shape[1])]
-    labels=labs+[r"$\lambda$"]
-    data=n.vstack((vecs,vals[:vecs.shape[1]]))
-    caption="PCA formation"
-    g.lTable(labels,labelsh,data,caption,table_dir+fname,"textGeral_")
-    ME(table_dir+fname[:-4],"\\bf",[(0,i) for i in range(1,6)]+[(i,0) for i in range(1,11)])
-    DL(table_dir+fname[:-4]+"_",[1,-3],[1],[2,3,5,7,8])
-def tPCA(medidas,keys):
-    data=[]
-    for author in medidas:
-        data+=[[]]
-        for key in keys:
-            data[-1]+=[medidas[author][key]]
-    data_=n.array(data)
-    data__=data_.T
-    return g.pca.PCA(data__,final_dimensions=5)
-
-
 from sklearn.feature_extraction.text import TfidfVectorizer
 def tfIdf(texts):
-    """Returns distance matrix for the texts"""
+    """Returns distance matrix for the texts TTM"""
     vect = TfidfVectorizer(min_df=1)
     tfidf = vect.fit_transform([tt.lower() for tt in texts])
     aa=(tfidf * tfidf.T).A
@@ -920,7 +834,7 @@ def tfIdf(texts):
 def kolmogorovSmirnovDistance(seq1,seq2,bins=300):
     """Calculate distance between histograms
     
-    Adapted from the Kolmogorov-Smirnov test"""
+    Adapted from the Kolmogorov-Smirnov test TTM"""
     amin=min(min(seq1),min(seq2))
     amax=max(max(seq1),max(seq2))
     bins=n.linspace(amin,amax,bins+1,endpoint=True)
@@ -938,7 +852,7 @@ def kolmogorovSmirnovDistance(seq1,seq2,bins=300):
     calpha=Dnn/fact
     return calpha
 def uniteTables3(TDIR,tag):
-    """junta cada POS tag da wn em uma tabelona"""
+    """junta cada POS tag da wn em uma tabelona TTM"""
     tt="wnPOSInline2a","wnPOSInline2b","wnPOSInline2c","wnPOSInline2d",
     fnames=[]
     for pos in ("n","as","v","r"):
@@ -956,10 +870,13 @@ def uniteTables3(TDIR,tag):
         if os.path.isfile(fnames[3]+".tex"):
             g.tableHelpers.vstackTables_(fname,fnames[3],fname)
 def uniteTables2(TDIR,tag):
+    """vtstack tables TTM Deprecated?"""
     foo=TDIR+"posMerged{}".format(tag)
     g.tableHelpers.vstackTables_(TDIR+"posInline{}_".format(tag),
             TDIR+"wnPOSInline{}_".format(tag),foo)
+
 def uniteTables(TDIR,tag):
+    """vstack tables TTM Deprecated?"""
     t1="geral"#"geralInline0_"
     t2="chars"
     t3="tokensMerged"
@@ -976,8 +893,8 @@ def uniteTables(TDIR,tag):
     g.tableHelpers.vstackTables(foo,tt[3],foo)
     g.tableHelpers.vstackTables(foo,tt[4],foo)
 
-
 def makeTables_(lids,TOTAL,TDIR,FDIR,tags=None,offset=0,start_from=0,basedir="~./gmane3/"):
+    """General outline of a text analysis and tables rendering TTM"""
     if not tags:
         tags=[str(i) for i in range(len(lids))]
     for lid,tag in zip(lids,tags):
@@ -1020,7 +937,11 @@ def makeTable(lid,es,TOTAL,TDIR,FDIR,tag,offset=0):
     
     pos_measures=g.textUtils.medidasPOS_([i["tokens_sentences"] for i in sent_measures]); check("medidas POS")
     g.textUtils.makePOSTable(pos_measures,TDIR,tag=tag)
-    
+
+    def medidasWordnet2_(list_wn_stuff,pos):
+        return [medidasWordnet2(i,pos) for i in list_wn_stuff]
+    def medidasWordnet_(list_words_with_pos_tags):
+        return [medidasWordnet(i) for i in list_words_with_pos_tags]
     wn_measures=g.textUtils.medidasWordnet_([i["tags"] for i in pos_measures]); check("medidas wordnet")
     g.textUtils.makeWordnetPOSTable(wn_measures,TDIR ,tag=tag) # medias e desvios das incidencias dos atributos
 
@@ -1035,7 +956,7 @@ def makeTable(lid,es,TOTAL,TDIR,FDIR,tag,offset=0):
     dists=g.textUtils.ksAll(sinais,mkeys=["lens_tok","lens_word","lens_sent"]); check("ks sinais")
     g.textUtils.makeKSTables(dists,TDIR,
             fnames=("ksTokens","ksWords","ksSents"),
-            tags=("size of tokens","size of known words","size of sentences"),tag=tag)
+        =("size of tokens","size of known words","size of sentences"),tag=tag)
 
     sinais2=g.textUtils.medidasSinais2_(pos_measures,msg_measures); check("medidas sinais 2")
     dists2=g.textUtils.ksAll(sinais2,mkeys=["adj","sub","pun","verb","chars"]); check("ks sinais 2")

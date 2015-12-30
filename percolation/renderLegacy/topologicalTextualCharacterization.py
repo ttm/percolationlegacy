@@ -42,11 +42,6 @@ class Bootstrap:
             self.writeOverallEndpoint(endpoint_url)
         translates=self.loadTranslates(endpoint_url,update)
         self.endpoint_url=endpoint_url
-    def extra(self): # DEPRECATED
-        self.writeOverallTable2(analysis)
-        self.oi=oi
-        self.translates=translates
-        self.analysis=analysis
     def overallAnalysis(self,endpoint_url):
         """Withour use for now"""
         # análise geral dos grafos, quais atributos, datas, etc
@@ -79,7 +74,6 @@ class Bootstrap:
             vals=[i for i in vals if i]
             dname=os.path.dirname(fname)
             vals_=[]
-            #asd=asd
             for val in vals:
                 if self.provenance in ("Gmane","IRC"):
                     files=os.listdir(dname)
@@ -94,8 +88,6 @@ class Bootstrap:
                 guri=P.utils.urifyFilename(fname_)
                 if update:
                     cmd="s-post {} {} {}".format(endpoint_url, guri, fname2)
-                    #cmd="s-put {} {} {}".format(endpoint_url, guri, fname2)
-                    #cmd="s-update --service {}?graph={} --file={}".format(endpoint_url, guri, fname2)
                     c(cmd)
                     os.system(cmd)
                 if guri in self.trans.keys():
@@ -159,8 +151,6 @@ class Bootstrap:
         caption="overview of social datasets"
         P.tableHelpers.lTable(labels,labelsh,data,caption,"tryMe2TT.tex",ttype="strings")
         P.tableHelpers.doubleColumn("tryMe2TT.tex")
-
-
     def getOverallInfos(self,endpoint_url,metagnames):
         """analisa com os nomes, quantidades, proveniencias e demais infos do Meta"""
         self.odict={}
@@ -213,8 +203,6 @@ class Bootstrap:
             vals=P.utils.mQuery(endpoint_url,qq,keys)[0]
             bdict={i:j for i,j in zip(keys,vals)}
             self.odict[gname]=bdict
-    def writeOverallTable2(self,analysis,fdir):
-        pass
 class Analyses:
     """Calculate unit roots, PCA averages and deviations and best fit to scale-free"""
     def __init__(self,bootstrap_instance,graphids=[],tables=False,do_network=False, \
