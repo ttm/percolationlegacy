@@ -19,14 +19,21 @@ def analyseAll(texts_list):
     return locals()
 def medidasChars(T):
     """Medidas de letras TTM formatar para passagem como dicionário"""
-    nc=len(T)
-    ne=T.count(" ")
-    nl=sum([t.isalpha() for t in T])
-    nm=sum([t.isupper() for t in T])
-    nv=sum([t in ("a","e","i","o","u") for t in T])
-    np=sum([t in puncts for t in T])
-    nd=sum([t.isdigit() for t in T]) # numerais
-    return nc,ne/nc,np/(nc-ne),nd/(nc-ne),nl/(nc-ne),nv/nl,nm/nl
+    nchars=len(T)
+    nspaces=T.count(" ")
+    nletters=sum([t.isalpha() for t in T])
+    nuppercase=sum([t.isupper() for t in T])
+    nvowels=sum([t in ("a","e","i","o","u") for t in T])
+    npuntuations=sum([t in puncts for t in T])
+    ndigits=sum([t.isdigit() for t in T]) # numerais
+    frac_espaces=nspaces/nchars
+    frac_letters=nletters/(nchars-nspaces)
+    frac_vowels=nvowels/nletters
+    frac_uppercase=nuppercase/nletters
+    frac_punctuations=npunctuations/(nchars-nspaces)
+    frac_digits=ndigits/(nchars-nspaces)
+    del T
+    return locals()
 def medidasTokens(T):
     """Medidas extensas sobre os tokens TTM"""
     atime=time.time()
@@ -74,7 +81,7 @@ def medidasTokens(T):
     known_words_not_stopword_has_synset_unique=set(known_words_not_stopword_has_synset)
     tvars=("kw","kwnsw","kwssnsw","kwssnsw","kwsw","sw")
     token_sizes=mediaDesvio(tvars,medidas_tokens)
-    del foo,foo_,t,tokens,tokens_lowercase,tvars
+    del foo,foo_,t,tokens,tokens_lowercase,tvars,T
     return locals()
 
 def medidasMensagens(ds,tids=None):
