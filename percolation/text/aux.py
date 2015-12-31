@@ -1,6 +1,21 @@
 __doc__="auxiliary functions for text analysis routines"
 
-def textFomSectors(author_messages,
+def textFromAuthors(author_messages,sectorialized_agents):
+    authors=set([i[0] for i in author_messages])
+    authors_text={}
+    for author in authors:
+        authors_text[author]=""
+    for author,text in author_messages:
+        authors_text[author]+=text
+    return authors_text
+def textFromSectors(authors_text,sectorialized_agents):
+    sectors_text={}
+    for sector in sectorialized_agents:
+        sectors_text[sector]=""
+        for author in sectorialized_agents[sector]:
+            for text in authors_text[author]:
+                sectors_text[sector]+=text
+    return sectors_text
 def auxAnalysis(texts):
     """Textual analysis that did not fit anywhere else"""
     return {"tfIdf":P.text.analysis.tfIdf(texts)}

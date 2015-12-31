@@ -1,10 +1,16 @@
 __doc__="for topological measures"
-def topologicalMeasures(self):
+import networkx as x
+
+def topologicalMeasures(gg=x.Graph()):
     """A detailed info about one and only graph.
 
     Information about date, number of friends, friendships,
     interactions, etc.
     Average degree, average clustering, etc.
+
+    Input: networkx Graph
+    Used by: P.renderLegacy.topologicalTextualCharacterization.Analysis()
+    Uses: P.topology.measures.overallMeasures()
     ToDo: implement homophily
     """
     degrees=self.gg.degree()
@@ -48,4 +54,61 @@ def topologicalMeasures(self):
     else:
         weights=[1]*nedges
         frac_strongly_connected=  frac_connected
-    self.topm_dict=locals()
+    overall_measures=overallMeasures(locals())
+    return locals()
+
+def _overallMeasures(topm_dict):
+    """Overall measures of a network.
+
+    Used by: P.topology.measures.topologicalMeasures()"""
+    return [
+            #topm_dict["nodes_edge"], correlated to degree
+            topm_dict["nnodes"], 
+            topm_dict["nedges"],
+            topm_dict["prob"], # anotar em ocorrências por mil ou milhões etc
+            topm_dict["max_degree_empirical"],
+            max(   topm_dict["strengths_"]),
+            max(   topm_dict["weights"]),
+            n.mean(topm_dict["degrees_"]),
+            n.std( topm_dict["degrees_"]),
+            n.mean(topm_dict["strengths_"]),
+            n.std( topm_dict["strengths_"]),
+            n.mean(topm_dict["weights"]),
+            n.std( topm_dict["weights"]),
+            n.mean(topm_dict["clustering_"]               ),
+            n.std( topm_dict["clustering_"]               ),
+            n.mean(topm_dict["clustering_w_"]             ),
+            n.std( topm_dict["clustering_w_"]             ),
+            n.mean(topm_dict["square_clustering_"]),
+            n.std( topm_dict["square_clustering_"]),
+            n.mean(topm_dict["closeness_"]                ),
+            n.std( topm_dict["closeness_"]                ),
+            n.mean(topm_dict["eccentricity_"]             ),
+            n.std( topm_dict["eccentricity_"]             ),
+            n.mean(topm_dict["sectorialized_degrees__"][0]), # periphery
+            n.std( topm_dict["sectorialized_degrees__"][0]), # periphery
+            n.mean(topm_dict["sectorialized_degrees__"][1]), # intermediary
+            n.std( topm_dict["sectorialized_degrees__"][1]), # intermediary
+            n.mean(topm_dict["sectorialized_degrees__"][2]), # hubs
+            n.std( topm_dict["sectorialized_degrees__"][2]), # hubs
+
+            topm_dict["sectorialized_nagents__"][0], # periphery
+            topm_dict["sectorialized_nagents__"][1], # intermediary
+            topm_dict["sectorialized_nagents__"][2], # hubs
+            topm_dict["transitivity"],
+            topm_dict["transitivity_u"],
+            topm_dict["diameter"],
+            topm_dict["radius"],
+            topm_dict["frac_connected"],
+            topm_dict["size_component"],
+            topm_dict["ashort_path"],
+            topm_dict["ashort_path_u"],
+            topm_dict["ashort_path_w"],
+            topm_dict["ashort_path_uw"],
+            topm_dict["ncenter"],
+            topm_dict["nperiphery"],
+            topm_dict["sectorialized_agents__"],
+            topm_dict["sectorialized_degrees__"],
+            topm_dict["frac_strongly_connected"],
+            topm_dict["frac_weakly_connected"],
+        ]

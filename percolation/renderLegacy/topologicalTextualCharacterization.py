@@ -271,57 +271,7 @@ class Analyses:
             # tem as medidas topologicas, organizar em 1 ou + tabelas
             # renderizar em paisagem ou nem assim?
             # fazer papel grande, deixar que de zoom pq eh digital
-            line=[
-                    anal.topm_dict["nnodes"], 
-                    anal.topm_dict["nedges"],
-                    #anal.topm_dict["nodes_edge"], correlated to degree
-                    anal.topm_dict["prob"], # anotar em ocorrências por mil ou milhões etc
-                    anal.topm_dict["max_degree_empirical"],
-                    max(anal.topm_dict["strengths_"]),
-                    max(anal.topm_dict["weights"]),
-                    n.mean(anal.topm_dict["degrees_"]),
-                    n.std(anal.topm_dict["degrees_"]),
-                    n.mean(anal.topm_dict["strengths_"]),
-                    n.std(anal.topm_dict["strengths_"]),
-                    n.mean(anal.topm_dict["weights"]),
-                    n.std(anal.topm_dict["weights"]),
-                    n.mean(anal.topm_dict["clustering_"]               ),
-                    n.std(anal.topm_dict["clustering_"]               ),
-                    n.mean(anal.topm_dict["clustering_w_"]             ),
-                    n.std(anal.topm_dict["clustering_w_"]             ),
-                    n.mean(anal.topm_dict["square_clustering_"]),
-                    n.std( anal.topm_dict["square_clustering_"]),
-                    n.mean(anal.topm_dict["closeness_"]                ),
-                    n.std(anal.topm_dict["closeness_"]                ),
-                    n.mean(anal.topm_dict["eccentricity_"]             ),
-                    n.std(anal.topm_dict["eccentricity_"]             ),
-                    n.mean(anal.topm_dict["sectorialized_degrees__"][0]), # periphery
-                    n.std(anal.topm_dict["sectorialized_degrees__"][0]), # periphery
-                    n.mean(anal.topm_dict["sectorialized_degrees__"][1]), # intermediary
-                    n.std(anal.topm_dict["sectorialized_degrees__"][1]), # intermediary
-                    n.mean(anal.topm_dict["sectorialized_degrees__"][2]), # hubs
-                    n.std(anal.topm_dict["sectorialized_degrees__"][2]), # hubs
 
-                    anal.topm_dict["sectorialized_nagents__"][0], # periphery
-                    anal.topm_dict["sectorialized_nagents__"][1], # intermediary
-                    anal.topm_dict["sectorialized_nagents__"][2], # hubs
-                    anal.topm_dict["transitivity"],
-                    anal.topm_dict["transitivity_u"],
-                    anal.topm_dict["diameter"],
-                    anal.topm_dict["radius"],
-                    anal.topm_dict["frac_connected"],
-                    anal.topm_dict["size_component"],
-                    anal.topm_dict["ashort_path"],
-                    anal.topm_dict["ashort_path_u"],
-                    anal.topm_dict["ashort_path_w"],
-                    anal.topm_dict["ashort_path_uw"],
-                    anal.topm_dict["ncenter"],
-                    anal.topm_dict["nperiphery"],
-#                    anal.topm_dict["sectorialized_agents__"],
-#                    anal.topm_dict["sectorialized_degrees__"],
-                    anal.topm_dict["frac_strongly_connected"],
-                    anal.topm_dict["frac_weakly_connected"],
-                ]
             lines+=[line]
         labelsh=["$N$","$E$","$p$","$k_{max}$","$s_{max}$","$w_{max}$",
                  "$\mu(k)$","$\sigma(k)$","$\mu(s)$","$\std(s)$","$\mu(w)$","$\std(w)$",
@@ -352,15 +302,15 @@ class Analysis:
         self.graphid=graphid
         self.boot=bootstrap_instance
         if options.get("do_network"):
-            self.makeNetwork()
+            self.network=self.makeNetwork()
         if options.get("do_topology"):
-            self.topologicalMeasures()
+            self.topm_dict=P.topology.measures.topologicalMeasures(self.network)
         if options.get("do_sectors"):
-            self.getErdosSectorsUsers()
+            self.erdos_sectors=P.topology.sectorialize.getErdosSectors(self.topm_dict)
         if options.get("do_time"):
-            self.temporalMeasures()
+            self.temp_dict=self.temporalMeasures()
         if options.get("do_text"):
-            self.textualMeasures()
+            self.textm_dict=self.textualMeasures()
         if options.get("do_power"):
             self.scaleFreeTest()
         if options.get("do_pca"):
@@ -368,7 +318,8 @@ class Analysis:
         if options.get("write_back"):
             scalefree_info=self.writeBack()
         # explore different scales
-
+    def topologicalMeasures(self):
+        line=P.topology.measures.overallMeasures(anal.topm_dict)
     def pcaAnalysis(self):
         # choose some case collections of measures with wich to make PCA analysis
         # at least one for topological measures
@@ -385,12 +336,9 @@ class Analysis:
                    OPTIONAL {{  ?s gmane:body ?text .            }} .   \
                 }} }}"
         author_texts=P.utils.mQuery(self.boot.endpoint_url,query,("from","text")))
-        texts=P.text.aux.textFromSectors(author_texts,self.topm_dict["sectorialized_agents"])
-        sector_text_analysis=P.text.analysis.analyseAll(texts)
-        author_text_analysis=P.text.analysis.analyseAll(texts)
-        del query, texts
-        self.topm_dict.update(locals())
-        raise NotImplementedError("Text processing must be implemented")
+        P.text.analysis.analyseAll(author_texts,self.erdos_sectors["sectorialized_agents__"])
+        del query
+        return locals()
     def writeBack(self):
         """Write analysis info back to the endpoint"""
         raise NotImplementedError("Write back must be implemented")
@@ -438,7 +386,7 @@ class Analysis:
              }} }} GROUP BY ?from ?to"
             keys="from","to","weight"
         vals=P.utils.mQuery(self.boot.endpoint_url,query,keys)
-        self.topm_dict.update(P.topology.makeNetwork.makeNetwork(vals))
+        return P.topology.makeNetwork.makeNetwork(vals)
 
     def temporalMeasures(self):
         if self.boot.provenance == "Facebook":

@@ -2,6 +2,25 @@ __doc__="functions for analysis of text by isolated functionalities \
         or analysis and rendering roadmaps"
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+def analyseAll(authors_texts,erdos_sectorialization):
+    """Overall text analysis routine, uses all resources
+
+    Uses: P.text.aux.textFromAuthors()
+          P.text.aux.textFromSectors()
+    Used by: P.renderLegacy.topologicalTextualCharacterization.Analysis()
+    """
+    authors_text=P.text.aux.textFromAuthors(authors_texts,self.topm_dict["sectorialized_agents"])
+    sectors_text=P.text.aux.textFromSectors(authors_text,erdos_sectorialization)
+    authors_analysis={}
+    for author in authors_text:
+        authors_analysis[author]={}
+        authors_analysis[author]["rawAnalysis"]=P.text.raw.analyseAll(texts)
+        authors_analysis[author]["posAnalysis"]=P.text.pos.analyseAll(texts,authors_analysis[author]["rawAnalysis"]["tokens"])
+        authors_analysis[author]["wnAnalysis" ]=P.text.pos.analyseAll(texts,authors_analysis[author]["rawAnalysis"]["tokens"])
+        authors_analysis[author]["ksAnalysis" ]=P.text.ks.selectedComparisons(texts,locals())
+        authors_analysis[author]["auxAnalysis"]=P.text.auxAnalysis(texts)
+    del authors_texts, erdos_sectorialization,author
+    return locals()
 def tfIdf(texts):
     """Returns distance matrix for the texts TTM"""
     vect = TfidfVectorizer(min_df=1)

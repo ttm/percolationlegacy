@@ -1,25 +1,28 @@
 __doc__="for finding Erdos sectors of a network"
-def getErdosSectorsUsers(self,minimum_incidence=2):
-    t=self.topm_dict
+def getErdosSectors(topm_dict,minimum_incidence=None):
+    """Make Erdös sectorialization and return dict with main variables"""
+
+    if not minimum_incidence:
+        minimum_incidence=max(2,int(topm_dict["nnodes"]*0.01))
+    t=topm_dict
     max_degree_empirical=max(t["degrees_"])
     prob=t["nedges"]/(t["nnodes"]*(t["nnodes"]-1)) # edge probability
-    self.max_degree_possible=2*(t["nnodes"]-1) # max d given N
+    max_degree_possible=2*(t["nnodes"]-1) # max d given N
     d_=list(set(t["degrees_"]))
     d_.sort()
-    sectorialized_degrees__= self.newerSectorializeDegrees(
-                                  self.makeEmpiricalDistribution(
-                                    t["degrees_"], d_, t["nnodes"] ),
-          stats.binom(self.max_degree_possible,prob),
-          d_,
-          max_degree_empirical,
-          minimum_incidence,t["nnodes"])
-    sectorialized_agents__= self.sectorializeAgents(
+    sectorialized_degrees__= newerSectorializeDegrees(
+                                    makeEmpiricalDistribution(
+                                           t["degrees_"], d_, t["nnodes"] ),
+                                    stats.binom(max_degree_possible,prob),
+                                    d_,
+                                    max_degree_empirical,
+                                    minimum_incidence,t["nnodes"])
+    sectorialized_agents__= sectorializeAgents(
          sectorialized_degrees__, t["degrees"])
     sectorialized_nagents__=[len(i) for i in sectorialized_agents__]
-    #mvars=("prob","max_degree_empirical","sectorialized_degrees__","sectorialized_agents__")
     del t
-    self.topm_dict.update(locals())
-def sectorializeAgents(self,sectorialized_degrees,agent_degrees):
+    return locals()
+def sectorializeAgents(sectorialized_degrees,agent_degrees):
     periphery=[x for x in agent_degrees
                  if agent_degrees[x] in sectorialized_degrees[0]]
     intermediary=[x for x in agent_degrees
@@ -27,13 +30,13 @@ def sectorializeAgents(self,sectorialized_degrees,agent_degrees):
     hubs=[x for x in agent_degrees
                  if agent_degrees[x] in sectorialized_degrees[2]]
     return locals()
-def newerSectorializeDegrees(self,empirical_distribution,binomial,incident_degrees_,max_degree_empirical,minimum_count,num_agents):
+def newerSectorializeDegrees(empirical_distribution,binomial,incident_degrees_,max_degree_empirical,minimum_count,num_agents):
     # compute bins [start, end]
     prob_min=minimum_count/num_agents
     llimit=0
     rlimit=0
-    self.bins=bins=[]
-    self.empirical_probs=empirical_probs=[]
+    bins=bins=[]
+    empirical_probs=empirical_probs=[]
     while (rlimit < len(incident_degrees_)):
         if (sum(empirical_distribution[llimit:])>prob_min):
             prob_empirical=0
@@ -69,8 +72,8 @@ def newerSectorializeDegrees(self,empirical_distribution,binomial,incident_degre
     # calcula probabilidades em cada bin
     # compara as probabilidades
     distribution_compare = list(n.array(empirical_probs) < n.array(binomial_probs))
-    self.binomial_probs=binomial_probs
-    self.distribution_compare0=distribution_compare
+    binomial_probs=binomial_probs
+    distribution_compare0=distribution_compare
     if sum(distribution_compare):
         tindex= distribution_compare.index(True)
         tindex2=distribution_compare[::-1].index(True)
@@ -84,7 +87,7 @@ def newerSectorializeDegrees(self,empirical_distribution,binomial,incident_degre
 
     return periphery_degrees, intermediary_degrees, hub_degrees
 
-def makeEmpiricalDistribution(self, incident_degrees, incident_degrees_, N):
+def makeEmpiricalDistribution(incident_degrees, incident_degrees_, N):
     empirical_distribution=[]
     for degree in incident_degrees_:
         empirical_distribution.append(incident_degrees.count(degree)/N)
