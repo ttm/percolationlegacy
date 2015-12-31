@@ -30,59 +30,53 @@ def medidasChars(T):
 def medidasTokens(T):
     """Medidas extensas sobre os tokens TTM"""
     atime=time.time()
-    wtok=k.tokenize.wordpunct_tokenize(T)
-    wtok_=[t.lower() for t in wtok]
-    nt=len(wtok) #
-    ntd=len(set(wtok)) # 
+    tokens=k.tokenize.wordpunct_tokenize(T)
+    tokens_lowercase=[t.lower() for t in tokens]
+    ntokens=len(tokens) #
+    ntokens_diff=len(set(tokens)) # 
     # tokens que sao pontuacoes
-    ntp=sum([sum([tt in puncts for tt in t])==len(t) for t in wtok]) #
+    ntokens_punct=sum([sum([tt in puncts for tt in t])==len(t) for t in tokens]) #
     # known and unkown words
-    kw=[] #
-    ukw=[] #
-    tp=[]
-    sw=[]
-    for t in wtok_:
-        if t in WL_:
-            kw.append(t)
+    known_words=[] #
+    unknown_words=[] #
+    punctuation_tokens=[]
+    stopwords=[]
+    for t in tokens_lowercase:
+        if t in WORDLIST_UNIQUE:
+            known_words.append(t)
         elif sum([tt in puncts for tt in t])==len(t):
-            tp.append(t)
+            punctuation_tokens.append(t)
         else:
-            ukw.append(t)
-        if t in stopwords:
-            sw.append(t)
-    sw_=set(sw)
-    kw_=set(kw)
-    ukw_=set(ukw)
-    kwss=[i for i in kw if wn.synsets(i)] #
-    kwss_=set(kwss) #
-    # known words that does not have synsets
-    kwnss=[i for i in kw if i not in kwss_]; c("MT2:")
-    kwnss_=set(kwnss) #
-    # words that are stopwords
-    kwsw=[i for i in kw if i in stopwords] #
-    kwsw_=set(kwsw); c("MT3:")
-    # known words that are not stopwords
-    kwnsw=[i for i in kw if i not in stopwords] #
-    kwnsw_=set(kwnsw) #
-    # unknown words that are stopwords
-    ukwsw=[i for i in ukw if i in stopwords]; c( "MT4:")
-    # known words that return synsets and are stopwords
-    kwsssw=[i for i in kwss if i in stopwords]; c("MT5:")
+            unknown_words.append(t)
+        if t in STOPWORDS:
+            stopwords.append(t)
+    stopwords_unique=set(stopwords)
+    known_words_unique=set(known_words)
+    unknown_words_unique=set(uknown_words)
+    known_words_has_wnsynset=[i for i in known_words if wn.synsets(i)]
+    known_words_has_wnsynset_unique=set(known_words_has_wnsynset)
+    known_words_no_wnsynset=[i for i in known_words if i not in known_words_has_wnsynset_unique]
+    known_words_no_wnsynset_unique=set(known_words_without_wnsynset)
+    known_words_stopwords=[i for i in known_words if i in stopwords_unique]
+    known_words_stopwords_unique=set(known_words_stopwords)
+    known_words_not_stopwords=[i for i in known_words if i not in stopwords_unique]
+    known_words_not_stopwords_unique=set(known_words_not_stopwords)
+    unknown_words_stopwords=[i for i in unknown_words if i in stopwords_unique]
+    known_words_stopwords_has_wnsynset=[i for i in kwss if i in stopwords_unique]
     # known words that dont return synsets and are stopwords
-    kwnsssw=[i for i in kwnss if i in stopwords]; c("MT6:")
+    known_words_stopwords_no_wnsynset=[i for i in kwnss if i in stopwords_unique]; c("MT6:")
     # words that are known, are not stopwords and do not return synset
-    foo_=kwnss_.difference(stopwords)
-    kwnssnsw=[i for i in kw if i in foo_]; c("MT7:")
-    foo_=kwss_.difference(stopwords) 
-    kwssnsw=[i for i in kw if i in foo_] #
-    kwssnsw_=set(kwssnsw); c("MT8:")
-    del foo, foo_,t,wtok,wtok_
+    foo_=known_words_no_synset_unique.difference(stopwords_unique)
+    known_words_not_stopword_no_synset=[i for i in kw if i in foo_]; c("MT7:")
+    # known words with synset that are not stopwords
+    foo_=known_words_has_wnsynset_unique.difference(stopwords_unique) 
+    known_words_not_stopword_has_synset=[i for i in kw if i in foo_] #
+    known_words_not_stopword_has_synset_unique=set(known_words_not_stopword_has_synset)
+    tvars=("kw","kwnsw","kwssnsw","kwssnsw","kwsw","sw")
+    token_sizes=mediaDesvio(tvars,medidas_tokens)
+    del foo,foo_,t,tokens,tokens_lowercase,tvars
     return locals()
 
-def medidasTamanhosTokens(medidas_tokens):
-    """Medidas dos tamanhos dos tokens TTM"""
-    tvars=("kw","kwnsw","kwssnsw","kwssnsw","kwsw","sw")
-    return mediaDesvio(tvars,medidas_tokens)
 def medidasMensagens(ds,tids=None):
     """Medidas das mensagens em si TTM"""
     if not tids:
@@ -90,7 +84,7 @@ def medidasMensagens(ds,tids=None):
     else:
         mT=[ds.messages[i][3] for i in tids]
     tokens_msgs=[k.tokenize.wordpunct_tokenize(t) for t in mT] # tokens
-    knownw_msgs=[[i for i in toks if (i not in stopwords) and (i in WL_)] for toks in tokens_msgs]
+    knownw_msgs=[[i for i in toks if (i not in stopwords) and (i in WORDLIST_UNIQUE)] for toks in tokens_msgs]
     stopw_msgs=[[i for i in toks if i in stopwords] for toks in tokens_msgs]
     puncts_msgs=[[i for i in toks if
          (len(i)==sum([(ii in puncts) for ii in i]))]
@@ -105,7 +99,7 @@ def medidasSentencas(T):
     """Medidas das sentenças TTM"""
     TS=k.sent_tokenize(T)
     tokens_sentences=[k.tokenize.wordpunct_tokenize(i) for i in TS] ### Para os POS tags
-    knownw_sentences=[[i for i in ts if (i not in stopwords) and (i in WL_)] for ts in tokens_sentences]
+    knownw_sentences=[[i for i in ts if (i not in stopwords) and (i in WORDLIST_UNIQUE)] for ts in tokens_sentences]
     stopw_sentences =[[i for i in ts if i in stopwords] for ts in tokens_sentences]
     puncts_sentences=[[i for i in ts if
          (len(i)==sum([(ii in puncts) for ii in i]))]
@@ -133,42 +127,5 @@ def medidasTamanhosMensagens(mT, tids=None):
     ttmT=[len(k.tokenize.wordpunct_tokenize(t)) for t in mT] # tokens
     tsmT=[len(k.sent_tokenize(t)) for t in mT] # sentences
     return mediaDesvio(("tmT""ttmT""tsmT"),locals())
-def medidasTokensQ(T,lang="en"):
-    """Medidas de tokens TTM"""
-    atime=time.time()
-    wtok=k.tokenize.wordpunct_tokenize(T)
-    wtok_=[t.lower() for t in wtok]
-    if lang=="en":
-        kw=[len(i) for i in wtok_ if i in WL_]
-        sw=[len(i) for i in wtok_ if i in stopwords]
-    else:
-        kw=[len(i) for i in wtok_ if i in WLP_]
-        sw=[len(i) for i in wtok_ if i in stopwordsP]
-    return P.utils.mediaDesvio(("kw","sw"),locals())
-
-def medidasTokens_(T,ncontract=None):
-    """Make measures on tokens, one should favor medidasTokens() if doing a thorough analysis"""
-    wtok=k.tokenize.wordpunct_tokenize(T)
-    wtok_=[t.lower() for t in wtok]
-    tokens=len(wtok) #
-    tokens_=set(wtok)
-    tokens_diff=len(tokens_)/tokens # 
-    punct=sum([sum([tt in puncts for tt in t])==len(t) for t in wtok_])
-    punct/=tokens
-    known=[i for i in wtok_ if (i not in stopwords) and (i in WL_)]
-    knownw=len(known)
-    known_=set(known)
-    knownw_diff=len(known_)/knownw
-    stop=[i for i in wtok_ if i in stopwords]
-    stopw=len(stop)/knownw
-    knownw/=tokens
-    contract=ncontract/tokens
-
-    Mtoken,Stoken=mediaDesvio_(wtok_)
-    Mknownw,Sknownw=mediaDesvio_(known)
-    Mknownw_diff,Sknownw_diff=mediaDesvio_(known_)
-    Mstopw,Sstopw=mediaDesvio_(stop)
-    del wtok, wtok_,known,known_,stop
-    return locals()
 
 
