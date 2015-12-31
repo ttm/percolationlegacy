@@ -308,20 +308,24 @@ class Analysis:
         if options.get("do_sectors"):
             self.erdos_sectors=P.topology.sectorialize.getErdosSectors(self.topm_dict)
         if options.get("do_time"):
-            self.temp_dict=self.temporalMeasures()
+            self.tempm_dict=self.temporalMeasures()
         if options.get("do_text"):
             self.textm_dict=self.textualMeasures()
         if options.get("do_power"):
-            self.scaleFreeTest()
+            self.powerm_dict=self.powerlawFit()
         if options.get("do_pca"):
-            self.pcaAnalysis()
+            self.pca_analyses=self.pcaAnalyses()
         if options.get("write_back"):
-            scalefree_info=self.writeBack()
+            self.writeBack()
         # explore different scales
-    def topologicalMeasures(self):
-        line=P.topology.measures.overallMeasures(anal.topm_dict)
-    def pcaAnalysis(self):
+    def pcaAnalyses(self):
         # choose some case collections of measures with wich to make PCA analysis
+        pca={}
+        pca["topological"]=P.topology.analysis.pca(self.topm_dict)
+        pca["textual"]=P.text.analysis.pca(    self.textm_dict)
+        pca["temporal"]=P.text.analysis.pca(    self.tempm_dict)
+        pca["hybrid"]=P.pca.PCA(self.topm_dict,self.textm_dict)
+        return pca
         # at least one for topological measures
         # another for textual measures
         # another with both
@@ -392,24 +396,30 @@ class Analysis:
         if self.boot.provenance == "Facebook":
             print("Try making RDF of .tab so to render temporal measures")
             return
-        query= "SELECT ?mdatetime WHERE \
+        query= "SELECT ?mdatetime ?author WHERE \
          {{ GRAPH <"+ self.graphid +"> {{            \
+           OPTIONAL {{ ?s <"+str(P.rdf.ns.gmane.author)+">    ?author .  }} .          \n \
+           OPTIONAL {{ ?s <"+str(P.rdf.ns.tw.author)+">    ?author .  }} .          \n \
            OPTIONAL {{ ?s <"+str(P.rdf.ns.gmane.sentAt)+">    ?mdatetime .  }} .          \n \
            OPTIONAL {{ ?s <"+str(P.rdf.ns.tw.sentAt)+">       ?mdatetime .  }} .          \n \
          }} }}"
-        keys=("mdatetime",)
-        vals=[i[0]for i in P.utils.mQuery(self.boot.endpoint_url,query,keys)]
-        self.time_statistics=P.temporalStats.TemporalStatistics(datetimestrings=vals)
+        keys=("mdatetime","author")
+        vals_=P.utils.mQuery(self.boot.endpoint_url,query,keys)
+        vals=[i[0]for i in vals_]
+        overall_time_statistics=P.temporalStats.TemporalStatistics(datetimestrings=vals)
+        user_time_statistics=P.temporalStats.usersTemporalStatistics(vals_)
 
-    def scaleFreeTest(self):
+    def powerlawFit(self):
         """Under the framework developed at: http://arxiv.org/abs/1305.0215"""
-        self.power_res=powerlaw.Fit(self.topm_dict["degrees_"],discrete=True)
+        
+        powerlaw_degree_fit=P.topology.powerlawFit(self.topm_dict["degrees_"])
         c("degree fit of" + self.graphid)
-        if self.gg.is_directed():
-            self.power_res_=powerlaw.Fit(self.topm_dict["strengths_"],discrete=True)
-            c("strength fit of " + self.graphid)
+        if self.network["gg"].is_directed():
+            powerlaw_strength_fit=P.topology.powerlawFit(self.topm_dict["strengths_"])
         else:
-            self.power_res_=self.power_res
+            powerlaw_strength_fit=self.powerlaw_degree_fit
+        return locals()
+
 class TimelineAnalysis(Analyses):
     # make Analyses with input graphids
     # plot timelines

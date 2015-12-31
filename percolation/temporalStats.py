@@ -1,5 +1,18 @@
 import numpy as n, calendar, datetime, dateutil.parser as DT#, datetime as DT
 
+def userTemporalStatistics(users_times):
+    """Make temporal statics for users"""
+    users=set([i for i in users_times])
+    user_times={}
+    for user in users:
+        user_times[user]=[]
+    for user,time in users_times:
+        users_time[user]+=[time]
+    user_time_stats={}
+    for user in users:
+        users_time_stats[user]=TemporalStatistics(user_times[user])
+    del user,time,users_times,users
+    return locals()
 def circularStatistics(population, period):
     pop=n.array(population)
     pop_=pop*2*n.pi/period
