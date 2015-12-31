@@ -1,7 +1,6 @@
 __doc__="functions for analysis of text by isolated functionalities \
         or analysis and rendering roadmaps"
 from sklearn.feature_extraction.text import TfidfVectorizer
-
 def analyseAll(authors_texts,erdos_sectorialization):
     """Overall text analysis routine, uses all resources
 
@@ -9,17 +8,35 @@ def analyseAll(authors_texts,erdos_sectorialization):
           P.text.aux.textFromSectors()
     Used by: P.renderLegacy.topologicalTextualCharacterization.Analysis()
     """
-    authors_text=P.text.aux.textFromAuthors(authors_texts,self.topm_dict["sectorialized_agents"])
-    sectors_text=P.text.aux.textFromSectors(authors_text,erdos_sectorialization)
+    authors_texts=P.text.aux.textFromAuthors(authors_texts,self.topm_dict["sectorialized_agents"])
+    sectors_texts=P.text.aux.textFromSectors(authors_text,erdos_sectorialization)
     authors_analysis={}
-    for author in authors_text:
+    for author in authors_texts:
         authors_analysis[author]={}
+        texts=authors_texts[author]
         authors_analysis[author]["rawAnalysis"]=P.text.raw.analyseAll(texts)
         authors_analysis[author]["posAnalysis"]=P.text.pos.analyseAll(texts,authors_analysis[author]["rawAnalysis"]["tokens"])
-        authors_analysis[author]["wnAnalysis" ]=P.text.pos.analyseAll(texts,authors_analysis[author]["rawAnalysis"]["tokens"])
+        authors_analysis[author]["wnAnalysis" ]=P.text.wordnet.analyseAll(texts,authors_analysis[author]["rawAnalysis"]["tokens"])
         authors_analysis[author]["ksAnalysis" ]=P.text.ks.selectedComparisons(texts,locals())
-        authors_analysis[author]["auxAnalysis"]=P.text.auxAnalysis(texts)
-    del authors_texts, erdos_sectorialization,author
+        authors_analysis[author]["auxAnalysis"]=P.text.aux.auxAnalysis(texts)
+    sectors_analysis={}
+    for sector in sectors_texts:
+        sectors_analysis[sector]={}
+        texts=sectors_texts[sector]
+        sectors_analysis[author]["rawAnalysis"]=P.text.raw.analyseAll(texts)
+        sectors_analysis[author]["posAnalysis"]=P.text.pos.analyseAll(texts,authors_analysis[author]["rawAnalysis"]["tokens"])
+        sectors_analysis[author]["wnAnalysis" ]=P.text.wordnet.analyseAll(texts,authors_analysis[author]["rawAnalysis"]["tokens"])
+        sectors_analysis[author]["ksAnalysis" ]=P.text.ks.selectedComparisons(texts,locals())
+        sectors_analysis[author]["auxAnalysis"]=P.text.aux.auxAnalysis(texts)
+    all_text=[i[1] for i in authors_texts]
+    all_analysis={}
+    all_analysis["rawAnalysis"]=P.text.raw.analyseAll(texts)
+    all_analysis["posAnalysis"]=P.text.pos.analyseAll(texts,authors_analysis[author]["rawAnalysis"]["tokens"])
+    all_analysis["wnAnalysis" ]=P.text.wordnet.analyseAll(texts,authors_analysis[author]["rawAnalysis"]["tokens"])
+    all_analysis["ksAnalysis" ]=P.text.ks.selectedComparisons(texts,locals())
+    all_analysis["auxAnalysis"]=P.text.aux.auxAnalysis(texts)
+
+    del authors_texts, erdos_sectorialization,author,sector
     return locals()
 def tfIdf(texts):
     """Returns distance matrix for the texts TTM"""

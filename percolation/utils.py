@@ -2,8 +2,6 @@ import time, pickle, os, zipfile, string, networkx as x
 import builtins as B
 from SPARQLWrapper import SPARQLWrapper, JSON
 TT=time.time()
-def mediaDesvioLista(tids=("astring","bstring"),adict={"stringkey":"tokens"}):
-    """Calcula média e desvio, retornando lista"""
 def mediaDesvio(tids=("astring","bstring"),adict={"stringkey":"tokens"}):
     """Para facilitar nas medidas de média e desvio TTM"""
     fdict={}

@@ -326,10 +326,10 @@ class Analysis:
     def pcaAnalyses(self):
         # choose some case collections of measures with wich to make PCA analysis
         pca={}
-        pca["topological"]=P.topology.analysis.pca(self.topom_dict)
+        pca["topological"]=P.topology.analysis.pca(self.topom_dict,self.powerm_dict)
         pca["textual"]=P.text.analysis.pca(        self.textm_dict)
         pca["temporal"]=P.text.analysis.pca(       self.tempm_dict)
-        pca["hybrid"]=P.pca.PCA(self.topom_dict,self.textm_dict,self.tempm_dict)
+        pca["hybrid"]=P.pca.PCA(self.topom_dict,self.textm_dict,self.tempm_dict,self.powerm_dict)
         return pca
         # at least one for topological measures
         # another for textual measures

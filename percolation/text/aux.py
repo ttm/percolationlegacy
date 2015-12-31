@@ -2,20 +2,20 @@ __doc__="auxiliary functions for text analysis routines"
 
 def textFromAuthors(author_messages,sectorialized_agents):
     authors=set([i[0] for i in author_messages])
-    authors_text={}
+    authors_texts={}
     for author in authors:
-        authors_text[author]=""
+        authors_texts[author]=[]
     for author,text in author_messages:
-        authors_text[author]+=text
-    return authors_text
+        authors_texts[author]+=[text]
+    return authors_texts
 def textFromSectors(authors_text,sectorialized_agents):
-    sectors_text={}
+    sectors_texts={}
     for sector in sectorialized_agents:
-        sectors_text[sector]=""
+        sectors_texts[sector]=[]
         for author in sectorialized_agents[sector]:
             for text in authors_text[author]:
-                sectors_text[sector]+=text
-    return sectors_text
+                sectors_texts[sector]+=[text]
+    return sectors_texts
 def auxAnalysis(texts):
     """Textual analysis that did not fit anywhere else"""
     return {"tfIdf":P.text.analysis.tfIdf(texts)}

@@ -1,30 +1,32 @@
 __doc__="analysis of chars, tokens, sentences and messages"
-def medidasTokens_(T,ncontract=None):
-    """Make measures on tokens TTM"""
-    wtok=k.tokenize.wordpunct_tokenize(T)
-    wtok_=[t.lower() for t in wtok]
-    tokens=len(wtok) #
-    tokens_=set(wtok)
-    tokens_diff=len(tokens_)/tokens # 
-    punct=sum([sum([tt in puncts for tt in t])==len(t) for t in wtok_])
-    punct/=tokens
-    known=[i for i in wtok_ if (i not in stopwords) and (i in WL_)]
-    knownw=len(known)
-    known_=set(known)
-    knownw_diff=len(known_)/knownw
-    stop=[i for i in wtok_ if i in stopwords]
-    stopw=len(stop)/knownw
-    knownw/=tokens
-    contract=ncontract/tokens
-
-    Mtoken,Stoken=mediaDesvio_(wtok_)
-    Mknownw,Sknownw=mediaDesvio_(known)
-    Mknownw_diff,Sknownw_diff=mediaDesvio_(known_)
-    Mstopw,Sstopw=mediaDesvio_(stop)
-    del wtok, wtok_,known,known_,stop
-    vdict=locals()
-    return vdict
-
+def analyseAll(texts_list):
+    """Make raw text analysis of all texts and of the merged text"""
+    # medidas por mensagem
+    texts_measures=[]
+    for text in texts_list:
+        texts_measures.append({})
+        texts_measures[-1]["chars"]=medidasChars(text)
+        texts_measures[-1]["tokens"]=medidasTokens(string_text)
+        texts_measures[-1]["sentences"]=medidasSentences(string_text)
+        texts_measures[-1]["messages"]=medidasMessages(string_text)
+    # medidas da lista toda
+    text_measures={}
+    text_measures["chars"]=medidasChars(text)
+    text_measures["tokens"]=medidasTokens(string_text)
+    text_measures["sentences"]=medidasSentences(string_text)
+    text_measures["messages"]=medidasMessages(string_text)
+    del text,texts_list
+    return locals()
+def medidasChars(T):
+    """Medidas de letras TTM formatar para passagem como dicionário"""
+    nc=len(T)
+    ne=T.count(" ")
+    nl=sum([t.isalpha() for t in T])
+    nm=sum([t.isupper() for t in T])
+    nv=sum([t in ("a","e","i","o","u") for t in T])
+    np=sum([t in puncts for t in T])
+    nd=sum([t.isdigit() for t in T]) # numerais
+    return nc,ne/nc,np/(nc-ne),nd/(nc-ne),nl/(nc-ne),nv/nl,nm/nl
 def medidasTokens(T):
     """Medidas extensas sobre os tokens TTM"""
     atime=time.time()
@@ -77,20 +79,10 @@ def medidasTokens(T):
     del foo, foo_,t,wtok,wtok_
     return locals()
 
-def medidasLetras(T):
-    """Medidas de letras TTM formatar para passagem como dicionário"""
-    nc=len(T)
-    ne=T.count(" ")
-    nl=sum([t.isalpha() for t in T])
-    nm=sum([t.isupper() for t in T])
-    nv=sum([t in ("a","e","i","o","u") for t in T])
-    np=sum([t in puncts for t in T])
-    nd=sum([t.isdigit() for t in T]) # numerais
-    return nc,ne/nc,np/(nc-ne),nd/(nc-ne),nl/(nc-ne),nv/nl,nm/nl
 def medidasTamanhosTokens(medidas_tokens):
     """Medidas dos tamanhos dos tokens TTM"""
     tvars=("kw","kwnsw","kwssnsw","kwssnsw","kwsw","sw")
-    return mediaDesvio(tids,medidas_tokens)
+    return mediaDesvio(tvars,medidas_tokens)
 def medidasMensagens(ds,tids=None):
     """Medidas das mensagens em si TTM"""
     if not tids:
@@ -153,3 +145,30 @@ def medidasTokensQ(T,lang="en"):
         kw=[len(i) for i in wtok_ if i in WLP_]
         sw=[len(i) for i in wtok_ if i in stopwordsP]
     return P.utils.mediaDesvio(("kw","sw"),locals())
+
+def medidasTokens_(T,ncontract=None):
+    """Make measures on tokens, one should favor medidasTokens() if doing a thorough analysis"""
+    wtok=k.tokenize.wordpunct_tokenize(T)
+    wtok_=[t.lower() for t in wtok]
+    tokens=len(wtok) #
+    tokens_=set(wtok)
+    tokens_diff=len(tokens_)/tokens # 
+    punct=sum([sum([tt in puncts for tt in t])==len(t) for t in wtok_])
+    punct/=tokens
+    known=[i for i in wtok_ if (i not in stopwords) and (i in WL_)]
+    knownw=len(known)
+    known_=set(known)
+    knownw_diff=len(known_)/knownw
+    stop=[i for i in wtok_ if i in stopwords]
+    stopw=len(stop)/knownw
+    knownw/=tokens
+    contract=ncontract/tokens
+
+    Mtoken,Stoken=mediaDesvio_(wtok_)
+    Mknownw,Sknownw=mediaDesvio_(known)
+    Mknownw_diff,Sknownw_diff=mediaDesvio_(known_)
+    Mstopw,Sstopw=mediaDesvio_(stop)
+    del wtok, wtok_,known,known_,stop
+    return locals()
+
+

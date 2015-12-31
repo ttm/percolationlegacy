@@ -10,16 +10,16 @@ def getErdosSectors(topm_dict,minimum_incidence=None):
     max_degree_possible=2*(t["nnodes"]-1) # max d given N
     d_=list(set(t["degrees_"]))
     d_.sort()
-    sectorialized_degrees__= newerSectorializeDegrees(
+    sectorialized_degrees= newerSectorializeDegrees(
                                     makeEmpiricalDistribution(
                                            t["degrees_"], d_, t["nnodes"] ),
                                     stats.binom(max_degree_possible,prob),
                                     d_,
                                     max_degree_empirical,
                                     minimum_incidence,t["nnodes"])
-    sectorialized_agents__= sectorializeAgents(
-         sectorialized_degrees__, t["degrees"])
-    sectorialized_nagents__=[len(i) for i in sectorialized_agents__]
+    sectorialized_agents= sectorializeAgents(
+         sectorialized_degrees, t["degrees"])
+    sectorialized_nagents=[len(i) for i in sectorialized_agents]
     del t
     return locals()
 def sectorializeAgents(sectorialized_degrees,agent_degrees):
