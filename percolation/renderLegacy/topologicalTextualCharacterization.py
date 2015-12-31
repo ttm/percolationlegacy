@@ -207,7 +207,8 @@ class Analyses:
     """Calculate unit roots, PCA averages and deviations and best fit to scale-free"""
     def __init__(self,bootstrap_instance,graphids=[],tables=False,do_network=False, \
                  do_topology=False,do_power=False, \
-                 do_text=False,do_time=False,write_back=False):
+                 do_text=False,do_time=False,do_pca=False, do_network_pca=False, \
+                 write_back=False):
         if not graphids:
             graphids=list(bootstrap_instance.trans.keys())
         self.options=locals()
@@ -215,8 +216,12 @@ class Analyses:
         for gid in graphids:
             aa+=[Analysis(bootstrap_instance,gid,self.options)]
         self.aa=aa
+        if do_network_pca:
+            self.makeNetworkPCA()
         if tables:
             self.renderTables()
+    def makeNetworkPCA(self):
+        raise NotImplementedError("network PCA analysis must be implemented")
     def renderTables(self):
         for analysis in self.aa:
             # make a line for the table or for each table
@@ -304,9 +309,9 @@ class Analysis:
         if options.get("do_network"):
             self.network=self.makeNetwork()
         if options.get("do_topology"):
-            self.topm_dict=P.topology.measures.topologicalMeasures(self.network)
+            self.topom_dict=P.topology.measures.topologicalMeasures(self.network)
         if options.get("do_sectors"):
-            self.erdos_sectors=P.topology.sectorialize.getErdosSectors(self.topm_dict)
+            self.erdos_sectors=P.topology.sectorialize.getErdosSectors(self.topom_dict)
         if options.get("do_time"):
             self.tempm_dict=self.temporalMeasures()
         if options.get("do_text"):
@@ -321,10 +326,10 @@ class Analysis:
     def pcaAnalyses(self):
         # choose some case collections of measures with wich to make PCA analysis
         pca={}
-        pca["topological"]=P.topology.analysis.pca(self.topm_dict)
-        pca["textual"]=P.text.analysis.pca(    self.textm_dict)
-        pca["temporal"]=P.text.analysis.pca(    self.tempm_dict)
-        pca["hybrid"]=P.pca.PCA(self.topm_dict,self.textm_dict)
+        pca["topological"]=P.topology.analysis.pca(self.topom_dict)
+        pca["textual"]=P.text.analysis.pca(        self.textm_dict)
+        pca["temporal"]=P.text.analysis.pca(       self.tempm_dict)
+        pca["hybrid"]=P.pca.PCA(self.topom_dict,self.textm_dict,self.tempm_dict)
         return pca
         # at least one for topological measures
         # another for textual measures
@@ -333,7 +338,7 @@ class Analysis:
     def textualMeasures(self):
         # get textual content related to each user
         query= "SELECT ?{} ?{} WHERE \
-                {{ GRAPH <"+ self.graphid +"> {{                 }} .   \
+                {{ GRAPH <"+ self.graphid +"> {{                   \
                    OPTIONAL {{  ?s tw:author ?from .             }} .   \
                    OPTIONAL {{  ?s gmane:author ?from .          }} .   \
                    OPTIONAL {{  ?s tw:messageContent ?text .     }} .   \
@@ -412,10 +417,10 @@ class Analysis:
     def powerlawFit(self):
         """Under the framework developed at: http://arxiv.org/abs/1305.0215"""
         
-        powerlaw_degree_fit=P.topology.powerlawFit(self.topm_dict["degrees_"])
+        powerlaw_degree_fit=P.topology.powerlawFit(self.topom_dict["degrees_"])
         c("degree fit of" + self.graphid)
         if self.network["gg"].is_directed():
-            powerlaw_strength_fit=P.topology.powerlawFit(self.topm_dict["strengths_"])
+            powerlaw_strength_fit=P.topology.powerlawFit(self.topom_dict["strengths_"])
         else:
             powerlaw_strength_fit=self.powerlaw_degree_fit
         return locals()
