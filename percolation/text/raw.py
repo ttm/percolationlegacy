@@ -8,13 +8,13 @@ def analyseAll(texts_list):
         texts_measures["each_message"].append({})
         texts_measures["each_message"][-1]["chars"]=medidasChars(text)
         texts_measures["each_message"][-1]["tokens"]=medidasTokens(text)
-        texts_measures["each_message"][-1]["sentences"]=medidasSentences(text,texts_measures[-1]["tokens"]["known_words_unique"])
+        texts_measures["each_message"][-1]["sentences"]=medidasSentencas(text,texts_measures[-1]["tokens"]["known_words_unique"])
     texts_measures["messages"]=medidasMessages(texts_list)
     text_measures={}
     all_text=" ".join(texts_list)
     text_measures["chars"]=medidasChars(all_text)
     text_measures["tokens"]=medidasTokens(all_text)
-    text_measures["sentences"]=medidasSentences(all_text,text_measures["tokens"]["known_words_unique"])
+    text_measures["sentences"]=medidasSentencas(all_text,text_measures["tokens"]["known_words_unique"])
     del text,texts_list,all_text
     return locals()
 

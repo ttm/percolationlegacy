@@ -1,4 +1,15 @@
 __doc__="text analysis with POS tags"
+def analyseAll(raw_analysis):
+    """Make POS tags analysis of all texts and of merged text"""
+    texts_measures=[]
+    for each_raw_analysis in raw_analysis["texts_measures"]["each_message"]:
+        texts_measures.append(
+          medidasPOS(each_raw_analysis["sentences"]["sentences"]))
+    text_measures=medidasPOS(
+            raw_analysis["text_measures"]["sentences"]["sentences"]))
+    del each_raw_analysis, raw_analysis
+    return locals()
+
 def medidasPOS(sentences_tokenized):
     """Measures of POS tags
 
@@ -26,16 +37,16 @@ def medidasPOS(sentences_tokenized):
     for more details:
         http://arxiv.org/abs/1104.2086"""
 
-    tags=brill_tagger.tag_sents(sentences_tokenized)
-    tags_=[item for sublist in tags for item in sublist]
-    tags__=[i[1] for i in tags_ if i[0].lower() in WL_]
-    htags=c.Counter(tags__)
-    htags__=c.OrderedDict()
+    tagged_sentences=brill_tagger.tag_sents(sentences_tokenized) #
+    tagged_words=[item for sublist in tagged_sentences for item in sublist]
+    tags=[i[1] for i in tags_ if i[0].lower() in P.text.aux.KNOWN_WORDS]
+    tags_histogram=c.Counter(tags)
+    tags_histogram_normalized=c.OrderedDict() #
     if htags:
        	factor=100.0/sum(htags.values())
         htags_={}
-        for i in htags.keys(): htags_[i]=htags[i]*factor    
-        htags__=c.OrderedDict(sorted(htags_.items(), key=lambda x: -x[1]))
-    del tags_,tags__,htags,htags_,factor
+        for i in tags_histogram.keys(): tags_histogram_normalized[i]=tags_histogram[i]*factor    
+        tags_histogram_normalized_ordered=c.OrderedDict(sorted(htags_.items(), key=lambda x: -x[1])) #
+    del tagged_words,tags,tags_histogram,htags_,factor,i,sentences_tokenized
     return locals()
 

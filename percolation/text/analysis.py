@@ -15,7 +15,7 @@ def analyseAll(authors_texts,erdos_sectorialization):
         authors_analysis[author]={}
         texts=authors_texts[author]
         authors_analysis[author]["rawAnalysis"]=P.text.raw.analyseAll(texts)
-        authors_analysis[author]["posAnalysis"]=P.text.pos.analyseAll(texts,authors_analysis[author]["rawAnalysis"]["tokens"])
+        authors_analysis[author]["posAnalysis"]=P.text.pos.analyseAll(authors_analysis[author]["rawAnalysis"])
         authors_analysis[author]["wnAnalysis" ]=P.text.wordnet.analyseAll(texts,authors_analysis[author]["rawAnalysis"]["tokens"])
         authors_analysis[author]["ksAnalysis" ]=P.text.ks.selectedComparisons(texts,locals())
         authors_analysis[author]["auxAnalysis"]=P.text.aux.auxAnalysis(texts)
