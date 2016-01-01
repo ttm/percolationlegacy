@@ -216,10 +216,14 @@ class Analyses:
         for gid in graphids:
             aa+=[Analysis(bootstrap_instance,gid,self.options)]
         self.aa=aa
+        if do_network_kolmogorov_smirnov:
+            self.makeNetworkKolmogorvSmirnov()
         if do_network_pca:
             self.makeNetworkPCA()
         if tables:
             self.renderTables()
+    def makeNetworkKolmogorovSmirnov(self):
+        raise NotImplementedError("network KS analysis must be implemented")
     def makeNetworkPCA(self):
         raise NotImplementedError("network PCA analysis must be implemented")
     def renderTables(self):

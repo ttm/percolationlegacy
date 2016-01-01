@@ -1,3 +1,21 @@
+__doc__="most of the following routines are deprecated \
+        in favor of better or more complete analyses \
+        in the percolation.text module"
+ 
+def medidasParticipante(dict_auth_text):
+    """Medidas de texto por autor TTM"""
+    medidas_autor={}
+    for author in dict_auth_text:
+        text=dict_auth_text[author]
+        if text:
+            text_,ncontract=R(text)
+            medidas=medidasSentencas(text_)
+            medidas2=medidasPOS(medidas["tokens_sentences"])
+            medidas.update(medidas2)
+            medidas_autor[author]=medidas
+    return medidas_autor
+
+
 def medidasSinais2_(medidas_pos_list,medidas_mensagens):
     return [medidasSinais2(post,mmU)
             for post,mmU in zip(medidas_pos_list,medidas_mensagens)]
