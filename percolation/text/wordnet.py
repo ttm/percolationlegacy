@@ -1,17 +1,25 @@
 __doc__="text analysis with wordnet"
-
 from nltk.corpus import wordnet as wn
 
-def medidasWordnet2_POS(wn_measures,poss=("n","as","v","r")):
-    """Make specific measures to each POS tag found TTM"""
-    wn_measures2={}
-    for pos in poss:
-        wn_measures2[pos]=g.textUtils.medidasWordnet2_(wn_measures,pos)
-    return wn_measures2
-      
-def medidasWordnet(words_with_pos_tags):
+def analyseAll(pos_analysis):
+    """Make wordnet text analysis of all texts and of the merged text"""
+    texts_measures=[]
+    for each_pos_analysis in pos_analysis["texts_measures"]:
+        texts_measures.append({})
+        texts_measures[-1]["wordnet_context"]=\
+                contextoWordnet(each_pos_analysis["tagged_sentences"])
+        texts_measures[-1]["wordnet_measures"]=\
+                medidasWordnetPOS(texts_measures[-1]["wordnet_context"])
+    text_measures={}
+    text_measures["wordnet_context"]=\
+                contextoWordnet(pos_analysis["text_measures"]["tagged_sentences"])
+    text_measures["wordnet_measures"]=\
+                medidasWordnetPOS(text_measures["wordnet_context"])
+    del pos_analysis,each_pos_analysis
+    return locals()
+def contextoWordnet(pos_tagged_sentences):
     """Medidas gerais sobre a aplicação da Wordnet TTM"""
-    WT=words_with_pos_tags
+    WT=pos_tagged_sentences
     WT_=[(i[0].lower(),i[1]) for j in WT for i in j] #
     wlists=filtro(WT_) #
     wl=wlists["word_com_synset"]
@@ -37,7 +45,13 @@ def medidasWordnet(words_with_pos_tags):
     del WT,wl,ww,pp,pos,ss,poss,fposs,tindex,posok_,ftags_
     return locals()
 
-def medidasWordnet2(wndict,pos=None):
+def medidasWordnetPOS(wn_measures,poss=("n","as","v","r")):
+    """Make specific measures to each POS tag found TTM"""
+    wn_measures={}
+    for pos in poss:
+        wn_measures[pos]=g.textUtils.medidasWordnet(wn_measures,pos)
+    return wn_measures
+def medidasWordnet(wndict,pos=None):
     """Medidas das categorias da Wordnet sobre os verbetes TTM"""
     sss=wndict["posok"]
     if pos:
@@ -92,20 +106,4 @@ def medidasWordnet2(wndict,pos=None):
         del locals_[mvar]
     medidas.update(locals_)
     return medidas
-
-def medidasSinais2_(medidas_pos_list,medidas_mensagens):
-    return [medidasSinais2(post,mmU)
-            for post,mmU in zip(medidas_pos_list,medidas_mensagens)]
-def medidasSinais2(post,medidas_mensagensU):
-    """Get POS measures from Wordnet tagging"""
-    sinal=[[i[1] for i in j] for j in post["tags"]]
-    sinal_=chunks([i[1] for j in post["tags"] for i in j],100)
-    sinais={}
-    sinais["adj"]=[j.count("ADJ") for j in sinal]
-    sinais["sub"]=[j.count("NOUN") for j in sinal]
-    sinais["pun"]=[j.count(".") for j in sinal]
-    sinais["verb"]=[j.count("VERB") for j in sinal_]
-    sinais["chars"]=medidas_mensagensU["toks_msgs"]
-    return sinais
-
 
