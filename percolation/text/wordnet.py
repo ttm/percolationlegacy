@@ -19,30 +19,27 @@ def analyseAll(pos_analysis):
     return locals()
 def contextoWordnet(pos_tagged_sentences):
     """Medidas gerais sobre a aplicação da Wordnet TTM"""
-    WT=pos_tagged_sentences
-    WT_=[(i[0].lower(),i[1]) for j in WT for i in j] #
-    wlists=filtro(WT_) #
-    wl=wlists["word_com_synset"]
-    posok=[] #
-    posnok=[] #
-    for ww in wl:
-        pos = traduzPOS(ww[1])
-        ss=ww[2]
-        # procura nos nomes dos synsets o pos e numeracao mais baixa
-        poss=[i.pos() for i in ss]
-        fposs=[pp in pos for pp in poss]
-        if sum(fposs):
-            tindex=fposs.index(True)
-            posok.append((ww[0],ss[tindex]))
+    pos_tagged_words_lowercase=[(i[0].lower(),i[1]) for j in pos_tagged_sentences for i in j] #
+    words_lists=P.text.aux.filtro(pos_tagged_words_lowercase) #
+    words_pos_tagger_wordnet_ok=[] #
+    words_pos_tagger_wordnet_not_ok=[] #
+    for word in words_lists["word_com_synset"]s:
+        synset=word[2]
+        wordnet_pos_tag=[i.pos() for i in synset]
+        pos_tag = P.text.aux.traduzPOS(word[1])
+        found_ok_wordnet_pos_tag=[(pp in pos_tag) for pp in wordnet_pos_tag]
+        if sum(found_ok_wordnet_pos_tag):
+            tindex=found_ok_wordnet_pos_tag.index(True)
+            words_pos_tagger_wordnet_ok.append((word[0],synset[tindex]))
         else:
-            posnok.append(ww)
-    # estatísticas sobre posok
+            words_pos_tagger_wordnet_not_ok.append(word)
+    # estatísticas sobre words_pos_tagger_wordnet_ok
     # quais as tags?
-    posok_=[i[1].pos() for i in posok]
-    ftags_=[100*posok_.count(i)/len(posok_) for i in ('n', 's','a', 'r', 'v')]
-    ftags=ftags_[0:2]+ftags_[3:] #
-    ftags[1]+=ftags_[2]
-    del WT,wl,ww,pp,pos,ss,poss,fposs,tindex,posok_,ftags_
+    wordnet_pos_tags_ok=[i[1].pos() for i in words_pos_tagger_wordnet_ok]
+    wordnet_pos_tags_ok_histogram_normalized=[100*wordnet_pos_tags_ok.count(i)/len(posok_) for i in ('n', 's','a', 'r', 'v')]
+    wordnet_pos_tags_ok_histogram_normalized[1]+=wordnet_pos_tags_ok_histogram_normalized[2]
+    wordnet_pos_tags_ok_histogram_normalized=wordnet_pos_tags_ok_histogram_normalized[0:2]+wordnet_pos_tags_ok_histogram_normalized[3:] #
+    del pos_tagged_sentences,word,synset,wordnet_pos_tag,pos_tag,found_ok_wordnet_pos_tag
     return locals()
 
 def medidasWordnetPOS(wn_measures,poss=("n","as","v","r")):
@@ -53,7 +50,7 @@ def medidasWordnetPOS(wn_measures,poss=("n","as","v","r")):
     return wn_measures
 def medidasWordnet(wndict,pos=None):
     """Medidas das categorias da Wordnet sobre os verbetes TTM"""
-    sss=wndict["posok"]
+    sss=wndict["words_pos_tagger_wordnet_ok"]
     if pos:
         sss_=[i[1] for i in sss if i[1].pos() in pos]
     else:
