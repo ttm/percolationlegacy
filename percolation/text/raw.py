@@ -12,10 +12,9 @@ def analyseAll(texts_list):
     texts_measures["messages"]=medidasMessages(texts_list)
     text_measures={}
     all_text=" ".join(texts_list)
-    text_measures["chars"]=medidasChars(        all_text)
-    text_measures["tokens"]=medidasTokens(      all_text)
+    text_measures["chars"]=medidasChars(all_text)
+    text_measures["tokens"]=medidasTokens(all_text)
     text_measures["sentences"]=medidasSentences(all_text,text_measures["tokens"]["known_words_unique"])
-#    text_measures["messages"]=medidasMessages(string_text)
     del text,texts_list,all_text
     return locals()
 
@@ -104,29 +103,17 @@ def medidasSentencas(T,known_words_unique):
     medidas.update({nsentences:len(tokens_sentences)})
     return medidas
 
-def medidasMensagens(ds,tids=None):
-    """Medidas das mensagens em si TTM"""
-    if not tids:
-        mT=[ds.messages[i][3] for i in ds.message_ids]
-    else:
-        mT=[ds.messages[i][3] for i in tids]
-    tokens_msgs=[k.tokenize.wordpunct_tokenize(t) for t in mT] # tokens
-    knownw_msgs=[[i for i in toks if (i not in stopwords) and (i in WORDLIST_UNIQUE)] for toks in tokens_msgs]
-    stopw_msgs=[[i for i in toks if i in stopwords] for toks in tokens_msgs]
-    puncts_msgs=[[i for i in toks if
+def medidasMensagens(texts_list):
+    """Medidas das mensagens em si"""
+    tokens_messages=[k.tokenize.wordpunct_tokenize(t) for t in texts_list] # tokens
+    known_words_messages=[[i for i in toks if (i not in stopwords) and (i in WORDLIST_UNIQUE)] for toks in tokens_messages]
+    stopwords_messages=[[i for i in toks if i in stopwords] for toks in tokens_messages]
+    punctuations_messages=[[i for i in toks if
          (len(i)==sum([(ii in puncts) for ii in i]))]
-         for toks in tokens_msgs] #
-    sents_msgs=[k.sent_tokenize(t) for t in mT] # tokens
-    nmsgs=len(mT)
-    mvars="mT","tokens_msgs","knownw_msgs","stopw_msgs","puncts_msgs","sents_msgs"
+         for toks in tokens_messages] #
+    sentences_msgs=[k.sent_tokenize(t) for t in texts_list] # tokens
+    chars_messages=texts_list
+    mvars="chars_messages","tokens_messages","knownw_messages","stopw_messages","puncts_messages","sents_messages"
     medidas=mediaDesvio(mvars,locals())
-    medidas.update({"nmsgs":nmsgs,"tokens_msgs":tokens_msgs})
+    medidas.update({"nmessages":len(texts_list),"tokens_messages":tokens_messages})
     return medidas
-
-def medidasTamanhosMensagens(mT,tids=None):
-    tmT=[len(t) for t in mT] # chars
-    ttmT=[len(k.tokenize.wordpunct_tokenize(t)) for t in mT] # tokens
-    tsmT=[len(k.sent_tokenize(t)) for t in mT] # sentences
-    return mediaDesvio(("tmT""ttmT""tsmT"),locals())
-
-
