@@ -17,6 +17,7 @@ def analyseAll(pos_analysis):
                 medidasWordnetPOS(text_measures["wordnet_context"])
     del pos_analysis,each_pos_analysis
     return locals()
+
 def contextoWordnet(pos_tagged_sentences):
     """Medidas gerais sobre a aplicação da Wordnet TTM"""
     pos_tagged_words_lowercase=[(i[0].lower(),i[1]) for j in pos_tagged_sentences for i in j] #
@@ -42,65 +43,64 @@ def contextoWordnet(pos_tagged_sentences):
     del pos_tagged_sentences,word,synset,wordnet_pos_tag,pos_tag,found_ok_wordnet_pos_tag
     return locals()
 
-def medidasWordnetPOS(wn_measures,poss=("n","as","v","r")):
+def medidasWordnetPOS(wordnet_context,pos_tags=("n","as","v","r")):
     """Make specific measures to each POS tag found TTM"""
-    wn_measures={}
-    for pos in poss:
-        wn_measures[pos]=g.textUtils.medidasWordnet(wn_measures,pos)
-    return wn_measures
-def medidasWordnet(wndict,pos=None):
+    wordnet_measures={}
+    for pos_tag in pos_tags:
+        wordnet_measures[pos]=g.textUtils.medidasWordnet(wordnet_context,pos_tag)
+    return wordnet_measures
+
+def medidasWordnet(wordnet_context,pos_tag=None):
     """Medidas das categorias da Wordnet sobre os verbetes TTM"""
-    sss=wndict["words_pos_tagger_wordnet_ok"]
-    if pos:
-        sss_=[i[1] for i in sss if i[1].pos() in pos]
+    tagged_words=wordnet_context["words_pos_tagger_wordnet_ok"]
+    if pos_tag:
+        tagged_words_chosen=[i[1] for i in tagged_words if i[1].pos() in pos_tag]
     else:
-        sss_=[i[1] for i in sss]
-    hyperpaths=[i.hypernym_paths() for i in sss_]
-    top_hypernyms=[i[0][:4] for i in hyperpaths] # fazer histograma por camada
-    lexnames=[i.lexname().split(".")[-1] for i in sss_] # rever
-
-    mhol=[len(i.member_holonyms()) for i in sss_]
-    phol=[len(i.part_holonyms()) for i in sss_]
-    shol=[len(i.substance_holonyms()) for i in sss_]
-    nhol_=[mhol[i]+phol[i]+shol[i] for i in range(len(sss_))] ###
-
-    mmer=[len(i.member_meronyms()) for i in sss_] #
-    pmer=[len(i.part_meronyms()) for i in sss_]
-    smer=[len(i.substance_meronyms()) for i in sss_]
-    nmer_=[mmer[i]+pmer[i]+smer[i] for i in range(len(sss_))] ###
-
-    nlemmas=[len(i.lemmas()) for i in sss_] ###
+        tagged_words_chosen=[i[1] for i in tagged_words]
+    nlemmas=[len(i.lemmas()) for i in tagged_words_chosen] ###
+    hyperpaths=[i.hypernym_paths() for i in tagged_words_chosen]
     nhyperpaths=[len(i) for i in hyperpaths]
     shyperpaths=[len(i) for j in hyperpaths for i in j]
 
-    nentailments=[len(i.entailments()) for i in sss_]
+    top_hypernyms=[i[0][:4] for i in hyperpaths] # fazer histograma por camada
+    lexnames=[i.lexname().split(".")[-1] for i in tagged_words_chosen] # rever
 
-    nhypernyms=[len(i.hypernyms()) for i in sss_]
-    nihypernyms=[len(i.instance_hypernyms()) for i in sss_]
-    nhyper_=[nhypernyms[i]+nihypernyms[i] for i in range(len(sss_))]
+    member_holonyms=[len(i.member_holonyms()) for i in tagged_words_chosen]
+    part_holonyms=[len(i.part_holonyms()) for i in tagged_words_chosen]
+    substance_holonyms=[len(i.substance_holonyms()) for i in tagged_words_chosen]
+    nholonyms=[mhol[i]+phol[i]+shol[i] for i in range(len(tagged_words_chosen))] ###
 
-    nhypo=[len(i.hyponyms()) for i in sss_] ###
-    nihypo=[len(i.instance_hyponyms()) for i in sss_]
-    nhypo_=[nhypo[i]+nihypo[i] for i in range(len(sss_))]
+    member_meronyms=[len(i.member_meronyms()) for i in tagged_words_chosen] #
+    part_meronyms=[len(i.part_meronyms()) for i in tagged_words_chosen]
+    substance_meronyms=[len(i.substance_meronyms()) for i in tagged_words_chosen]
+    nmeronyms=[mmer[i]+pmer[i]+smer[i] for i in range(len(tagged_words_chosen))] ###
 
-    maxd=[i.max_depth() for i in sss_] ###
-    mind=[i.min_depth() for i in sss_] ###
+    nentailments=[len(i.entailments()) for i in tagged_words_chosen]
 
-    nregion_domains=[len(i.region_domains()) for i in sss_] #
-    ntopic_domains= [len(i.topic_domains())  for i in sss_]
-    nusage_domains= [len(i.usage_domains())  for i in sss_]
+    nhypernyms=[len(i.hypernyms()) for i in tagged_words_chosen]
+    ninstance_hypernyms=[len(i.instance_hypernyms()) for i in tagged_words_chosen]
+    nhypernyms=[nhypernyms[i]+ninstance_hypernyms[i] for i in range(len(tagged_words_chosen))]
+
+    nhyponyms=[len(i.hyponyms()) for i in tagged_words_chosen] ###
+    ninstance_hyponyms=[len(i.instance_hyponyms()) for i in tagged_words_chosen]
+    nhyponyms=[nhyponyms[i]+ninstance_hyponyms[i] for i in range(len(tagged_words_chosen))]
+
+    max_depth=[i.max_depth() for i in tagged_words_chosen] ###
+    min_ddepth=[i.min_depth() for i in tagged_words_chosen] ###
+
+    nregion_domains=[len(i.region_domains()) for i in tagged_words_chosen] #
+    ntopic_domains= [len(i.topic_domains())  for i in tagged_words_chosen]
+    nusage_domains= [len(i.usage_domains())  for i in tagged_words_chosen]
     ndomains=[nregion_domains[i]+ntopic_domains[i]+nusage_domains[i]
-            for i in range(len(sss_))] ###
+            for i in range(len(tagged_words_chosen))] ###
 
-    nsimilar=[    len(i.similar_tos()) for i in sss_]
-    nverb_groups=[len(i.verb_groups()) for i in sss_]
+    nsimilar=[    len(i.similar_tos()) for i in tagged_words_chosen]
+    nverb_groups=[len(i.verb_groups()) for i in tagged_words_chosen]
 
-    del wndict
-    mvars_=[i for i in locals.keys() if i not in ("sss","sss_","top_hypernyms","pos","hyperpaths","lexnames")]
+    del wordnet_context,pos_tag,tagged_words
     locals_=locals()
-    medidas=mediaDesvio(mvars_,locals_)
-    for mvar in mvars:
-        del locals_[mvar]
+    mvars_=[i for i in locals_.keys() if i not in ("tagged_words_chosen","hyperpaths","top_hypernyms","lexnames")]
+    medidas=mediaDesvio(mvars,locals_)
     medidas.update(locals_)
     return medidas
 
