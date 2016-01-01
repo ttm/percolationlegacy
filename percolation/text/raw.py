@@ -1,22 +1,24 @@
 __doc__="analysis of chars, tokens, sentences and messages"
+
 def analyseAll(texts_list):
     """Make raw text analysis of all texts and of the merged text"""
     # medidas por mensagem
-    texts_measures=[]
+    texts_measures={"each_message":[]}
     for text in texts_list:
-        texts_measures.append({})
-        texts_measures[-1]["chars"]=medidasChars(text)
-        texts_measures[-1]["tokens"]=medidasTokens(string_text)
-        texts_measures[-1]["sentences"]=medidasSentences(string_text)
-        texts_measures[-1]["messages"]=medidasMessages(string_text)
-    # medidas da lista toda
+        texts_measures["each_message"].append({})
+        texts_measures["each_message"][-1]["chars"]=medidasChars(text)
+        texts_measures["each_message"][-1]["tokens"]=medidasTokens(text)
+        texts_measures["each_message"][-1]["sentences"]=medidasSentences(text,texts_measures[-1]["tokens"]["known_words_unique"])
+    texts_measures["messages"]=medidasMessages(texts_list)
     text_measures={}
-    text_measures["chars"]=medidasChars(text)
-    text_measures["tokens"]=medidasTokens(string_text)
-    text_measures["sentences"]=medidasSentences(string_text)
-    text_measures["messages"]=medidasMessages(string_text)
-    del text,texts_list
+    all_text=" ".join(texts_list)
+    text_measures["chars"]=medidasChars(        all_text)
+    text_measures["tokens"]=medidasTokens(      all_text)
+    text_measures["sentences"]=medidasSentences(all_text,text_measures["tokens"]["known_words_unique"])
+#    text_measures["messages"]=medidasMessages(string_text)
+    del text,texts_list,all_text
     return locals()
+
 def medidasChars(T):
     """Medidas de letras TTM formatar para passagem como dicionário"""
     nchars=len(T)
@@ -34,6 +36,7 @@ def medidasChars(T):
     frac_digits=ndigits/(nchars-nspaces)
     del T
     return locals()
+
 def medidasTokens(T):
     """Medidas extensas sobre os tokens TTM"""
     atime=time.time()
@@ -84,6 +87,23 @@ def medidasTokens(T):
     del foo,foo_,t,tokens,tokens_lowercase,tvars,T
     return locals()
 
+def medidasSentencas(T,known_words_unique):
+    """Medidas das sentenças TTM"""
+    sentences=k.sent_tokenize(T)
+    tokens_sentences=[k.tokenize.wordpunct_tokenize(i) for i in sentences] ### Para os POS tags
+    known_words_sentences=[[i for i in ts if (i not in STOPWORDS) and (i in WORDLIST_UNIQUE)] for ts in tokens_sentences]
+    stopwords_sentences =[[i for i in ts if i in STOPWORDS] for ts in tokens_sentences]
+    punctuations_sentences=[[i for i in ts if
+         (len(i)==sum([(ii in puncts) for ii in i]))]
+         for ts in tokens_sentences] #
+    
+    known_words_sentences=[[ii for ii in i if ii in known_words_unique] for i in tokens_sentences]
+    del T
+    mvars=list(locals().keys())
+    medidas=mediaDesvio(mvars,locals())
+    medidas.update({nsentences:len(tokens_sentences)})
+    return medidas
+
 def medidasMensagens(ds,tids=None):
     """Medidas das mensagens em si TTM"""
     if not tids:
@@ -102,34 +122,8 @@ def medidasMensagens(ds,tids=None):
     medidas=mediaDesvio(mvars,locals())
     medidas.update({"nmsgs":nmsgs,"tokens_msgs":tokens_msgs})
     return medidas
-def medidasSentencas(T):
-    """Medidas das sentenças TTM"""
-    TS=k.sent_tokenize(T)
-    tokens_sentences=[k.tokenize.wordpunct_tokenize(i) for i in TS] ### Para os POS tags
-    knownw_sentences=[[i for i in ts if (i not in stopwords) and (i in WORDLIST_UNIQUE)] for ts in tokens_sentences]
-    stopw_sentences =[[i for i in ts if i in stopwords] for ts in tokens_sentences]
-    puncts_sentences=[[i for i in ts if
-         (len(i)==sum([(ii in puncts) for ii in i]))]
-         for ts in tokens_sentences] #
-    mvars="TS","tokens_sentences","knownw_sentences","stopw_sentences","puncts_sentences"
-    medidas=mediaDesvio(mvars,locals())
-    medidas.update{"nsents":len(TS),"tokens_sentences":tokens_sentences}
-    return medidas
-def medidasTamanhosSentencas(T,medidas_tokens):
-    """Medidas dos tamanhos das sentenças TTM"""
-    TS=k.sent_tokenize(T)
-    sTS=[k.tokenize.wordpunct_tokenize(i) for i in TS] ### Para os POS tags
-    # numero de caracteres por sentenca
-    tTS=[len(i) for i in TS]
-    # tamanho das sentencas em tokens
-    tsTS=[len(i) for i in sTS]
-    # tamanho das sentencas em palavras conhecidas
-    kw_=medidas_tokens["kw_"]
-    tsTSkw=[len([ii for ii in i if ii in kw_]) for i in sTS]
-    medidas=mediaDesvio(("tsTS","tTS","tsTSkw"),locals())
-    medidas.update({"sTS",sTS})
-    return medidas
-def medidasTamanhosMensagens(mT, tids=None):
+
+def medidasTamanhosMensagens(mT,tids=None):
     tmT=[len(t) for t in mT] # chars
     ttmT=[len(k.tokenize.wordpunct_tokenize(t)) for t in mT] # tokens
     tsmT=[len(k.sent_tokenize(t)) for t in mT] # sentences
