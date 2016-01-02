@@ -122,7 +122,6 @@ def medidasMensagens(texts_list):
     del texts_list
     locals_=locals()
     mvars=tuple(locals_.keys())
-    del mvars
     medidas=mediaDesvio(mvars,locals())
     medidas.update({nmessages=len(texts_list)})
     medidas.update(locals_)
