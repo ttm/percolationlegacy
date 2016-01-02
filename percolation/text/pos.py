@@ -2,11 +2,11 @@ __doc__="text analysis with POS tags"
 def analyseAll(raw_analysis):
     """Make POS tags analysis of all texts and of merged text"""
     texts_measures=[]
-    for each_raw_analysis in raw_analysis["texts_measures"]["each_message"]:
+    for each_raw_analysis in raw_analysis["texts_measures"]["each_text"]:
         texts_measures.append(
           medidasPOS(each_raw_analysis["sentences"]["sentences"]))
     text_measures=medidasPOS(
-            raw_analysis["text_measures"]["sentences"]["sentences"]))
+            raw_analysis["text_measures"]["sentences"]["sentences"])
     del each_raw_analysis, raw_analysis
     return locals()
 
@@ -47,6 +47,5 @@ def medidasPOS(sentences_tokenized):
         htags_={}
         for i in tags_histogram.keys(): tags_histogram_normalized[i]=tags_histogram[i]*factor    
         tags_histogram_normalized_ordered=c.OrderedDict(sorted(htags_.items(), key=lambda x: -x[1])) #
-    del tagged_words,tags,tags_histogram,htags_,factor,i,sentences_tokenized
+    del tagged_words,tags,tags_histogram,htags_,factor,i,sentences_tokenized,tags_histogram_normalized
     return locals()
-

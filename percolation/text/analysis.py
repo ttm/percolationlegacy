@@ -17,7 +17,7 @@ def analyseAll(authors_texts,sectorialized_agents):
         texts=authors_texts[author]
         authors_analysis[author]["raw_analysis"]=P.text.raw.analyseAll(texts)
         authors_analysis[author]["pos_analysis"]=     P.text.pos.analyseAll(authors_analysis[author]["raw_analysis"])
-        authors_analysis[author][ "wn_analysis" ]=P.text.wordnet.analyseAll(authors_analysis[author]["pos_analysis"])
+        authors_analysis[author][ "wordnet_analysis" ]=P.text.wordnet.analyseAll(authors_analysis[author]["pos_analysis"])
         authors_analysis[author]["aux_analysis"]=P.text.tfIdf.tfIdf(texts)
     # análise de cada setor e da estrutura toda
     authors_analysis["ks_analysis"]=P.text.ks.selectedComparisons(authors_analysis,sectorialized_agents)
@@ -25,7 +25,7 @@ def analyseAll(authors_texts,sectorialized_agents):
     texts=[sectors_texts[i] for i in ("peripherals","intermediaries","hubs")]
     sectors_analysis["raw_analysis"]=P.text.raw.analyseAll(texts)
     sectors_analysis["pos_analysis"]=     P.text.pos.analyseAll(sectors_analysis["raw_analysis"])
-    sectors_analysis[ "wn_analysis" ]=P.text.wordnet.analyseAll(sectors_analysis["pos_analysis"])
+    sectors_analysis[ "wordnet_analysis" ]=P.text.wordnet.analyseAll(sectors_analysis["pos_analysis"])
     sectors_analysis["aux_analysis"]=P.text.tfIdf.tfIdf(texts)
     del authors_texts,texts,erdos_sectorialization,author
     return locals()
