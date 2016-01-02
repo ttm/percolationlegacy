@@ -1,11 +1,14 @@
 __doc__="Kolmogorov-Smirnov routines"
 import numpy as n
 from scipy import stats
-def kolmogorovSmirnovDistance__(seq1,seq2,bins=300):
+def kolmogorovSmirnovTest(seq1,seq2,bins=300):
     """Calculate distance between histograms
     
     Adapted from the Kolmogorov-Smirnov test,
-    returns calpha, and Dnn"""
+    returns calpha, and Dnn.
+    Please refer to:
+    https://github.com/ttm/kolmogorov-smirnov/raw/master/paper.pdf
+    for benchmarks of this implementation."""
     amin=min(min(seq1),min(seq2))
     amax=max(max(seq1),max(seq2))
     bins=n.linspace(amin,amax,bins+1,endpoint=True)

@@ -346,7 +346,7 @@ class Analysis:
                    OPTIONAL {{  ?s gmane:body ?text .            }} .   \
                 }} }}"
         author_texts=P.utils.mQuery(self.boot.endpoint_url,query,("from","text")))
-        P.text.analysis.analyseAll(author_texts,self.erdos_sectors["sectorialized_agents"])
+        self.textual_analyses=P.text.analysis.analyseAll(author_texts,self.erdos_sectors["sectorialized_agents"])
         del query
         return locals()
     def writeBack(self):

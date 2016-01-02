@@ -20,7 +20,7 @@ def analyseAll(authors_texts,sectorialized_agents):
         authors_analysis[author][ "wordnet_analysis" ]=P.text.wordnet.analyseAll(authors_analysis[author]["pos_analysis"])
         authors_analysis[author]["aux_analysis"]=P.text.tfIdf.tfIdf(texts)
     # análise de cada setor e da estrutura toda
-    authors_analysis["ks_analysis"]=P.text.ks.selectedComparisons(authors_analysis,sectorialized_agents)
+    authors_analysis["ks_analysis"]=P.text.ks.analyseAll(authors_analysis,sectorialized_agents)
     sectors_analysis={}
     texts=[sectors_texts[i] for i in ("peripherals","intermediaries","hubs")]
     sectors_analysis["raw_analysis"]=P.text.raw.analyseAll(texts)
