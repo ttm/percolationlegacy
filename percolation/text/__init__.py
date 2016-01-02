@@ -1,1 +1,1 @@
-from . import analysis, raw, POS, wordnet, renderTables, renderFigures, aux, sandbox
+from . import analysis, raw, POS, wordnet, renderTables, renderFigures, aux, tfIdf, sandbox

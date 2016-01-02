@@ -23,9 +23,9 @@ def getErdosSectors(topm_dict,minimum_incidence=None):
     del t
     return locals()
 def sectorializeAgents(sectorialized_degrees,agent_degrees):
-    periphery=[x for x in agent_degrees
+    peripherals=[x for x in agent_degrees
                  if agent_degrees[x] in sectorialized_degrees[0]]
-    intermediary=[x for x in agent_degrees
+    intermediaries=[x for x in agent_degrees
                  if agent_degrees[x] in sectorialized_degrees[1]]
     hubs=[x for x in agent_degrees
                  if agent_degrees[x] in sectorialized_degrees[2]]

@@ -80,19 +80,6 @@ def traduzPOS(astring):
         return wn.ADV
     else:
         return "NOPOS"
- 
-def medidasParticipante(dict_auth_text):
-    """Medidas de texto por autor TTM"""
-    medidas_autor={}
-    for author in dict_auth_text:
-        text=dict_auth_text[author]
-        if text:
-            text_,ncontract=R(text)
-            medidas=medidasSentencas(text_)
-            medidas2=medidasPOS(medidas["tokens_sentences"])
-            medidas.update(medidas2)
-            medidas_autor[author]=medidas
-    return medidas_autor
 
 def textosParticipante(ds,authors=None):
     """Junta o texto de cada participante TTM"""

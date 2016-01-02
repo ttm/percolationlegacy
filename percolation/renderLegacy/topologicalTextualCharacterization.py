@@ -335,9 +335,6 @@ class Analysis:
         pca["temporal"]=P.text.analysis.pca(       self.tempm_dict)
         pca["hybrid"]=P.pca.PCA(self.topom_dict,self.textm_dict,self.tempm_dict,self.powerm_dict)
         return pca
-        # at least one for topological measures
-        # another for textual measures
-        # another with both
         raise NotImplementedError("PCA analysis must be implemented")
     def textualMeasures(self):
         # get textual content related to each user

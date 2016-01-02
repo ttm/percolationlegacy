@@ -3,13 +3,13 @@ __doc__="analysis of chars, tokens, sentences and messages"
 def analyseAll(texts_list):
     """Make raw text analysis of all texts and of the merged text"""
     # medidas por mensagem
-    texts_measures={"each_message":[]}
+    texts_measures={"each_text":[]}
     for text in texts_list:
-        texts_measures["each_message"].append({})
-        texts_measures["each_message"][-1]["chars"]=medidasChars(text)
-        texts_measures["each_message"][-1]["tokens"]=medidasTokens(text)
-        texts_measures["each_message"][-1]["sentences"]=medidasSentencas(text,texts_measures[-1]["tokens"]["known_words_unique"])
-    texts_measures["messages"]=medidasMessages(texts_list)
+        texts_measures["each_text"].append({})
+        texts_measures["each_text"][-1]["chars"]=medidasChars(text)
+        texts_measures["each_text"][-1]["tokens"]=medidasTokens(text)
+        texts_measures["each_text"][-1]["sentences"]=medidasSentencas(text,texts_measures[-1]["tokens"]["known_words_unique"])
+    texts_measures["all_texts"]=medidasMenssages(texts_list)
     text_measures={}
     all_text=" ".join(texts_list)
     text_measures["chars"]=medidasChars(all_text)
@@ -81,7 +81,11 @@ def medidasTokens(T):
     foo_=known_words_has_wnsynset_unique.difference(stopwords_unique) 
     known_words_not_stopword_has_synset=[i for i in kw if i in foo_] #
     known_words_not_stopword_has_synset_unique=set(known_words_not_stopword_has_synset)
-    tvars=("kw","kwnsw","kwssnsw","kwssnsw","kwsw","sw")
+    tvars=("known_words","known_words_has_wnsynset_not_stopword","known_words_stopwords","stopwords")
+    frac_punctuations=len(punctuations)/len(tokens)
+    frac_known_words= len(known_words)/len(tokens)
+    frac_stopwords=   len(stopwords)/len(known_words)
+    lexical_diversity=len(known_words)/len(known_words_unique)
     token_sizes=mediaDesvio(tvars,medidas_tokens)
     del foo,foo_,t,tokens,tokens_lowercase,tvars,T
     return locals()
