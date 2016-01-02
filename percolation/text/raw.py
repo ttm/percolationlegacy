@@ -9,7 +9,7 @@ def analyseAll(texts_list):
         texts_measures["each_text"][-1]["chars"]=medidasChars(text)
         texts_measures["each_text"][-1]["tokens"]=medidasTokens(text)
         texts_measures["each_text"][-1]["sentences"]=medidasSentencas(text,texts_measures[-1]["tokens"]["known_words_unique"])
-    texts_measures["all_texts"]=medidasMenssages(texts_list)
+    texts_measures["all_texts"]=medidasMensagens(texts_list)
     text_measures={}
     all_text=" ".join(texts_list)
     text_measures["chars"]=medidasChars(all_text)
@@ -83,8 +83,8 @@ def medidasTokens(T):
     known_words_not_stopword_has_synset_unique=set(known_words_not_stopword_has_synset)
     tvars=("known_words","known_words_has_wnsynset_not_stopword","known_words_stopwords","stopwords")
     frac_punctuations=len(punctuations)/len(tokens)
-    frac_known_words= len(known_words)/len(tokens)
-    frac_stopwords=   len(stopwords)/len(known_words)
+    frac_known_words = len(known_words)/len(tokens)
+    frac_stopwords   =   len(stopwords)/len(known_words)
     lexical_diversity=len(known_words)/len(known_words_unique)
     token_sizes=mediaDesvio(tvars,medidas_tokens)
     del foo,foo_,t,tokens,tokens_lowercase,tvars,T
@@ -94,7 +94,7 @@ def medidasSentencas(T,known_words_unique):
     """Medidas das sentenças TTM"""
     sentences=k.sent_tokenize(T)
     tokens_sentences=[k.tokenize.wordpunct_tokenize(i) for i in sentences] ### Para os POS tags
-    known_words_sentences=[[i for i in ts if (i not in STOPWORDS) and (i in WORDLIST_UNIQUE)] for ts in tokens_sentences]
+    known_words_not_stopwords_sentences=[[i for i in ts if (i not in STOPWORDS) and (i in WORDLIST_UNIQUE)] for ts in tokens_sentences]
     stopwords_sentences =[[i for i in ts if i in STOPWORDS] for ts in tokens_sentences]
     punctuations_sentences=[[i for i in ts if
          (len(i)==sum([(ii in puncts) for ii in i]))]
@@ -102,9 +102,11 @@ def medidasSentencas(T,known_words_unique):
     
     known_words_sentences=[[ii for ii in i if ii in known_words_unique] for i in tokens_sentences]
     del T
-    mvars=list(locals().keys())
-    medidas=mediaDesvio(mvars,locals())
+    locals_=locals()
+    mvars=tuple(locals_.keys())
+    medidas=mediaDesvio(mvars,locals_)
     medidas.update({nsentences:len(tokens_sentences)})
+    medidas.update(locals_)
     return medidas
 
 def medidasMensagens(texts_list):
@@ -116,8 +118,12 @@ def medidasMensagens(texts_list):
          (len(i)==sum([(ii in puncts) for ii in i]))]
          for toks in tokens_messages] #
     sentences_msgs=[k.sent_tokenize(t) for t in texts_list] # tokens
-    chars_messages=texts_list
-    mvars="chars_messages","tokens_messages","knownw_messages","stopw_messages","puncts_messages","sents_messages"
+    chars_messages=texts_list[:]
+    del texts_list
+    locals_=locals()
+    mvars=tuple(locals_.keys())
+    del mvars
     medidas=mediaDesvio(mvars,locals())
-    medidas.update({"nmessages":len(texts_list),"tokens_messages":tokens_messages})
+    medidas.update({nmessages=len(texts_list)})
+    medidas.update(locals_)
     return medidas
