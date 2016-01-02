@@ -36,12 +36,22 @@ def collectSamples(authors_analysis_dict,sectorialized_agents):
                 dict_keep[var]=new_dict[var]
             else:
                 dict_keep[var]+=new_dict[var]
+    samples={"raw_analysis":{"texts_measures":{}, "text_measures":{}},
+                     "pos_analysis":{"texts_measures":{}, "text_measures":{}},
+                     "wordnet_analysis":{"texts_measures":{}, "text_measures":{}},
+                    }
     for sector in sectorialized_agents:
-        samples[sector]={"raw_analysis":{"texts_measures":{}, "text_measures":{}},
-                         "pos_analysis":{"texts_measures":{}, "text_measures":{}},
-                         "wordnet_analysis":{"texts_measures":{}, "text_measures":{}},
-                        }
         for author in sectorialized_agents[sector]:
+            for analyses in authors_analysis:
+                for analysis_grouping in authors_analysis[analyses][author]:
+                    if type(authors_analysis[analyses][author][analysis_grouping])==dict:
+                        for analysis in authors_analysis[analyses][author][analysis_grouping]:
+                            samples[sector][analyses][analysis_grouping][analysis]=updateDict(samples[sector][analyses][analysis_grouping][analysis],getSamples(authors_analysis[analyses][author][analysis_grouping][analysis]))
+                    else:
+
+
+
+
             for analysis in authors_analysis["raw_analysis"][author]["texts_measures"]["each_text"]:
                 samples[sector]["raw_analysis"]["texts_measures"]["chars"]=updateDict(samples[sector]["raw_analysis"]["texts_measures"]["chars"],getSamples(authors_analysis["chars"]))
                 samples[sector]["raw_analysis"]["texts_measures"]["tokens"]=updateDict(samples[sector]["texts_measures"]["tokens"],getSamples(authors_analysis["tokens"]))
