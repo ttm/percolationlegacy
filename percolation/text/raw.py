@@ -19,15 +19,23 @@ def analyseAll(texts_list):
     return locals()
 
 def medidasMensagens2(texts_measures):
-    measures_types=("chars","tokens","sentences")
-    # tirar medias e desvios das medidas
-    # (ou dos tamanhos dos seus componentes)
+    #measure_types=("chars","tokens","sentences")
+    ## tirar medias e desvios das medidas,
+    # ou dos tamanhos dos seus componentes
     # parece ser a única coisa a fazer
+    for each_text in texts_measures:
+        for each_text_ in texts_measures[each_text]:
+            for metric_group in each_text_:
+                for measure_name in each_text_[metric_group]:
+                    tval+=each_text_[metric_group][measure_name_]
+
 
     ## de cada variavel a media e o desvio se for numerica
     # resultando na media e desvio da media e na media e desvio do desvio
     ## e fazendo contagens com len() se for iterável
     # mandando para mediaDesvio
+    
+
 
 
     for measure
