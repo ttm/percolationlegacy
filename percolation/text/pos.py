@@ -1,13 +1,13 @@
 __doc__="text analysis with POS tags"
 def analyseAll(raw_analysis):
     """Make POS tags analysis of all texts and of merged text"""
-    texts_measures={"each_text":[]}
+    texts_measures={"each_text":[]} #
     for each_raw_analysis in raw_analysis["texts_measures"]["each_text"]:
         texts_measures["each_text"].append({})
         texts_measures["each_text"][-1]["pos"]=
           medidasPOS(each_raw_analysis["sentences"]["sentences"])
     text_measures=medidasPOS(
-            raw_analysis["text_measures"]["sentences"]["sentences"])
+            raw_analysis["text_measures"]["sentences"]["sentences"]) #
     del each_raw_analysis, raw_analysis
     return locals()
 

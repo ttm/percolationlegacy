@@ -43,43 +43,43 @@ def collectSamplesUniform2(samples_dict):
         for agent in sectorialized_agents[sector]:
             if agent not in numeric_samples_agents.keys():
                 numeric_samples_agents[agent]={}
-                for analysis in aa[agent]:
-                    if analysis not in numeric_samples_agents_[agent]:
-                        numeric_samples_agents[agent][analysis]={}
-                        numeric_samples_sectors[sector][analysis]={}
-                    for data_grouping in aa[author][analysis]: # each text by author, of all text of the author and of the grouped text as one string.
-                        if data_grouping not in numeric_samples_agents[agent][analysis]:
-                            numeric_samples_agents[agent][ analysis][data_grouping]={}
-                            numeric_samples_sectors[sector][analysis][data_grouping]={}
-                        for data_group in aa[author][analysis][data_grouping]:
-                            if data_group not in numeric_samples_agents[agent][analysis][data_grouping]:
-                                numeric_samples_agents[agent][ analysis][data_grouping][data_group]={}
-                                numeric_samples_sectors[sector][analysis][data_grouping][data_group]={}
-                            for measures_type in aa[author][analysis][data_grouping][data_group]:
-                                if measures_type not in numeric_samples_agents[agent][analysis][data_grouping][data_group]:
-                                    numeric_samples_agents[agent][ analysis][data_grouping][data_group][ measures_type]={}
-                                    numeric_samples_sectors[sector][analysis][data_grouping][data_group][measures_type]={}
-                                for measure_name in aa[author][analysis][data_grouping][datagroup][measures_type]:
-                                    if measure_name not in numeric_samples_agents[agent][analysis][data_grouping][measures_type]:
-                                        numeric_samples_agents[agent][ analysis][data_grouping][data_group][ measures_type][measure_name]=[]
-                                        numeric_samples_sectors[sector][analysis][data_grouping][data_group][measures_type][measure_name]=[]
-                                    measure=aa[author][analysis][data_grouping][datagroup][measures_type][measure_name]
-                                    if isinstance(measure,numbers.Number):
-                                        # usually starts with m d n frac
-                                        numeric_values=[measure]
-                                    elif isinstance(measure,(list,tuple)):
-                                        if isinstance(measure[0],str):
-                                            numeric_values=[len(i) for i in measure]
-                                        else:
-                                            raise TypeError("expected iterator to have strings as elements")
+            for analysis in aa[agent]:
+                if analysis not in numeric_samples_agents_[agent]:
+                    numeric_samples_agents[agent][analysis]={}
+                    numeric_samples_sectors[sector][analysis]={}
+                for data_grouping in aa[agent][analysis]: # each text by author, of all text of the author and of the grouped text as one string.
+                    if data_grouping not in numeric_samples_agents[agent][analysis]:
+                        numeric_samples_agents[agent][ analysis][data_grouping]={}
+                        numeric_samples_sectors[sector][analysis][data_grouping]={}
+                    for data_group in aa[agent][analysis][data_grouping]:
+                        if data_group not in numeric_samples_agents[agent][analysis][data_grouping]:
+                            numeric_samples_agents[agent][ analysis][data_grouping][data_group]={}
+                            numeric_samples_sectors[sector][analysis][data_grouping][data_group]={}
+                        for measures_type in aa[agent][analysis][data_grouping][data_group]:
+                            if measures_type not in numeric_samples_agents[agent][analysis][data_grouping][data_group]:
+                                numeric_samples_agents[agent][ analysis][data_grouping][data_group][ measures_type]={}
+                                numeric_samples_sectors[sector][analysis][data_grouping][data_group][measures_type]={}
+                            for measure_name in aa[agent][analysis][data_grouping][datagroup][measures_type]:
+                                if measure_name not in numeric_samples_agents[agent][analysis][data_grouping][measures_type]:
+                                    numeric_samples_agents[agent][ analysis][data_grouping][data_group][ measures_type][measure_name]=[]
+                                    numeric_samples_sectors[sector][analysis][data_grouping][data_group][measures_type][measure_name]=[]
+                                measure=aa[agent][analysis][data_grouping][datagroup][measures_type][measure_name]
+                                if isinstance(measure,numbers.Number):
+                                    # usually starts with m d n frac
+                                    numeric_values=[measure]
+                                elif isinstance(measure,(list,tuple)):
+                                    if isinstance(measure[0],str):
+                                        numeric_values=[len(i) for i in measure]
                                     else:
-                                        raise TypeError("expected a number or an iterator wth string elements")
-                                    if len(numeric_values)>1 and sum([numeric_values[0]==i for i in numeric_values])==len(numeric_values):
-                                        all_equal="all equal {sector} {agent} {analysis} {data_grouping} {data_group} {measures_type} {measure_name} {numeric_values}".format(**locals())
-                                        c(all_equal)
-                                        indistinct_measures.append(all_equal)
-                                    numeric_samples_agents[agent][analysis][data_grouping][datagroup][  measures_type][measure_name] +=numeric_values
-                                    numeric_samples_sectors[sector][analysis][data_grouping][datagroup][measures_type][measure_name]+=numeric_values
+                                        raise TypeError("expected iterator to have strings as elements")
+                                else:
+                                    raise TypeError("expected a number or an iterator wth string elements")
+                                if len(numeric_values)>1 and sum([numeric_values[0]==i for i in numeric_values])==len(numeric_values):
+                                    all_equal="all equal {sector} {agent} {analysis} {data_grouping} {data_group} {measures_type} {measure_name} {numeric_values}".format(**locals())
+                                    c(all_equal)
+                                    indistinct_measures.append(all_equal)
+                                numeric_samples_agents[agent][analysis][data_grouping][datagroup][  measures_type][measure_name] +=numeric_values
+                                numeric_samples_sectors[sector][analysis][data_grouping][datagroup][measures_type][measure_name]+=numeric_values
                                         
 ############# OLD
 def selectedComparisons(samples_dict):

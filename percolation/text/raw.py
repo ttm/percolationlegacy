@@ -9,15 +9,28 @@ def analyseAll(texts_list):
         texts_measures["each_text"][-1]["chars"]=medidasChars(text)
         texts_measures["each_text"][-1]["tokens"]=medidasTokens(text)
         texts_measures["each_text"][-1]["sentences"]=medidasSentencas(text,texts_measures[-1]["tokens"]["known_words_unique"])
-    texts_measures["all_texts"]=medidasMensagens(texts_list)
+    del text
+    all_texts["texts_overall"]=medidasMensagens2(texts_measures)
+    all_text=" ".join(texts_list); del texts_list
     text_measures={}
-    all_text=" ".join(texts_list)
-    text_measures["chars"]=medidasChars(all_text)
-    text_measures["tokens"]=medidasTokens(all_text)
-    text_measures["sentences"]=medidasSentencas(all_text,text_measures["tokens"]["known_words_unique"])
-    del text,texts_list,all_text
+    text_measures["one_string"]["chars"]=medidasChars(all_text)
+    text_measures["one_string"]["tokens"]=medidasTokens(all_text); del all_text
+    text_measures["one_string"]["sentences"]=medidasSentencas(all_text,text_measures["one_string"]["tokens"]["known_words_unique"])
     return locals()
 
+def medidasMensagens2(texts_measures):
+    measures_types=("chars","tokens","sentences")
+    # tirar medias e desvios das medidas
+    # (ou dos tamanhos dos seus componentes)
+    # parece ser a única coisa a fazer
+
+    ## de cada variavel a media e o desvio se for numerica
+    # resultando na media e desvio da media e na media e desvio do desvio
+    ## e fazendo contagens com len() se for iterável
+    # mandando para mediaDesvio
+
+
+    for measure
 def medidasChars(T):
     """Medidas de letras TTM formatar para passagem como dicionário"""
     nchars=len(T)
@@ -90,17 +103,27 @@ def medidasTokens(T):
     del foo,foo_,t,tokens,tokens_lowercase,tvars,T
     return locals()
 
-def medidasSentencas(T,known_words_unique):
+def medidasSentencasParagrafos(T,known_words_unique):
     """Medidas das sentenças TTM"""
+    paragraphs=[i.strip() for i in T.split("\n")]
+    sentences_paragraphs=[k.sent_tokenize(j) for j in paragraphs]
+    tokens_paragraphs=[k.tokenize.wordpunct_tokenize(j) for j in paragraphs] ### Para os POS tags
+    known_words_paragraphs=[[ii for ii in i if ii in known_words_unique] for i in tokens_paragraphs]
+    known_words_not_stopwords_paragraphs=[[i for i in ts if (i not in STOPWORDS) and (i in WORDLIST_UNIQUE)] for ts in tokens_paragraphs]
+    stopwords_paragraphs=[[i for i in ts if i in STOPWORDS] for ts in tokens_paragraphs]
+    punctuations_sentences=[[i for i in ts if
+         (len(i)==sum([(ii in puncts) for ii in i]))]
+         for ts in tokens_paragraphs] #
+ 
+
     sentences=k.sent_tokenize(T)
     tokens_sentences=[k.tokenize.wordpunct_tokenize(i) for i in sentences] ### Para os POS tags
+    known_words_sentences=[[ii for ii in i if ii in known_words_unique] for i in tokens_sentences]
     known_words_not_stopwords_sentences=[[i for i in ts if (i not in STOPWORDS) and (i in WORDLIST_UNIQUE)] for ts in tokens_sentences]
     stopwords_sentences =[[i for i in ts if i in STOPWORDS] for ts in tokens_sentences]
     punctuations_sentences=[[i for i in ts if
          (len(i)==sum([(ii in puncts) for ii in i]))]
          for ts in tokens_sentences] #
-    
-    known_words_sentences=[[ii for ii in i if ii in known_words_unique] for i in tokens_sentences]
     del T
     locals_=locals()
     mvars=tuple(locals_.keys())
