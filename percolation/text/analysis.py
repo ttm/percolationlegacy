@@ -15,10 +15,10 @@ def analyseAll(authors_texts,sectorialized_agents):
     for author in authors_texts:
         authors_analysis[author]={}
         texts=authors_texts[author]
-        authors_analysis[author]["raw_analysis"]=P.text.raw.analyseAll(texts)
-        authors_analysis[author]["pos_analysis"]=     P.text.pos.analyseAll(authors_analysis[author]["raw_analysis"])
-        authors_analysis[author][ "wordnet_analysis" ]=P.text.wordnet.analyseAll(authors_analysis[author]["pos_analysis"])
-        authors_analysis[author]["aux_analysis"]=P.text.tfIdf.tfIdf(texts)
+        authors_analysis[author]["raw_metrics"]=P.text.raw.analyseAll(texts)
+        authors_analysis[author]["pos_metrics"]=     P.text.pos.analyseAll(authors_analysis[author]["raw_analysis"])
+        authors_analysis[author][ "wordnet_metrics" ]=P.text.wordnet.analyseAll(authors_analysis[author]["pos_analysis"])
+        authors_analysis[author]["aux_metrics"]=P.text.tfIdf.tfIdf(texts)
     # análise de cada setor e da estrutura toda
     authors_analysis["ks_analysis"]=P.text.ks.analyseAll(authors_analysis,sectorialized_agents)
     sectors_analysis={}
@@ -29,4 +29,8 @@ def analyseAll(authors_texts,sectorialized_agents):
     sectors_analysis["aux_analysis"]=P.text.tfIdf.tfIdf(texts)
     del authors_texts,texts,erdos_sectorialization,author
     return locals()
+
+
+
+
 
