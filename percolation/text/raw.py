@@ -8,14 +8,9 @@ def analyseAll(texts_list):
         texts_measures["each_text"].append({})
         texts_measures["each_text"][-1]["chars"]=medidasChars(text)
         texts_measures["each_text"][-1]["tokens"]=medidasTokens(text)
-        texts_measures["each_text"][-1]["sentences"]=medidasSentencas(text,texts_measures[-1]["tokens"]["known_words_unique"])
+        texts_measures["each_text"][-1]["sentences"]=medidasSentencasParagrafos(text,texts_measures[-1]["tokens"]["known_words_unique"])
     del text
-    all_texts["texts_overall"]=medidasMensagens2(texts_measures)
-    all_text=" ".join(texts_list); del texts_list
-    text_measures={}
-    text_measures["one_string"]["chars"]=medidasChars(all_text)
-    text_measures["one_string"]["tokens"]=medidasTokens(all_text); del all_text
-    text_measures["one_string"]["sentences"]=medidasSentencas(all_text,text_measures["one_string"]["tokens"]["known_words_unique"])
+    texts_measures["texts_overall"]=[medidasMensagens2(texts_measures)]
     return locals()
 
 def medidasMensagens2(texts_measures):
@@ -46,39 +41,38 @@ def medidasMensagens2(texts_measures):
                 texts_overall[metric_group][measure_type][mean_name]=n.mean(vals)
                 texts_overall[metric_group][measure_type][std_name]=n.std(vals)
     return each_text_measure, texts_overall
+
 def medidasChars(T):
     """Medidas de letras TTM formatar para passagem como dicionário"""
-    nchars=len(T)
+    nchars=len(T) #
     nspaces=T.count(" ")
     nletters=sum([t.isalpha() for t in T])
     nuppercase=sum([t.isupper() for t in T])
     nvowels=sum([t in ("a","e","i","o","u") for t in T])
-    npuntuations=sum([t in puncts for t in T])
+    npunctuations=sum([t in puncts for t in T])
     ndigits=sum([t.isdigit() for t in T]) # numerais
-    frac_espaces=nspaces/nchars
-    frac_letters=nletters/(nchars-nspaces)
-    frac_vowels=nvowels/nletters
-    frac_uppercase=nuppercase/nletters
-    frac_punctuations=npunctuations/(nchars-nspaces)
-    frac_digits=ndigits/(nchars-nspaces)
-    del T
-    return locals()
+    frac_spaces=nspaces/nchars #
+    frac_letters=nletters/(nchars-nspaces) #
+    frac_vowels=nvowels/nletters #
+    frac_uppercase=nuppercase/nletters #
+    frac_punctuations=npunctuations/(nchars-nspaces) #
+    frac_digits=ndigits/(nchars-nspaces) #
+    del T,nspaces,nletters,nuppercase,nvowels,npunctuations,ndigits
+    measures={"numeric":locals()}
+    return measures
 
 def medidasTokens(T):
     """Medidas extensas sobre os tokens TTM"""
     atime=time.time()
-    tokens=k.tokenize.wordpunct_tokenize(T)
-    tokens_lowercase=[t.lower() for t in tokens]
-    ntokens=len(tokens) #
-    ntokens_diff=len(set(tokens)) # 
-    # tokens que sao pontuacoes
-    ntokens_punct=sum([sum([tt in puncts for tt in t])==len(t) for t in tokens]) #
+    T=T.lower()
+    tokens=k.tokenize.wordpunct_tokenize(T); del T
+    tokens=[t.lower() for t in tokens]
     # known and unkown words
     known_words=[] #
     unknown_words=[] #
     punctuation_tokens=[]
-    stopwords=[]
-    for t in tokens_lowercase:
+    stopwords=[] #
+    for t in tokens:
         if t in WORDLIST_UNIQUE:
             known_words.append(t)
         elif sum([tt in puncts for tt in t])==len(t):
@@ -87,6 +81,7 @@ def medidasTokens(T):
             unknown_words.append(t)
         if t in STOPWORDS:
             stopwords.append(t)
+    del t
     stopwords_unique=set(stopwords)
     known_words_unique=set(known_words)
     unknown_words_unique=set(uknown_words)
@@ -109,13 +104,19 @@ def medidasTokens(T):
     foo_=known_words_has_wnsynset_unique.difference(stopwords_unique) 
     known_words_not_stopword_has_synset=[i for i in kw if i in foo_] #
     known_words_not_stopword_has_synset_unique=set(known_words_not_stopword_has_synset)
-    tvars=("known_words","known_words_has_wnsynset_not_stopword","known_words_stopwords","stopwords")
-    frac_punctuations=len(punctuations)/len(tokens)
-    frac_known_words = len(known_words)/len(tokens)
-    frac_stopwords   =   len(stopwords)/len(known_words)
-    lexical_diversity=len(known_words)/len(known_words_unique)
-    token_sizes=mediaDesvio(tvars,medidas_tokens)
-    del foo,foo_,t,tokens,tokens_lowercase,tvars,T
+    del foo_
+    measures=P.text.aux.mediaDesvio2(locals())
+    measures["numeric"].update(tokensFracs(measures["strings"]}))
+    return measures
+
+def tokensFracs(strings):
+    ntokens=len(strings["tokens"])
+    frac_punctuations=len(strings["punctuations"])/len(strings["tokens"])
+    frac_known_words =len(strings["known_words"])/len( strings["tokens"])
+    frac_stopwords   =len(strings["stopwords"])/len(   strings["known_words"])
+    lexical_diversity=len(strings["known_words"])/len( strings["known_words_unique"])
+    token_diversity=  len(strings["tokens_unique"])/ntokens
+    del strings
     return locals()
 
 def medidasSentencasParagrafos(T,known_words_unique):
@@ -129,9 +130,7 @@ def medidasSentencasParagrafos(T,known_words_unique):
     punctuations_sentences=[[i for i in ts if
          (len(i)==sum([(ii in puncts) for ii in i]))]
          for ts in tokens_paragraphs] #
- 
-
-    sentences=k.sent_tokenize(T)
+    sentences=k.sent_tokenize(T); del T
     tokens_sentences=[k.tokenize.wordpunct_tokenize(i) for i in sentences] ### Para os POS tags
     known_words_sentences=[[ii for ii in i if ii in known_words_unique] for i in tokens_sentences]
     known_words_not_stopwords_sentences=[[i for i in ts if (i not in STOPWORDS) and (i in WORDLIST_UNIQUE)] for ts in tokens_sentences]
@@ -139,13 +138,18 @@ def medidasSentencasParagrafos(T,known_words_unique):
     punctuations_sentences=[[i for i in ts if
          (len(i)==sum([(ii in puncts) for ii in i]))]
          for ts in tokens_sentences] #
-    del T
-    locals_=locals()
-    mvars=tuple(locals_.keys())
-    medidas=mediaDesvio(mvars,locals_)
-    medidas.update({nsentences:len(tokens_sentences)})
-    medidas.update(locals_)
-    return medidas
+
+    measures=P.text.aux.mediaDesvio2(locals())
+    measures["numeric"].update(sentenceFracs(measures["strings"]}))
+    return measures
+
+def sentenceFracs(strings):
+    nsentences=len(tokens_sentences)
+    nparagraphs=len(tokens_sentences)
+    # empty paragraphs
+    # sentences/paragraph
+    # etc
+    medidas.update({})
 
 def medidasMensagens(texts_list):
     """Medidas das mensagens em si"""

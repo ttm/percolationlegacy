@@ -16,26 +16,28 @@ def textFromSectors(authors_text,sectorialized_agents):
             for text in authors_text[author]:
                 sectors_texts[sector]+=[text]
     return sectors_texts
-def mediaDesvio(tids=("astring","bstring"),adict={"stringkey":"tokens"}):
-    """Para facilitar nas medidas de média e desvio TTM"""
-    fdict={}
+
+def mediaDesvio2(adict={"stringkey":"strings_list"}):
+    measures={"strings":adict,"numeric":{},"lengths":{}}
+    for key in adict:
+        lengths=[len(i) for i in adict[key]]
+        measures["numeric"]["m"+key]=n.mean(lengths)
+        measures["numeric"]["d"+key]=n.std(lengths)
+        measures["lengths"][key]=lengths
+    return measures
+
+def mediaDesvio(adict={"stringkey":"strings_list"},tids=("astring","bstring")):
+    """Calcula media e desvio dos tamanhos das strings"""
+    if not tids:
+        tids=tuple(adict.keys())
+    measures_dict={}
+    lengths_dict={}
     for tid in tids:
-        tid_=tid+"_"
-        toks=[len(i) for i in adict[tid]]
-        mtid=n.mean(toks)
-        dtid=n.std(toks)
-        fdict["m"+tid]=mtid
-        fdict["d"+tid]=dtid
-        if tid_ in adict.keys():
-            toks_=[len(i) for i in adict[tid_]]
-            mtid_=n.mean(toks_)
-            dtid_= n.std(toks_)
-            fdict["m"+tid_]=mtid_
-            fdict["d"+tid_]=dtid_
-    return fdict
-def auxAnalysis(texts):
-    """Textual analysis that did not fit anywhere else"""
-    return {"tfIdf":P.text.analysis.tfIdf(texts)}
+        lengths=[len(i) for i in adict[tid]]
+        measures_dict["m"+tid]=n.mean(lengths)
+        measures_dict["d"+tid]=n.std(lengths)
+        lengths_dict[tid]=lengths
+    return measures_dict,lengths_dict
 
 def makeText_(ds,pr):
     """Get text in all sectors TTM"""
