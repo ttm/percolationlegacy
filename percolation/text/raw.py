@@ -23,22 +23,29 @@ def medidasMensagens2(texts_measures):
     ## tirar medias e desvios das medidas,
     # ou dos tamanhos dos seus componentes
     # parece ser a única coisa a fazer
-    for each_text in texts_measures:
-        for each_text_ in texts_measures[each_text]:
-            for metric_group in each_text_:
-                for measure_name in each_text_[metric_group]:
-                    tval+=each_text_[metric_group][measure_name_]
+    each_text_measure={}
+    for data_group in texts_measures: # each_text
+        for metric_group in data_group: # chars, tokens, sents
+            for measure_type in metric_group[metric_group]: # numeric or list/tuple of strings
+                for measure_name in metric_group[metric_group][measure_type]: # nchars, frac_x, known_words, etc
+                    if measure_type=="numeric":
+                        measure=[data_group[metric_group][measure_type][measure_name]]
+                    elif measure_type=="strings":
+                        measure=[len(i) for i in data_group[metric_group][measure_type][measure_name]]
 
-
-    ## de cada variavel a media e o desvio se for numerica
-    # resultando na media e desvio da media e na media e desvio do desvio
-    ## e fazendo contagens com len() se for iterável
-    # mandando para mediaDesvio
-    
-
-
-
-    for measure
+                    each_text_measure[metric_group][measure_type][measure_name]+=measure
+    texts_overall={}
+    for metric_group in each_text_measure: # chars, tokens, sents
+        texts_overall[metric_group]={}
+        for measure_type in each_text_measure[metric_group]: # numeric or list/tuple of strings
+            texts_overall[metric_group][measure_type]={}
+            for measure_name in each_text_measure[metric_group][measure_type]: # nchars, frac_x, known_words, etc
+                vals=each_text_measure[metric_group][measure_type][measure_name]
+                mean_name="M{}".format(measure_name)
+                std_name="M{}".format(measure_name)
+                texts_overall[metric_group][measure_type][mean_name]=n.mean(vals)
+                texts_overall[metric_group][measure_type][std_name]=n.std(vals)
+    return each_text_measure, texts_overall
 def medidasChars(T):
     """Medidas de letras TTM formatar para passagem como dicionário"""
     nchars=len(T)
