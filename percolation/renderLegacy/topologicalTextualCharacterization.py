@@ -207,7 +207,8 @@ class Analyses:
     """Calculate unit roots, PCA averages and deviations and best fit to scale-free"""
     def __init__(self,bootstrap_instance,graphids=[],tables=False,do_network=False, \
                  do_topology=False,do_power=False, \
-                 do_text=False,do_time=False,do_pca=False, do_network_pca=False, \
+                 do_text=False,do_ks_False, \
+                 do_time=False,do_pca=False, do_network_pca=False, \
                  write_back=False):
         if not graphids:
             graphids=list(bootstrap_instance.trans.keys())
@@ -320,6 +321,8 @@ class Analysis:
             self.tempm_dict=self.temporalMeasures()
         if options.get("do_text"):
             self.textm_dict=self.textualMeasures()
+        if do_ks:
+            ks_analysis=P.text.ks.analyseAll(authors_analysis,sectorialized_agents)
         if options.get("do_power"):
             self.powerm_dict=self.powerlawFit()
         if options.get("do_pca"):
@@ -346,7 +349,7 @@ class Analysis:
                    OPTIONAL {{  ?s gmane:body ?text .            }} .   \
                 }} }}"
         author_texts=P.utils.mQuery(self.boot.endpoint_url,query,("from","text")))
-        self.textual_analyses=P.text.analysis.analyseAll(author_texts,self.erdos_sectors["sectorialized_agents"])
+        textual_analyses=P.text.analysis.analyseAll(author_texts,self.erdos_sectors["sectorialized_agents"])
         del query
         return locals()
     def writeBack(self):
