@@ -19,7 +19,8 @@ def textFromSectors(authors_text,sectorialized_agents):
 
 def mediaDesvio2(adict={"stringkey":"strings_list"}):
     measures={"strings":adict,"numeric":{},"lengths":{}}
-    for key in adict:
+    keys=[key for key in adict if key[0]!="n"]
+    for key in keys:
         lengths=[len(i) for i in adict[key]]
         measures["numeric"]["m"+key]=n.mean(lengths)
         measures["numeric"]["d"+key]=n.std(lengths)

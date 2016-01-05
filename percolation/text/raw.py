@@ -18,29 +18,29 @@ def medidasMensagens2(texts_measures):
     ## tirar medias e desvios das medidas,
     # ou dos tamanhos dos seus componentes
     # parece ser a única coisa a fazer
-    each_text_measure={}
+    all_texts_measures={}
     for data_group in texts_measures: # each_text
         for metric_group in data_group: # chars, tokens, sents
             for measure_type in metric_group[metric_group]: # numeric or list/tuple of strings
                 for measure_name in metric_group[metric_group][measure_type]: # nchars, frac_x, known_words, etc
                     if measure_type=="numeric":
                         measure=[data_group[metric_group][measure_type][measure_name]]
-                    elif measure_type=="strings":
-                        measure=[len(i) for i in data_group[metric_group][measure_type][measure_name]]
+                    elif measure_type=="lengths":
+                        measure=data_group[metric_group][measure_type][measure_name]]
 
-                    each_text_measure[metric_group][measure_type][measure_name]+=measure
+                    all_texts_measures[metric_group][measure_type][measure_name]+=measure
     texts_overall={}
-    for metric_group in each_text_measure: # chars, tokens, sents
+    for metric_group in all_texts_measures: # chars, tokens, sents
         texts_overall[metric_group]={}
-        for measure_type in each_text_measure[metric_group]: # numeric or list/tuple of strings
+        for measure_type in all_texts_measures[metric_group]: # numeric or list/tuple of strings
             texts_overall[metric_group][measure_type]={}
-            for measure_name in each_text_measure[metric_group][measure_type]: # nchars, frac_x, known_words, etc
-                vals=each_text_measure[metric_group][measure_type][measure_name]
+            for measure_name in all_texts_measures[metric_group][measure_type]: # nchars, frac_x, known_words, etc
+                vals=all_texts_measures[metric_group][measure_type][measure_name]
                 mean_name="M{}".format(measure_name)
                 std_name="M{}".format(measure_name)
                 texts_overall[metric_group][measure_type][mean_name]=n.mean(vals)
                 texts_overall[metric_group][measure_type][std_name]=n.std(vals)
-    return each_text_measure, texts_overall
+    return all_texts_measures, texts_overall
 
 def medidasChars(T):
     """Medidas de letras TTM formatar para passagem como dicionário"""
@@ -122,15 +122,20 @@ def tokensFracs(strings):
 def medidasSentencasParagrafos(T,known_words_unique):
     """Medidas das sentenças TTM"""
     paragraphs=[i.strip() for i in T.split("\n")]
+    nparagraphs_empty=len([i for i in paragraphs if not i])
+    paragraphs=[i for i in paragraphs if i]
+
     sentences_paragraphs=[k.sent_tokenize(j) for j in paragraphs]
     tokens_paragraphs=[k.tokenize.wordpunct_tokenize(j) for j in paragraphs] ### Para os POS tags
     known_words_paragraphs=[[ii for ii in i if ii in known_words_unique] for i in tokens_paragraphs]
     known_words_not_stopwords_paragraphs=[[i for i in ts if (i not in STOPWORDS) and (i in WORDLIST_UNIQUE)] for ts in tokens_paragraphs]
     stopwords_paragraphs=[[i for i in ts if i in STOPWORDS] for ts in tokens_paragraphs]
-    punctuations_sentences=[[i for i in ts if
+    punctuations_paragraphs=[[i for i in ts if
          (len(i)==sum([(ii in puncts) for ii in i]))]
          for ts in tokens_paragraphs] #
     sentences=k.sent_tokenize(T); del T
+    nsentences_empty=len([i for i in sentences if not i])
+    sentences=[i for i in sentences if i]
     tokens_sentences=[k.tokenize.wordpunct_tokenize(i) for i in sentences] ### Para os POS tags
     known_words_sentences=[[ii for ii in i if ii in known_words_unique] for i in tokens_sentences]
     known_words_not_stopwords_sentences=[[i for i in ts if (i not in STOPWORDS) and (i in WORDLIST_UNIQUE)] for ts in tokens_sentences]
@@ -144,12 +149,9 @@ def medidasSentencasParagrafos(T,known_words_unique):
     return measures
 
 def sentenceFracs(strings):
-    nsentences=len(tokens_sentences)
-    nparagraphs=len(tokens_sentences)
-    # empty paragraphs
-    # sentences/paragraph
-    # etc
-    medidas.update({})
+    frac_sentences_paragraph=len(strings["sentences"])/len(strings["paragraphs"])
+    del strings
+    return locals()
 
 def medidasMensagens(texts_list):
     """Medidas das mensagens em si"""
