@@ -1,4 +1,11 @@
 __doc__="auxiliary functions for text analysis routines"
+this_dir, this_filename = os.path.split(__file__)
+#DATA_PATH = os.path.join(this_dir, "data", "data.txt")
+w=open(os.path.join(this_dir,"words.txt"),"r")
+# https://raw.githubusercontent.com/dwyl/english-words/master/words.txt
+w=w.read()
+WL=w.split()
+labelsh=("","g.","p.","i.","h.")
 
 def textFromAuthors(author_messages,sectorialized_agents):
     authors=set([i[0] for i in author_messages])

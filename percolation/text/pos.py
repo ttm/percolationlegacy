@@ -4,12 +4,39 @@ def analyseAll(raw_analysis):
     texts_measures={"each_text":[]} #
     for each_raw_analysis in raw_analysis["texts_measures"]["each_text"]:
         texts_measures["each_text"].append({})
-        texts_measures["each_text"][-1]["pos"]=
-          medidasPOS(each_raw_analysis["sentences"]["sentences"])
-    text_measures=medidasPOS(
+        texts_measures["each_text"][-1]["pos"]=[medidasPOS(each_raw_analysis["sentences"]["sentences"])]
+    text_measures["texts_overall"]=[medidasMensagens2(texts_measures)]
+    medidasPOS(
             raw_analysis["text_measures"]["sentences"]["sentences"]) #
     del each_raw_analysis, raw_analysis
     return locals()
+
+def medidasMensagens2(texts_measures):
+    all_texts_measures={}
+    for data_group in texts_measures: # each_text
+        for metric_group in data_group: # chars, tokens, sents
+            for measure_type in metric_group[metric_group]: # numeric or list/tuple of strings
+                for measure_name in metric_group[metric_group][measure_type]: # nchars, frac_x, known_words, etc
+                    if measure_type=="numeric":
+                        measure=[data_group[metric_group][measure_type][measure_name]]
+                    elif measure_type=="lengths":
+                        measure=data_group[metric_group][measure_type][measure_name]]
+                    else:
+                        raise KeyError("unidentified measute_type")
+
+                    all_texts_measures[metric_group][measure_type][measure_name]+=measure
+    texts_overall={}
+    for metric_group in all_texts_measures: # chars, tokens, sents
+        texts_overall[metric_group]={}
+        for measure_type in all_texts_measures[metric_group]: # numeric or list/tuple of strings
+            texts_overall[metric_group][measure_type]={}
+            for measure_name in all_texts_measures[metric_group][measure_type]: # nchars, frac_x, known_words, etc
+                vals=all_texts_measures[metric_group][measure_type][measure_name]
+                mean_name="M{}".format(measure_name)
+                std_name="M{}".format(measure_name)
+                texts_overall[metric_group][measure_type][mean_name]=n.mean(vals)
+                texts_overall[metric_group][measure_type][std_name]=n.std(vals)
+    return all_texts_measures, texts_overall
 
 def medidasPOS(sentences_tokenized):
     """Measures of POS tags
@@ -38,15 +65,26 @@ def medidasPOS(sentences_tokenized):
     for more details:
         http://arxiv.org/abs/1104.2086"""
 
-    tagged_sentences=brill_tagger.tag_sents(sentences_tokenized) #
-    tagged_words=[item for sublist in tagged_sentences for item in sublist]
-    tags=[i[1] for i in tags_ if i[0].lower() in P.text.aux.KNOWN_WORDS]
+    # metric_type: tagged_sentences # metric_name: the_tagged_sentences, measure: `the tag sentences`
+    tagged_sentences=brill_tagger.tag_sents(sentences_tokenized)
+    tagged_tokens=[item for sublist in tagged_sentences for item in sublist] #
+    tags=[i[1] for i in tagged_tokens if i[0].lower() in P.text.aux.KNOWN_WORDS]
     tags_histogram=c.Counter(tags)
-    tags_histogram_normalized=c.OrderedDict() #
+    # metric_type: numeric metric_name: `the pos tag`, measure: percentage of usage
+
+    tags_histogram_normalized={} #
     if htags:
        	factor=100.0/sum(htags.values())
         htags_={}
-        for i in tags_histogram.keys(): tags_histogram_normalized[i]=tags_histogram[i]*factor    
-        tags_histogram_normalized_ordered=c.OrderedDict(sorted(htags_.items(), key=lambda x: -x[1])) #
-    del tagged_words,tags,tags_histogram,htags_,factor,i,sentences_tokenized,tags_histogram_normalized
-    return locals()
+        for i in tags_histogram.keys():
+            tags_histogram_normalized[i]=tags_histogram[i]*factor    
+        tags_histogram_normalized=c.OrderedDict(sorted(tags_histogram_normalized.htags_.items(), key=lambda x: -x[1])) 
+
+    measures={"tagged_tokens":{},"numeric":{}}
+    measures["tagged_tokens"]["the_tagged_tokens"]=tagged_tokens
+    measures["numeric"]=tags_histogram_normalized
+    return measures
+
+
+
+
