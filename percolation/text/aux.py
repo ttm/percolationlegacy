@@ -51,6 +51,13 @@ def mediaDesvio(adict={"stringkey":"strings_list"},tids=("astring","bstring")):
         lengths_dict[tid]=lengths
     return measures_dict,lengths_dict
 
+def mediaDesvioNumbers(adict={"stringkey":"strings_list"}):
+    tdict={}
+    for key in adict:
+        tdict["m"+key]=n.mean(adict[key])
+        tdict["d"+key]=n.tsd(adict[key])
+    return tdict
+
 def makeText_(ds,pr):
     """Get text in all sectors TTM"""
     foo=[P.utils.REPLACER.replace(i) for i in texts]
