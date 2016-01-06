@@ -6,8 +6,6 @@ def analyseAll(raw_analysis):
         texts_measures["each_text"].append({})
         texts_measures["each_text"][-1]["pos"]=[medidasPOS(each_raw_analysis["sentences"]["sentences"])]
     text_measures["texts_overall"]=[medidasMensagens2(texts_measures)]
-    medidasPOS(
-            raw_analysis["text_measures"]["sentences"]["sentences"]) #
     del each_raw_analysis, raw_analysis
     return locals()
 
@@ -20,7 +18,9 @@ def medidasMensagens2(texts_measures):
                     if measure_type=="numeric":
                         measure=[data_group[metric_group][measure_type][measure_name]]
                     elif measure_type=="lengths":
-                        measure=data_group[metric_group][measure_type][measure_name]]
+                        measure=data_group[metric_group][measure_type][measure_name]
+                    elif measure_type=="tagged_tokens":
+                        measure=[i[1] for i in data_group[metric_group][measure_type][measure_name]]
                     else:
                         raise KeyError("unidentified measute_type")
 
@@ -30,6 +30,18 @@ def medidasMensagens2(texts_measures):
         texts_overall[metric_group]={}
         for measure_type in all_texts_measures[metric_group]: # numeric or list/tuple of strings
             texts_overall[metric_group][measure_type]={}
+            if measure_type=="tagged_tokens":
+                texts_overall[metric_group][measure_type]=pos_histogram
+                tags_histogram=c.Counter(texts_overall[metric_group][measure_type]["the_tagged_tokens"])
+                tags_histogram_normalized={} #
+                if tags_histogram:
+                    factor=100.0/sum(tags_histogram.values())
+                    htags_={}
+                    for i in tags_histogram.keys():
+                        tags_histogram_normalized[i]=tags_histogram[i]*factor    
+                    tags_histogram_normalized=c.OrderedDict(sorted(tags_histogram_normalized.items(), key=lambda x: -x[1])) 
+                texts_overall[metric_group][measure_type]=tags_histogram_normalized
+                continue
             for measure_name in all_texts_measures[metric_group][measure_type]: # nchars, frac_x, known_words, etc
                 vals=all_texts_measures[metric_group][measure_type][measure_name]
                 mean_name="M{}".format(measure_name)
@@ -73,12 +85,12 @@ def medidasPOS(sentences_tokenized):
     # metric_type: numeric metric_name: `the pos tag`, measure: percentage of usage
 
     tags_histogram_normalized={} #
-    if htags:
+    if tags_histogram:
        	factor=100.0/sum(htags.values())
         htags_={}
         for i in tags_histogram.keys():
             tags_histogram_normalized[i]=tags_histogram[i]*factor    
-        tags_histogram_normalized=c.OrderedDict(sorted(tags_histogram_normalized.htags_.items(), key=lambda x: -x[1])) 
+        tags_histogram_normalized=c.OrderedDict(sorted(tags_histogram_normalized.items(), key=lambda x: -x[1])) 
 
     measures={"tagged_tokens":{},"numeric":{}}
     measures["tagged_tokens"]["the_tagged_tokens"]=tagged_tokens
