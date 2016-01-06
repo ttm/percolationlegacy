@@ -14,13 +14,55 @@ def analyseAll(pos_analysis):
                 medidasWordnetPOS(texts_measures[-1]["wordnet_context"])
     del each_pos_analysis
     texts_measures["texts_overall"]=[medidasMensagens2(texts_measures)]
-    #text_measures={}
-    #text_measures["wordnet_context"]=\
-    #            contextoWordnet(pos_analysis["text_measures"]["tagged_sentences"])
-    #text_measures["wordnet_measures"]=\
-    #            medidasWordnetPOS(text_measures["wordnet_context"])
-    #del pos_analysis,each_pos_analysis
     return locals()
+
+
+def medidasMensagens2(texts_measures):
+    all_texts_measures={}
+    for data_group in texts_measures: # each_text
+        for metric_group in data_group: # chars, tokens, sents
+            for measure_type in metric_group[metric_group]: # numeric or list/tuple of strings
+                if measure_type=="strings":
+                    continue
+                for measure_name in metric_group[metric_group][measure_type]: # nchars, frac_x, known_words, etc
+                    if measure_type=="numeric":
+                        measure=[data_group[metric_group][measure_type][measure_name]]
+                    elif measure_type=="lengths":
+                        measure=data_group[metric_group][measure_type][measure_name]
+                    elif measure_type=="tagged_tokens":
+                        measure=[i[1] for i in data_group[metric_group][measure_type][measure_name]]
+                    else:
+                        raise KeyError("unidentified measute_type")
+
+                    all_texts_measures[metric_group][measure_type][measure_name]+=measure
+    texts_overall={}
+    for metric_group in all_texts_measures: # chars, tokens, sents
+        texts_overall[metric_group]={}
+        for measure_type in all_texts_measures[metric_group]: # numeric or list/tuple of strings
+            texts_overall[metric_group][measure_type]={}
+            if measure_type=="tagged_tokens":
+                texts_overall[metric_group][measure_type]=pos_histogram
+                tags_histogram=c.Counter(texts_overall[metric_group][measure_type]["the_tagged_tokens"])
+                tags_histogram_normalized={} #
+                if tags_histogram:
+                    factor=100.0/sum(tags_histogram.values())
+                    htags_={}
+                    for i in tags_histogram.keys():
+                        tags_histogram_normalized[i]=tags_histogram[i]*factor    
+                    tags_histogram_normalized=c.OrderedDict(sorted(tags_histogram_normalized.items(), key=lambda x: -x[1])) 
+                texts_overall[metric_group][measure_type]=tags_histogram_normalized
+                continue
+            for measure_name in all_texts_measures[metric_group][measure_type]: # nchars, frac_x, known_words, etc
+                vals=all_texts_measures[metric_group][measure_type][measure_name]
+                mean_name="M{}".format(measure_name)
+                std_name="M{}".format(measure_name)
+                texts_overall[metric_group][measure_type][mean_name]=n.mean(vals)
+                texts_overall[metric_group][measure_type][std_name]=n.std(vals)
+    return all_texts_measures, texts_overall
+
+
+
+
 
 def contextoWordnet(pos_tagged_tokens):
     """Medidas gerais sobre a aplicação da Wordnet TTM"""
