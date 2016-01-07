@@ -87,13 +87,11 @@ def systemAnalyseAll(sectors_analysis):
                         raise KeyError("data structure not understood")
     return all_texts_measures
 
-
-
-
 def sectorsAnalyseAll(authors_analysis,sectorialized_agents):
     all_texts_measures={}
-    for agent in sectorialized_agents:
-            analysis=authors_analysis[agent]["pos"]
+    for sector in sectorialized_agents:
+      for agent in sectorialized_agents[sector]:
+         analysis=authors_analysis[sector][agent]["wordnet"]
             for data_grouping in analysis:
                 for data_group in analysis[data_grouping]:
                     for measure_group in data_group:

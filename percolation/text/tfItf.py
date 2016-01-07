@@ -117,8 +117,9 @@ def systemAnalyseAll(sectors_analysis):
 
 def sectorsAnalyseAll(authors_analysis,sectorialized_agents):
     all_texts_measures={}
-    for agent in sectorialized_agents:
-        analysis=authors_analysis[agent]["tfIdf"]
+    for sector in sectorialized_agents:
+      for agent in sectorialized_agents[sector]:
+        analysis=authors_analysis[sector][agent]["tfIdf"]
         for data_grouping in analysis: # texts_overall, each_text
             for data_group in analysis[data_grouping]:
                 for measure_group in data_group: # tfIdf, text, texts
@@ -188,7 +189,9 @@ def sectorsAnalyseAll(authors_analysis,sectorialized_agents):
                         all_texts_measures[data_grouping][0][measure_group]["second_numeric"][std_name]= std_val
     return all_texts_measures
 
-def analyseAll(texts):
+def analyseAll(sectors_analysis):
+    for sector in sectors:
+
     texts_measures={"texts_overall":[{"tfIdf":{"tfIds_matrix":{}}}]}
     tfIdf_matrix=tfIdf(texts)
     distances=n.hstack(tfIdf_matrix[i][:i] for i in n.arange(tfIdf_matrix.shape[0]))

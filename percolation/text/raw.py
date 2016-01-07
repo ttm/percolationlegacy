@@ -23,15 +23,19 @@ def systemAnalyseAll(sectors_analysis):
                                 data_grouping_="authors_messages"
 
                             elif measure_type=="numeric": # sectors from data_grouping=strings
+                                measure=[measure]
                                 measure_type_="numeric_overall_high" # high quando o valor eh associado ao setor
                                 data_grouping_="sectors_strings"
                             elif measure_type=="second_numeric_low": # sectors from data_grouping=sectors_texts,
+                                measure=[measure]
                                 measure_type_="second_numeric_overall_low_high"
                                 data_grouping_="sectors_texts"
                             elif measure_type=="second_numeric": # sectors from data_grouping=authors
+                                measure=[measure]
                                 measure_type_="second_numeric_overall_high"
                                 data_grouping_="sectors_authors"
                             elif measure_type=="third_numeric": # sectors from authors from messages from texts
+                                measure=[measure]
                                 measure_type_="third_numeric_overall_high"
                                 data_grouping_="sectors_authors_messages"
                             else:
@@ -80,31 +84,32 @@ def systemAnalyseAll(sectors_analysis):
 
 def sectorsAnalyseAll(authors_analysis,sectorialized_agents):
     all_texts_measures={}
-    for agent in sectorialized_agents:
-            analysis=authors_analysis[agent]["raw_strings"]
-            for data_grouping in analysis:
-                for data_group in analysis[data_grouping]:
-                    for measure_group in data_group:
-                        for measure_type in data_group[measure_group]:
-                            for measure_name in data_group[measure_group][measure_type]:
-                                measure=data_group[measure_group][measure_type][measure_name]
-                                if measure_type=="lengths_overall": # directly from tokens
-                                    measure_type_="lengths_overall"
-                                    data_grouping_="strings"
-                                elif measure_type in "numeric_overall": # messages
-                                    measure_type_="numeric_overall_low"
-                                    data_grouping_="texts"
-                                elif measure_type in "numeric": # authors
-                                    measure=[measure]
-                                    measure_type_="numeric_overall"
-                                    data_grouping_="authors"
-                                elif measure_type=="second_numeric": # authors from messages
-                                    measure=[measure]
-                                    data_grouping_="authors_messages"
-                                    measure_type_="second_numeric_overall"
-                                else:
-                                    raise KeyError("data structure not understood")
-                                all_texts_measures[data_grouping_][0][measure_group][measure_type_][measure_name]+=measure
+    for sector in sectorialized_agents:
+      for agent in sectorialized_agents[sector]:
+          analysis=authors_analysis[sector][agent]["wordnet"]
+          for data_grouping in analysis:
+              for data_group in analysis[data_grouping]:
+                  for measure_group in data_group:
+                      for measure_type in data_group[measure_group]:
+                          for measure_name in data_group[measure_group][measure_type]:
+                              measure=data_group[measure_group][measure_type][measure_name]
+                              if measure_type=="lengths_overall": # directly from tokens
+                                  measure_type_="lengths_overall"
+                                  data_grouping_="strings"
+                              elif measure_type in "numeric_overall": # messages
+                                  measure_type_="numeric_overall_low"
+                                  data_grouping_="texts"
+                              elif measure_type in "numeric": # authors
+                                  measure=[measure]
+                                  measure_type_="numeric_overall"
+                                  data_grouping_="authors"
+                              elif measure_type=="second_numeric": # authors from messages
+                                  measure=[measure]
+                                  data_grouping_="authors_messages"
+                                  measure_type_="second_numeric_overall"
+                              else:
+                                  raise KeyError("data structure not understood")
+                              all_texts_measures[data_grouping_][0][measure_group][measure_type_][measure_name]+=measure
     for data_grouping in all_texts_measures: # chars, tokens, sents
         for data_group in all_texts_measures["data_grouping"]: # chars, tokens, sents
           for measure_group in data_group: # chars, tokens, sents
