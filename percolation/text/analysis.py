@@ -36,7 +36,7 @@ def analyseAll(authors_texts,sectorialized_agents):
     overall_analysis["raw_strings"]=P.text.raw.systemAnalysis(sectors_analysis)) # medias de toda a rede por mensagem, por autor e por setor
     overall_analysis["pos"]=P.text.raw.systemAnalysis(sectors_analysis)) # medias de toda a rede por mensagem, por autor e por setor
     overall_analysis["wordnet"]=P.text.raw.systemAnalysis(sectors_analysis)) # medias de toda a rede por mensagem, por autor e por setor
-    overall_analysis["tfIdf"]=P.text.raw.systemAnalysis(sectors_analysis)) # medias de toda a rede por mensagem, por autor e por setor
+    overall_analysis["tfIdf"]=P.text.raw.systemAnalysis(texts)) # medias de toda a rede por mensagem, por autor e por setor
 
     del authors_texts,sectorialized_agents,texts,author
     return locals()

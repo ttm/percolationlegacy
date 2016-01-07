@@ -60,7 +60,7 @@ def systemAnalyseAll(sectors_analysis):
                             for i in tags_histogram:
                                 tags_histogram_normalized[i]=tags_histogram[i]*factor    
                             tags_histogram_normalized=c.OrderedDict(sorted(tags_histogram_normalized.items(), key=lambda x: -x[1])) 
-                        all_texts_measures[data_grouping][0][measure_group]["numeric"]=tags_histogram_normalized
+                        all_texts_measures[data_grouping][0][measure_group]["numeric"].update(tags_histogram_normalized)
                     elif measure_type=="numeric_overall_low": # from messages, data_grouping == "texts"
                         all_texts_measures[data_grouping][0][measure_group]["second_numeric_low"][mean_name]=mean_val
                         all_texts_measures[data_grouping][0][measure_group]["second_numeric_low"][std_name]= std_val
@@ -195,8 +195,8 @@ def medidasMensagens2(texts_measures):
                     if measure_type=="numeric_overall":
                         mean_name="M{}".format(measure_name)
                         std_name="M{}".format(measure_name)
-                        all_texts_measures[metric_group]["second_numeric"][mean_name]=n.mean(measure)
-                        all_texts_measures[metric_group]["second_numeric"][std_name]=n.std(  measure)
+                        all_texts_measures[measure_group]["second_numeric"][mean_name]=n.mean(measure)
+                        all_texts_measures[measure_group]["second_numeric"][std_name]=n.std(  measure)
     return all_texts_measures
 
 def medidasPOS(sentences_tokenized):
