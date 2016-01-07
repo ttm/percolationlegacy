@@ -17,7 +17,7 @@ def analyseAll(authors_texts,sectorialized_agents):
         authors_measures[author]["raw_strings"]=P.text.raw.analyseAll(texts)
         authors_measures[author]["pos"]=     P.text.pos.analyseAll(authors_analysis[author]["raw_analysis"])
         authors_measures[author][ "wordnet" ]=P.text.wordnet.analyseAll(authors_analysis[author]["pos_analysis"])
-        authors_measures[author]["tfIdf"]=P.text.tfIdf.tfIdf(texts)
+        authors_measures[author]["tfIdf"]=P.text.tfIdf.analyseAll(texts) # tfIdf de cada texto e do autor, numeric: mean e std das distancias
     # análise de cada setor e da estrutura toda
 #    sectors_texts=P.text.aux.textFromSectors(authors_text,sectorialized_agents)
     sectors_analysis={}
@@ -25,6 +25,7 @@ def analyseAll(authors_texts,sectorialized_agents):
         sectors_analysis[sector]["raw_strings"]=P.text.raw.sectorsAnalyseAll(authors_analysis,sectorialized_agents[sector])
         sectors_analysis[sector]["pos"]=        P.text.pos.sectorsAnalyseAll(authors_analysis,sectorialized_agents[sector])
         sectors_analysis[sector]["wordnet"]=    P.text.wordnet.sectorsAnalyseAll(authors_analysis,sectorialized_agents[sector])
+        # tfIdf de cada texto e de cada autor, numeric: mean e std das distancias por texto e por autor, e media e etd dos autores
         sectors_analysis[sector]["tfIdf"]=      P.text.tfIdf.sectorsAnalyseAll(authors_analysis,sectorialized_agents[sector])
 
 #    texts=[sectors_texts[i] for i in ("peripherals","intermediaries","hubs")]
@@ -33,10 +34,11 @@ def analyseAll(authors_texts,sectorialized_agents):
 #    sectors_analysis[ "wordnet" ]=P.text.wordnet.analyseAll(sectors_analysis["pos_analysis"])
 #    sectors_analysis["tfIdf"]=P.text.tfIdf.tfIdf(texts)
 
-    overall_analysis["raw_strings"]=P.text.raw.systemAnalysis(sectors_analysis)) # medias de toda a rede por mensagem, por autor e por setor
-    overall_analysis["pos"]=P.text.raw.systemAnalysis(sectors_analysis)) # medias de toda a rede por mensagem, por autor e por setor
-    overall_analysis["wordnet"]=P.text.raw.systemAnalysis(sectors_analysis)) # medias de toda a rede por mensagem, por autor e por setor
-    overall_analysis["tfIdf"]=P.text.raw.systemAnalysis(texts)) # medias de toda a rede por mensagem, por autor e por setor
+    overall_analysis["raw_strings"]=P.text.raw.systemAnalysis(sectors_analysis) # medias de toda a rede por mensagem, por autor e por setor
+    overall_analysis["pos"]=P.text.raw.systemAnalysis(sectors_analysis) # medias de toda a rede por mensagem, por autor e por setor
+    overall_analysis["wordnet"]=P.text.raw.systemAnalysis(sectors_analysis) # medias de toda a rede por mensagem, por autor e por setor
+    # tfIdf de tudo por texto, autor e setor, numeric: media e desvio das distancias por cada grupo, media e desvio dos setores e dos autores
+    overall_analysis["tfIdf"]=P.text.tfIdf.systemAnalysis(sectors_analysis) # medias de toda a rede por mensagem, por autor e por setor
 
     del authors_texts,sectorialized_agents,texts,author
     return locals()
