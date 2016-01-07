@@ -11,6 +11,28 @@ del w
 
 labelsh=("","g.","p.","i.","h.")
 
+def systemAnalysis(sectors_analysis):
+    for sector in sectors_analysis:
+        for measure_domain in sectors_analysis[sector]:
+            for data_grouping in sectors_analysis[sector][measure_domain]:
+                for data_group in sectors_analysis[sector][measure_domain]:
+                    for measure_group in data_group:
+                        for measure_type in data_group[measure_group]:
+                            for measure_name in data_group[measure_group][measure_type]:
+                                measure=data_group[measure_group][measure_type][measure_name]
+                                if measure_type=="lengths_overall": # directly from tokens
+                                    measure_type_="lengths_overall"
+                                elif measure_type=="numeric_overall_low": # from messages from tokens
+                                    measure_type_="numeric_overall_low_low"
+                                elif measure_type=="numeric_overall": # from authors from tokens
+                                    measure_type_="numeric_overall_low_high"
+                                elif measure_type=="second_numeric_overall": # from authors from messages
+
+
+                                elif measure_type=="numeric":
+                                    measure_type_="numeric_overall"
+
+
 def textFromAuthors(author_messages,sectorialized_agents):
     authors=set([i[0] for i in author_messages])
     authors_texts={}
@@ -48,7 +70,7 @@ def mediaDesvio(adict={"stringkey":"strings_list"},tids=("astring","bstring")):
         lengths=[len(i) for i in adict[tid]]
         measures_dict["m"+tid]=n.mean(lengths)
         measures_dict["d"+tid]=n.std(lengths)
-        lengths_dict[tid]=lengths
+        lengths_dict["L"+tid]=lengths
     return measures_dict,lengths_dict
 
 def mediaDesvioNumbers(adict={"stringkey":"strings_list"}):

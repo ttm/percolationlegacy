@@ -41,7 +41,6 @@ def medidasMensagens2(texts_measures):
         for measure_type in all_texts_measures[metric_group]: # numeric or list/tuple of strings
             texts_overall[metric_group][measure_type]={}
             if measure_type=="tagged_tokens":
-                texts_overall[metric_group][measure_type]=pos_histogram
                 tags_histogram=c.Counter(texts_overall[metric_group][measure_type]["the_tagged_tokens"])
                 tags_histogram_normalized={} #
                 if tags_histogram:
@@ -59,10 +58,6 @@ def medidasMensagens2(texts_measures):
                 texts_overall[metric_group][measure_type][mean_name]=n.mean(vals)
                 texts_overall[metric_group][measure_type][std_name]=n.std(vals)
     return all_texts_measures, texts_overall
-
-
-
-
 
 def contextoWordnet(pos_tagged_tokens):
     """Medidas gerais sobre a aplicação da Wordnet TTM"""
@@ -116,7 +111,6 @@ def medidasWordnet(wordnet_context,pos_tag=None):
     part_holonyms     =[i.part_holonyms() for i in tagged_words_chosen]
     substance_holonyms=[i.substance_holonyms() for i in tagged_words_chosen]
     holonyms=[i+j+l for i,j,l in zip(tmember_holonyms,part_holonyms,substance_holonyms)]
-
 
     tmember_meronyms=   [i.member_meronyms() for i in tagged_words_chosen] #
     part_meronyms=     [i.part_meronyms() for i in tagged_words_chosen]
