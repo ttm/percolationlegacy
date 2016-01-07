@@ -72,6 +72,8 @@ def systemAnalyseAll(sectors_analysis):
                     elif measure_type=="third_numeric_overall_high": # from authors from messages, data_grouping=authors_messages
                         all_texts_measures[data_grouping][0][measure_group]["fourth_numeric_high"][mean_name]=mean_val
                         all_texts_measures[data_grouping][0][measure_group]["fourth_numeric_high"][std_name]= std_val
+                    else:
+                        raise KeyError("data structure not understood")
     return all_texts_measures
 
 
@@ -137,27 +139,26 @@ def analyseAll(texts_list):
         texts_measures["each_text"][-1]["tokens"]=medidasTokens(text)
         texts_measures["each_text"][-1]["sentences"]=medidasSentencasParagrafos(text,texts_measures[-1]["tokens"]["known_words_unique"])
     del text
-    texts_measures=medidasMensagens2(texts_measures)
+    texts_measures.update(medidasMensagens2(texts_measures["each_text"]))
     return texts_measures
 
 def medidasMensagens2(texts_measures):
-    #measure_types=("chars","tokens","sentences")
-    ## tirar medias e desvios das medidas,
-    # ou dos tamanhos dos seus componentes
-    # parece ser a única coisa a fazer
     all_texts_measures={}
     for data_group in texts_measures: # each_text
         for measure_group in data_group: # chars, tokens, sents
-            for measure_type in measure_group[measure_group]: # numeric or list/tuple of strings
-                for measure_name in measure_group[measure_group][measure_type]: # nchars, frac_x, known_words, etc
+            for measure_type in data_group[measure_group]: # numeric or list/tuple of strings
+                for measure_name in data_group[measure_group][measure_type]: # nchars, frac_x, known_words, etc
+                    measure=data_group[measure_group][measure_type][measure_name]
                     if measure_type=="lengths": # from overall text directly
-                        measure=data_group[measure_group][measure_type][measure_name]
-                        all_texts_measures["tokens"][0][measure_group]["lengths_overall"][measure_name]+=measure
+                        measure_type="lengths_overall"
+                        data_grouping="strings"
                     elif measure_type=="numeric": # from each of the texts
-                        measure=[data_group[measure_group][measure_type][measure_name]]
-                        all_texts_measures["texts"][0][measure_group]["numeric_overall"][measure_name]+=measure
-    for data_grouping in all_texts_measures:
-      for data_group in all_texts_measures[data_grouping]: # chars, tokens, sents
+                        measure=[measure]
+                        measure_type="numeric_overall"
+                        data_grouping="texts"
+                    all_texts_measures[data_grouping][0][measure_group][measure_type][measure_name]+=measure
+    for data_grouping in all_texts_measures: # "strings" ou "texts"
+      for data_group in all_texts_measures[data_grouping]: 
         for measure_group in data_group: # chars, tokens, sents
             for measure_type in data_group[measure_group]: # numeric or list/tuple of strings
                 for measure_name in data_group[measure_group][measure_type]: # nchars, frac_x, known_words, etc
