@@ -1,10 +1,82 @@
 __doc__="analysis of chars, tokens, sentences and messages"
 
-def sectorsAnalyseAll(authors_analysis,sectorialized_agents):
-    texts_measures={"texts_by_message":[], # cada mensagem, somente second_numeric, "usa measures_overall"
-                    "texts_by_author":[], # cada autor, um valor numérico, somente second e third_numeric
-                    "texts_lens":[]} # todo o setor para ter um valor numérico
+def systemAnalyseAll(sectors_analysis):
+    all_texts_measures={}
+    for sector in sectors_analysis:
+        for data_grouping in sectors_analysis[sector]["raw_analysis"]:
+            for data_group in sectors_analysis[sector]["raw_analysis"][data_grouping]:
+                for measure_group in data_group:
+                    for measure_type in data_group[measure_group]:
+                        for measure_name in data_group[measure_group][measure_type]:
+                            measure=data_group[measure_group][measure_type][measure_name]
+                            if measure_type=="lengths_overall": # directly from tokens
+                                measure_type_="lengths_overall"
+                                data_grouping_="strings"
+                            elif measure_type=="numeric_overall_low": # texts
+                                measure_type_="numeric_overall_low"
+                                data_grouping_="texts"
+                            elif measure_type=="numeric_overall": # authors
+                                measure_type_="numeric_overall"
+                                data_grouping_="authors"
+                            elif measure_type=="second_numeric_overall": # authors from messages
+                                measure_type_="second_numeric_overall"
+                                data_grouping_="authors_messages"
 
+                            elif measure_type=="numeric": # sectors from data_grouping=strings
+                                measure_type_="numeric_overall_high" # high quando o valor eh associado ao setor
+                                data_grouping_="sectors_strings"
+                            elif measure_type=="second_numeric_low": # sectors from data_grouping=sectors_texts,
+                                measure_type_="second_numeric_overall_low_high"
+                                data_grouping_="sectors_texts"
+                            elif measure_type=="second_numeric": # sectors from data_grouping=authors
+                                measure_type_="second_numeric_overall_high"
+                                data_grouping_="sectors_authors"
+                            elif measure_type=="third_numeric": # sectors from authors from messages from texts
+                                measure_type_="third_numeric_overall_high"
+                                data_grouping_="sectors_authors_messages"
+                            else:
+                                raise KeyError("data structure not understood")
+                            all_texts_measures[data_grouping_][0][measure_group][measure_type_][measure_name]+=measure
+    for data_grouping in all_texts_measures: # chars, tokens, sents
+        for data_group in all_texts_measures["data_grouping"]: # chars, tokens, sents
+          for measure_group in data_group: # chars, tokens, sents
+            for measure_type in data_group[measure_group]: # only list/tuple of strings at first
+                for measure_name in all_texts_measures[measure_group][measure_type]: # nchars, frac_x, known_words, etc
+                    vals=all_texts_measures[measure_group][measure_type][measure_name]
+                    mean_val=n.mean(vals)
+                    std_val=n.std(vals)
+                    mean_name="M{}".format(measure_name)
+                    std_name="D{}".format(measure_name)
+                    if measure_type=="lengths_overall": # directly from strings, data_grouping == "strings"
+                        all_texts_measures[data_grouping][0][measure_group]["numeric"][mean_name]=mean_val
+                        all_texts_measures[data_grouping][0][measure_group]["numeric"][std_name]= std_val
+                    elif measure_type=="numeric_overall_low": # from messages, data_grouping == "texts"
+                        all_texts_measures[data_grouping][0][measure_group]["second_numeric_low"][mean_name]=mean_val
+                        all_texts_measures[data_grouping][0][measure_group]["second_numeric_low"][std_name]= std_val
+                    elif measure_type=="numeric_overall": # from authors, data_grouping == "authors"
+                        all_texts_measures[data_grouping][0][measure_group]["second_numeric"][mean_name]=mean_val
+                        all_texts_measures[data_grouping][0][measure_group]["second_numeric"][std_name]= std_val
+                    elif measure_type=="second_numeric_overall": # from authors from messages, data_grouping=authors_messages
+                        all_texts_measures[data_grouping][0][measure_group]["third_numeric"][mean_name]=mean_val
+                        all_texts_measures[data_grouping][0][measure_group]["third_numeric"][std_name]= std_val
+
+                    elif measure_type=="numeric_overall_high": # from sectors from sectors_strings, sectors_strings
+                        all_texts_measures[data_grouping][0][measure_group]["second_numeric_high"][mean_name]=mean_val
+                        all_texts_measures[data_grouping][0][measure_group]["second_numeric_high"][std_name]= std_val
+                    elif measure_type=="second_numeric_overall_low_high": # from sectords from texts, data_grouping=sectors_texts
+                        all_texts_measures[data_grouping][0][measure_group]["third_numeric_low_high"][mean_name]=mean_val
+                        all_texts_measures[data_grouping][0][measure_group]["third_numeric_low_high"][std_name]= std_val
+                    elif measure_type=="second_numeric_overall_high": # from sectors from authors, data_grouping=sectors_authors
+                        all_texts_measures[data_grouping][0][measure_group]["third_numeric_high"][mean_name]=mean_val
+                        all_texts_measures[data_grouping][0][measure_group]["third_numeric_high"][std_name]= std_val
+                    elif measure_type=="third_numeric_overall_high": # from authors from messages, data_grouping=authors_messages
+                        all_texts_measures[data_grouping][0][measure_group]["fourth_numeric_high"][mean_name]=mean_val
+                        all_texts_measures[data_grouping][0][measure_group]["fourth_numeric_high"][std_name]= std_val
+    return all_texts_measures
+
+
+
+def sectorsAnalyseAll(authors_analysis,sectorialized_agents):
     all_texts_measures={}
     for agent in sectorialized_agents:
             analysis=authors_analysis[agent]["raw_strings"]
@@ -16,42 +88,41 @@ def sectorsAnalyseAll(authors_analysis,sectorialized_agents):
                                 measure=data_group[measure_group][measure_type][measure_name]
                                 if measure_type=="lengths_overall": # directly from tokens
                                     measure_type_="lengths_overall"
-                                    data_grouping_="text_overall"
+                                    data_grouping_="strings"
                                 elif measure_type in "numeric_overall": # messages
                                     measure_type_="numeric_overall_low"
-                                    data_grouping_="texts_overall"
+                                    data_grouping_="texts"
                                 elif measure_type in "numeric": # authors
                                     measure=[measure]
                                     measure_type_="numeric_overall"
-                                    data_grouping_="authors_overall"
+                                    data_grouping_="authors"
                                 elif measure_type=="second_numeric": # authors from messages
-                                    data_grouping_="authors_overall"
-                                    measure_type_="second_numeric_overall"
                                     measure=[measure]
+                                    data_grouping_="authors_messages"
+                                    measure_type_="second_numeric_overall"
                                 else:
                                     raise KeyError("data structure not understood")
                                 all_texts_measures[data_grouping_][0][measure_group][measure_type_][measure_name]+=measure
-#    texts_overall=all_texts_measures
     for data_grouping in all_texts_measures: # chars, tokens, sents
         for data_group in all_texts_measures["data_grouping"]: # chars, tokens, sents
           for measure_group in data_group: # chars, tokens, sents
-            for measure_type in data_group[measure_group]: # numeric or list/tuple of strings
+            for measure_type in data_group[measure_group]: # only list/tuple of strings at first
                 for measure_name in all_texts_measures[measure_group][measure_type]: # nchars, frac_x, known_words, etc
                     vals=all_texts_measures[measure_group][measure_type][measure_name]
                     mean_val=n.mean(vals)
                     std_val=n.std(vals)
                     mean_name="M{}".format(measure_name)
                     std_name="D{}".format(measure_name)
-                    if measure_type=="lengths_overall": # directly from strings, data_grouping == "text_overall"
+                    if measure_type=="lengths_overall": # directly from strings, data_grouping == "strings"
                         all_texts_measures[data_grouping][0][measure_group]["numeric"][mean_name]=mean_val
                         all_texts_measures[data_grouping][0][measure_group]["numeric"][std_name]= std_val
-                    elif measure_type=="numeric_overall_low": # from messages, data_grouping == "texts_overall"
+                    elif measure_type=="numeric_overall_low": # from messages, data_grouping == "texts"
                         all_texts_measures[data_grouping][0][measure_group]["second_numeric_low"][mean_name]=mean_val
                         all_texts_measures[data_grouping][0][measure_group]["second_numeric_low"][std_name]= std_val
-                    elif measure_type=="numeric_overall": # from authors, data_grouping == "authors_overall"
+                    elif measure_type=="numeric_overall": # from authors, data_grouping == "authors"
                         all_texts_measures[data_grouping][0][measure_group]["second_numeric"][mean_name]=mean_val
                         all_texts_measures[data_grouping][0][measure_group]["second_numeric"][std_name]= std_val
-                    elif measure_type=="second_numeric_overall": # from authors from messages
+                    elif measure_type=="second_numeric_overall": # from authors from messages, data_grouping=authors_messages
                         all_texts_measures[data_grouping][0][measure_group]["third_numeric"][mean_name]=mean_val
                         all_texts_measures[data_grouping][0][measure_group]["third_numeric"][std_name]= std_val
     return all_texts_measures
@@ -81,10 +152,10 @@ def medidasMensagens2(texts_measures):
                 for measure_name in measure_group[measure_group][measure_type]: # nchars, frac_x, known_words, etc
                     if measure_type=="lengths": # from overall text directly
                         measure=data_group[measure_group][measure_type][measure_name]
-                        all_texts_measures["text_overall"][0][measure_group]["lengths_overall"][measure_name]+=measure
+                        all_texts_measures["tokens"][0][measure_group]["lengths_overall"][measure_name]+=measure
                     elif measure_type=="numeric": # from each of the texts
                         measure=[data_group[measure_group][measure_type][measure_name]]
-                        all_texts_measures["texts_overall"][0][measure_group]["numeric_overall"][measure_name]+=measure
+                        all_texts_measures["texts"][0][measure_group]["numeric_overall"][measure_name]+=measure
     for data_grouping in all_texts_measures:
       for data_group in all_texts_measures[data_grouping]: # chars, tokens, sents
         for measure_group in data_group: # chars, tokens, sents

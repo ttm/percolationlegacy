@@ -26,11 +26,15 @@ def systemAnalysis(sectors_analysis):
                                     measure_type_="numeric_overall_low_low"
                                 elif measure_type=="numeric_overall": # from authors from tokens
                                     measure_type_="numeric_overall_low_high"
+
+
                                 elif measure_type=="second_numeric_overall": # from authors from messages
 
 
                                 elif measure_type=="numeric":
                                     measure_type_="numeric_overall"
+                                elif measure_type=="second_numeric":
+                                elif measure_type=="third_numeric":
 
 
 def textFromAuthors(author_messages,sectorialized_agents):
