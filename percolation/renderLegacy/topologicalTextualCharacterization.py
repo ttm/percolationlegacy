@@ -321,8 +321,8 @@ class Analysis:
             self.tempm_dict=self.temporalMeasures()
         if options.get("do_text"):
             self.textm_dict=self.textualMeasures()
-        if do_ks:
-            ks_analysis=P.text.ks.analyseAll(authors_analysis,sectorialized_agents)
+        if options.get("do_ks"):
+            ks_analysis=P.text.ks.ksComparisons(self.textm_dict["sectors_measures"])
         if options.get("do_power"):
             self.powerm_dict=self.powerlawFit()
         if options.get("do_pca"):
@@ -349,9 +349,9 @@ class Analysis:
                    OPTIONAL {{  ?s gmane:body ?text .            }} .   \
                 }} }}"
         author_texts=P.utils.mQuery(self.boot.endpoint_url,query,("from","text")))
-        textual_analyses=P.text.analysis.analyseAll(author_texts,self.erdos_sectors["sectorialized_agents"])
+        textual_measures=P.text.overallMeasuring.measureAll(author_texts,self.erdos_sectors["sectorialized_agents"])
         del query
-        return locals()
+        return textual_measures
     def writeBack(self):
         """Write analysis info back to the endpoint"""
         raise NotImplementedError("Write back must be implemented")

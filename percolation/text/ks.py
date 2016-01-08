@@ -1,16 +1,46 @@
 __doc__="routines for selected Kolmogorov-Smirnov related statistics on text analysis"
+import numbers
 
-def analyseAll(authors_analysis_dict,sectorialized_agents):
-    """Return selected comparisons from overall text analysis"""
-    samples_dict=collectSamplesUniform2(authors_analysis_dict,sectorialized_agents)
-    ks_sectors_comparisons=ksSectorsComparisonsUniform2(samples_dict)
+def ksComparisons(sectors_analysis):
+    multigroup_measures=[]
+    isnot_numeric_measures=[]
+    detached_measures=[]
+    ks_measures=P.utils.nestedDict()
+    for measure_domain in sectors_analysis["peripherals"]:
+            for data_grouping in sectors_analysis["peripherals"][measure_domain]:
+                if len(sectors_analysis["peripherals"][measure_domain][data_grouping])>1:
+                    multigroup_measures.append((measure_domain,data_grouping))
+                    continue
+                data_group=sectors_analysis["peripherals"][measure_domain][data_grouping][0]:
+                for measure_group in data_group:
+                    for measure_type in data_group[measure_group]:
+                        for measure_name in data_group[measure_group]:
+                            measure_peripherals=data_group[measure_group][measure_type][measure_name]
+                            if isinstance(measure_peripherals,(list,tuple)):
+                                if not isinstance(measure_peripherals,numbers.Number):
+                                    isnot_numeric_measures.append((measure_domain,data_grouping,measure_type,measure_name,measure))
+                                else:
+                                    measure_intermediaries=sectors_analysis["intermediaries"][measure_domain][data_grouping][0][measure_group][measure_type][measure_name]
+                                    measure_hubs=sectors_analysis["hubs"][measure_domain][data_grouping][0][measure_group][measure_type][measure_name]
+                                    nbins=min([i/3 for i in (len(measure_peripherals),len(measure_intermediaries), len(measure_hubs))]+[300])
+                                    p_i_ks_stats=P.kolmogorovSmirnov.kolmogorovSmirnovTest(measure_peripherals,measure_intermediaries,nbins)
+                                    p_h_ks_stats=P.kolmogorovSmirnov.kolmogorovSmirnovTest(measure_peripherals,measure_hubs,nbins)
+                                    i_h_ks_stats=P.kolmogorovSmirnov.kolmogorovSmirnovTest(measure_intermediaries,measure_hubs,nbins)
+                                    ks_measures[measure_domain][data_grouping][measure_group]["ks_stats"]["p_i_ks_"+"measure_name"]=p_i_stats
+                                    ks_measures[measure_domain][data_grouping][measure_group]["ks_stats"]["p_h_ks_"+"measure_name"]=p_h_stats
+                                    ks_measures[measure_domain][data_grouping][measure_group]["ks_stats"]["i_h_ks_"+"measure_name"]=i_h_stats
+                            else:
+                                detached_measures.append((measure_domain,data_grouping,measure_type,measure_name,measure))
+
+
+
 
 def selectedComparisonsUniform2(samples_dict):
     sector_samples_dict=samples_dict["numeric_samples_sectors"]
 #    for sector in sector_samples_dict["numeric_samples_sectors"]:
     sector="peripherals"
     ks_sectors_comparisons={}
-    for analysis in sector_samples_dict[sector]:
+      for analysis in sector_samples_dict[sector]:
         if analysis not in ks_sectors_comparisons:
             ks_sectors_comparisons[analysis]={}
         for data_grouping in sector_samples_dict[sector][analysis]:

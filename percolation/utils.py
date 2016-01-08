@@ -2,6 +2,10 @@ import time, pickle, os, zipfile, string, networkx as x
 import builtins as B
 from SPARQLWrapper import SPARQLWrapper, JSON
 TT=time.time()
+
+nestedDict = lambda: collections.defaultdict(nestedDict)
+# use with tdict=nestedDict(); tdict["akey1"]["akey2"]="anything"
+
 def min3(narray):
     narray_=n.array(narray)
     args=narray_.argsort()
