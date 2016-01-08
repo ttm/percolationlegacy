@@ -3,7 +3,16 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 def systemAnalyseAll(sectors_analysis):
     all_texts_measures={}
-    for sector in sectors_analysis:
+    nperipherals_authors=sectors_analyis["peripherals"]["tfIdf"]["authors"][0]["tfIdf"]["tfIdf_matrix_authors"]["the_matrix"].shape[0]
+    nintermediary_authors=sectors_analyis["intermediaries"]["tfIdf"]["authors"][0]["tfIdf"]["tfIdf_matrix_authors"]["the_matrix"].shape[0]
+    nhubs_authors=sectors_analyis["hubs"]["tfIdf"]["authors"][0]["tfIdf"]["tfIdf_matrix_authors"]["the_matrix"].shape[0]
+
+    nperipherals_texts=sectors_analyis["peripherals"]["tfIdf"][ "texts"][0]["tfIdf"]["tfIdf_matrix_authors"]["the_matrix"].shape[0]
+    nintermediary_texts=sectors_analyis["intermediaries"]["tfIdf"]["texts"][0]["tfIdf"]["tfIdf_matrix_authors"]["the_matrix"].shape[0]
+    nhubs_texts=sectors_analyis["hubs"]["tfIdf"][        "texts"][0]["tfIdf"]["tfIdf_matrix_authors"]["the_matrix"].shape[0]
+
+    sectors="peripherals","intermediaries","hubs"
+    for sector in sectors:
         for data_grouping in sectors_analysis[sector]["tfIdf"]: # texts, authors
             for data_group in sectors_analysis[sector]["tfIdf"][data_grouping]: 
                 for measure_group in data_group: # tfIdf, text, texts
@@ -65,6 +74,40 @@ def systemAnalyseAll(sectors_analysis):
                         all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["ddistance"]=n.std(distances)
                         all_texts_measures[data_grouping][0]["tfIdf"]["distances_overall"]["the_distances"]=distances
                         all_texts_measures[data_grouping][0]["text"]["joint_text"]["the_text"]=" ".join(texts)
+
+                        p_p_distances=n.hstack(tfIdf_matrix[i][:i] for i in n.arange(nperipherals_texts))
+                        i_i_distances=n.hstack(tfIdf_matrix[i][nperipherals_texts:i]\
+                                for i in n.arange(nperipherals_texts,nperipherals_texts+nintermediaries_texts))
+                        h_h_distances=n.hstack(tfIdf_matrix[i][nperipherals_texts+nintermediaries_texts:i]
+                                for i in n.arange(nperipherals_texts+nintermediaries_texts,nperipherals_texts+nintermediary_texts+nhubs_texts))
+
+                        p_i_distances=n.hstack(tfIdf_matrix[i][nperipherals_texts:nperipherals_texts+j]\
+                                for i,j in zip(range(nperipherals_texts),range(nintermediaries_texts))
+                        p_h_distances=n.hstack(tfIdf_matrix[i][nperipherals_texts+nintermediaries_texts:nperipherals_texts+nintermediaries_texts+j]\
+                                for i,j in zip(range(nperipherals_texts),range(nhubs_texts))
+                        i_h_distances=n.hstack(tfIdf_matrix[nperipherals_texts+i][nperipherals_texts+nintermediaries_texts:nperipherals_texts+nintermediaries_texts+j]\
+                                for i,j in zip(range(nintermediaries_texts),range(nhubs_texts))
+
+                        all_texts_measures[data_grouping][0]["tfIdf"]["intersector_distances"]["peripherals_distances"]=p_p_distances
+                        all_texts_measures[data_grouping][0]["tfIdf"]["intersector_distances"]["intermediaries_distances"]=i_i_distances
+                        all_texts_measures[data_grouping][0]["tfIdf"]["intersector_distances"]["hubs_distances"]=h_h_distances
+                        all_texts_measures[data_grouping][0]["tfIdf"]["intersector_distances"]["peripherals_intermediaries_distances"]=p_i_distances
+                        all_texts_measures[data_grouping][0]["tfIdf"]["intersector_distances"]["peripherals_hubs_distances"]=p_h_distances
+                        all_texts_measures[data_grouping][0]["tfIdf"]["intersector_distances"]["intermediaries_hubs_distances"]=i_h_distances
+
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["mperipherals_distances"]=n.mean(p_p_distances)
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["dperipherals_distances"]=n.std(p_p_distances)
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["mintermediaries_distances"]=n.mean(i_i_distances)
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["dintermediaries_distances"]=n.std(i_i_distances)
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["mhubs_distances"]=n.mean(h_h_distances)
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["dhubs_distances"]=n.std(h_h_distances)
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["mperipherals_intermediaries_distances"]=n.mean(p_i_distances)
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["dperipherals_intermediaries_distances"]=n.std(p_i_distances)
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["mperipherals_hubs_distances"]=n.mean(p_h_distances)
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["dperipherals_hubs_distances"]=n.std(p_h_distances)
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["mintermediaries_hubs_distances"]=n.mean(i_h_distances)
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["dintermediaries_hubs_distances"]=n.std(i_h_distances)
+
                         data_grouping_=data_grouping+"_texts"
                         for text in measure:
                             all_texts_measures[data_grouping_].append({})
@@ -76,6 +119,41 @@ def systemAnalyseAll(sectors_analysis):
                         all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["mdistance_authors"]=n.mean(distances)
                         all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["ddistance_authors"]=n.std(distances)
                         all_texts_measures[data_grouping][0]["tfIdf"]["distances_overall_authors"]["the_distances"]=distances
+
+                        p_p_distances=n.hstack(tfIdf_matrix[i][:i] for i in n.arange(nperipherals_authors))
+                        i_i_distances=n.hstack(tfIdf_matrix[i][nperipherals_authors:i]\
+                                for i in n.arange(nperipherals_authors,nperipherals_authors+nintermediaries_authors))
+                        h_h_distances=n.hstack(tfIdf_matrix[i][nperipherals_authors+nintermediaries_authors:i]
+                                for i in n.arange(nperipherals_authors+nintermediaries_authors,nperipherals_authors+nintermediary_authors+nhubs_authors))
+
+                        p_i_distances=n.hstack(tfIdf_matrix[i][nperipherals_authors:nperipherals_authors+j]\
+                                for i,j in zip(range(nperipherals_authors),range(nintermediaries_authors))
+                        p_h_distances=n.hstack(tfIdf_matrix[i][nperipherals_authors+nintermediaries_authors:nperipherals_authors+nintermediaries_authors+j]\
+                                for i,j in zip(range(nperipherals_authors),range(nhubs_authors))
+                        i_h_distances=n.hstack(tfIdf_matrix[nperipherals_authors+i][nperipherals_authors+nintermediaries_authors:nperipherals_authors+nintermediaries_authors+j]\
+                                for i,j in zip(range(nintermediaries_authors),range(nhubs_authors))
+
+                        all_texts_measures[data_grouping][0]["tfIdf"]["intersector_distances"]["peripherals_distances"]=p_p_distances
+                        all_texts_measures[data_grouping][0]["tfIdf"]["intersector_distances"]["intermediaries_distances"]=i_i_distances
+                        all_texts_measures[data_grouping][0]["tfIdf"]["intersector_distances"]["hubs_distances"]=h_h_distances
+                        all_texts_measures[data_grouping][0]["tfIdf"]["intersector_distances"]["peripherals_intermediaries_distances"]=p_i_distances
+                        all_texts_measures[data_grouping][0]["tfIdf"]["intersector_distances"]["peripherals_hubs_distances"]=p_h_distances
+                        all_texts_measures[data_grouping][0]["tfIdf"]["intersector_distances"]["intermediaries_hubs_distances"]=i_h_distances
+
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["mperipherals_distances"]=n.mean(p_p_distances)
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["dperipherals_distances"]=n.std(p_p_distances)
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["mintermediaries_distances"]=n.mean(i_i_distances)
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["dintermediaries_distances"]=n.std(i_i_distances)
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["mhubs_distances"]=n.mean(h_h_distances)
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["dhubs_distances"]=n.std(h_h_distances)
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["mperipherals_intermediaries_distances"]=n.mean(p_i_distances)
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["dperipherals_intermediaries_distances"]=n.std(p_i_distances)
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["mperipherals_hubs_distances"]=n.mean(p_h_distances)
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["dperipherals_hubs_distances"]=n.std(p_h_distances)
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["mintermediaries_hubs_distances"]=n.mean(i_h_distances)
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["dintermediaries_hubs_distances"]=n.std(i_h_distances)
+
+
                         data_grouping_=data_grouping+"_texts"
                         all_texts_measures[data_grouping_]=[]
                         for text in measure:
@@ -87,6 +165,11 @@ def systemAnalyseAll(sectors_analysis):
                         all_texts_measures[data_grouping][0]["tfIdf"]["tfIdf_matrix"]["the_matrix"]=tfIdf_matrix
                         all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["mdistance"]=n.mean(distances)
                         all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["ddistance"]=n.std(distances)
+
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["peripherals_intermediaries_distance"]=tfIdf_matrix[1][0]
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["peripherals_hubs_distance"]=   tfIdf_matrix[2][0]
+                        all_texts_measures[data_grouping][0]["tfIdf"]["numeric"]["intermediaries_hubs_distance"]=tfIdf_matrix[2][1]
+
                         all_texts_measures[data_grouping][0]["tfIdf"]["distances_overall"]["the_distances"]=distances
                         data_grouping_=data_grouping+"_texts"
                         all_texts_measures[data_grouping_]=[]
@@ -169,7 +252,7 @@ def sectorsAnalyseAll(authors_analysis,sectorialized_agents):
                         for text in measure:
                             all_texts_measures[data_grouping_].append({})
                             all_texts_measures[data_grouping_][-1]["texts"]["each_text"]["the_text"]=text
-                    if measure_type=="joint_text_authors": # directly from strings, data_grouping == "strings"
+                    if measure_type=="joint_text_authors": # directly from strings, data_grouping == "authors"
                         tfIdf_matrix=tfIdf(measure)
                         distances=n.hstack(tfIdf_matrix[i][:i] for i in n.arange(tfIdf_matrix.shape[0]))
                         all_texts_measures[data_grouping][0]["tfIdf"]["tfIdf_matrix_authors"]["the_matrix"]=tfIdf_matrix
