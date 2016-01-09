@@ -1,5 +1,5 @@
 __doc__="auxiliary functions for text analysis routines"
-
+import os
 this_dir, this_filename = os.path.split(__file__)
 #DATA_PATH = os.path.join(this_dir, "data", "data.txt")
 w=open(os.path.join(this_dir,"words.txt"),"r")

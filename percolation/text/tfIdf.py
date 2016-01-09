@@ -81,12 +81,12 @@ def systemAnalyseAll(sectors_analysis):
                         h_h_distances=n.hstack(tfIdf_matrix[i][nperipherals_texts+nintermediaries_texts:i]
                                 for i in n.arange(nperipherals_texts+nintermediaries_texts,nperipherals_texts+nintermediary_texts+nhubs_texts))
 
-                        p_i_distances=n.hstack(tfIdf_matrix[i][nperipherals_texts:nperipherals_texts+j]\
-                                for i,j in zip(range(nperipherals_texts),range(nintermediaries_texts))
-                        p_h_distances=n.hstack(tfIdf_matrix[i][nperipherals_texts+nintermediaries_texts:nperipherals_texts+nintermediaries_texts+j]\
-                                for i,j in zip(range(nperipherals_texts),range(nhubs_texts))
-                        i_h_distances=n.hstack(tfIdf_matrix[nperipherals_texts+i][nperipherals_texts+nintermediaries_texts:nperipherals_texts+nintermediaries_texts+j]\
-                                for i,j in zip(range(nintermediaries_texts),range(nhubs_texts))
+                        p_i_distances=n.hstack([tfIdf_matrix[i][nperipherals_texts:nperipherals_texts+j]\
+                                for i,j in zip(range(nperipherals_texts),range(nintermediaries_texts))])
+                        p_h_distances=n.hstack([tfIdf_matrix[i][nperipherals_texts+nintermediaries_texts:nperipherals_texts+nintermediaries_texts+j]\
+                                for i,j in zip(range(nperipherals_texts),range(nhubs_texts))])
+                        i_h_distances=n.hstack([tfIdf_matrix[nperipherals_texts+i][nperipherals_texts+nintermediaries_texts:nperipherals_texts+nintermediaries_texts+j]\
+                                for i,j in zip(range(nintermediaries_texts),range(nhubs_texts))])
 
                         all_texts_measures[data_grouping][0]["tfIdf"]["intersector_distances"]["peripherals_distances"]=p_p_distances
                         all_texts_measures[data_grouping][0]["tfIdf"]["intersector_distances"]["intermediaries_distances"]=i_i_distances
@@ -126,12 +126,12 @@ def systemAnalyseAll(sectors_analysis):
                         h_h_distances=n.hstack(tfIdf_matrix[i][nperipherals_authors+nintermediaries_authors:i]
                                 for i in n.arange(nperipherals_authors+nintermediaries_authors,nperipherals_authors+nintermediary_authors+nhubs_authors))
 
-                        p_i_distances=n.hstack(tfIdf_matrix[i][nperipherals_authors:nperipherals_authors+j]\
-                                for i,j in zip(range(nperipherals_authors),range(nintermediaries_authors))
-                        p_h_distances=n.hstack(tfIdf_matrix[i][nperipherals_authors+nintermediaries_authors:nperipherals_authors+nintermediaries_authors+j]\
-                                for i,j in zip(range(nperipherals_authors),range(nhubs_authors))
-                        i_h_distances=n.hstack(tfIdf_matrix[nperipherals_authors+i][nperipherals_authors+nintermediaries_authors:nperipherals_authors+nintermediaries_authors+j]\
-                                for i,j in zip(range(nintermediaries_authors),range(nhubs_authors))
+                        p_i_distances=n.hstack([tfIdf_matrix[i][nperipherals_authors:nperipherals_authors+j]\
+                                for i,j in zip(range(nperipherals_authors),range(nintermediaries_authors))])
+                        p_h_distances=n.hstack([tfIdf_matrix[i][nperipherals_authors+nintermediaries_authors:nperipherals_authors+nintermediaries_authors+j]\
+                                for i,j in zip(range(nperipherals_authors),range(nhubs_authors))])
+                        i_h_distances=n.hstack([tfIdf_matrix[nperipherals_authors+i][nperipherals_authors+nintermediaries_authors:nperipherals_authors+nintermediaries_authors+j]\
+                                for i,j in zip(range(nintermediaries_authors),range(nhubs_authors))])
 
                         all_texts_measures[data_grouping][0]["tfIdf"]["intersector_distances"]["peripherals_distances"]=p_p_distances
                         all_texts_measures[data_grouping][0]["tfIdf"]["intersector_distances"]["intermediaries_distances"]=i_i_distances
@@ -273,8 +273,6 @@ def sectorsAnalyseAll(authors_analysis,sectorialized_agents):
     return all_texts_measures
 
 def analyseAll(sectors_analysis):
-    for sector in sectors:
-
     texts_measures={"texts_overall":[{"tfIdf":{"tfIds_matrix":{}}}]}
     tfIdf_matrix=tfIdf(texts)
     distances=n.hstack(tfIdf_matrix[i][:i] for i in n.arange(tfIdf_matrix.shape[0]))

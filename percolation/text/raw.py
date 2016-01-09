@@ -242,7 +242,7 @@ def medidasTokens(T):
     known_words_not_stopword_has_synset_unique=set(known_words_not_stopword_has_synset)
     del foo_
     measures=P.text.aux.mediaDesvio2(locals())
-    measures["numeric"].update(tokensFracs(measures["strings"]}))
+    measures["numeric"].update(tokensFracs(measures["strings"]))
     return measures
 
 def tokensFracs(strings):
@@ -281,7 +281,7 @@ def medidasSentencasParagrafos(T,known_words_unique):
          for ts in tokens_sentences] #
 
     measures=P.text.aux.mediaDesvio2(locals())
-    measures["numeric"].update(sentenceFracs(measures["strings"]}))
+    measures["numeric"].update(sentenceFracs(measures["strings"]))
     return measures
 
 def sentenceFracs(strings):
@@ -303,6 +303,6 @@ def medidasMensagens(texts_list):
     locals_=locals()
     mvars=tuple(locals_.keys())
     medidas=mediaDesvio(mvars,locals())
-    medidas.update({nmessages=len(texts_list)})
+    medidas.update({"nmessages":len(texts_list)})
     medidas.update(locals_)
     return medidas

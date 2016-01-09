@@ -207,9 +207,9 @@ class Analyses:
     """Calculate unit roots, PCA averages and deviations and best fit to scale-free"""
     def __init__(self,bootstrap_instance,graphids=[],tables=False,do_network=False, \
                  do_topology=False,do_power=False, \
-                 do_text=False,do_ks_False, \
+                 do_text=False,do_ks=False, \
                  do_time=False,do_pca=False, do_network_pca=False, \
-                 write_back=False,tabledir="./tables"):
+                 write_back=False,tabledir="./tables/"):
         self.tabledir=tabledir
         if not graphids:
             graphids=list(bootstrap_instance.trans.keys())
@@ -235,7 +235,7 @@ class Analyses:
             # a table for the topological measures
             pass
         if self.options["do_power"]:
-            self.renderPowerlawTable()
+            self.renderPowerlawTable2()
         if self.options["do_topology"]:
             self.renderTopologicalTable()
         if self.options["do_text"]:
@@ -257,12 +257,12 @@ class Analyses:
         lines=[]
         for analysis in self.aa:
             label=analysis.graphid
-            line=[analysis.powerlaw_degree_fit.fit.__dict__[i] for i in labelsh if i in analysis.keys() else "-"]
+            line=[analysis.powerlaw_degree_fit.fit.__dict__[i] if i in analysis.keys() else "-" for i in labelsh]
             lines.append(line)
             labels.append(label)
             if analysis.gg.is_directed():
                 label=analysis.graphid+"*"
-                line=[analysis.powerlaw_strength_fit.fit.__dict__[i] for i in labelsh if i in analysis.keys() else "-"]
+                line=[analysis.powerlaw_strength_fit.fit.__dict__[i] if i in analysis.keys() else "-" for i in labelsh]
                 lines.append(line)
                 labels.append(label)
 
@@ -374,7 +374,7 @@ class Analysis:
                    OPTIONAL {{  ?s tw:messageContent ?text .     }} .   \
                    OPTIONAL {{  ?s gmane:body ?text .            }} .   \
                 }} }}"
-        author_texts=P.utils.mQuery(self.boot.endpoint_url,query,("from","text")))
+        author_texts=P.utils.mQuery(self.boot.endpoint_url,query,("from","text"))
         textual_measures=P.text.overallMeasuring.measureAll(author_texts,self.erdos_sectors["sectorialized_agents"])
         del query
         return textual_measures

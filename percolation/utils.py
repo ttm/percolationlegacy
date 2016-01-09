@@ -1,4 +1,4 @@
-import time, pickle, os, zipfile, string, networkx as x
+import time, pickle, os, zipfile, string, networkx as x, re
 import builtins as B
 from SPARQLWrapper import SPARQLWrapper, JSON
 TT=time.time()
@@ -280,8 +280,7 @@ class RegexpReplacer(object):
     (r'(\w+)\'re', '\g<1> are'),
     (r'(\w+)\'d', '\g<1> would')
     ]
-    def __init__(self, patterns=self.replacement_patterns):
-        self.patterns = [(re.compile(regex), repl) for (regex, repl) in patterns]
+    patterns = [(re.compile(regex), repl) for (regex, repl) in replacement_patterns]
     def replace(self, text):
         s = text
         count_=0
@@ -290,7 +289,7 @@ class RegexpReplacer(object):
             count_+=count
         return s, count_
 REPLACER=RegexpReplacer()
-del RegexReplacer
+del RegexpReplacer
 def chunks(l, n):
     """Yield successive n-sized chunks from l."""
     ll=[]

@@ -219,7 +219,7 @@ def medidasMensagens2(texts_measures):
                         std_name="M{}".format(measure_name)
                         mean_val=n.mean(measure)
                         std_val=n.std(  measure)
-                    if measure_type="lengths_overall":
+                    if measure_type=="lengths_overall":
                         all_texts_measures[measure_group]["numeric"][mean_name]=mean_val
                         all_texts_measures[measure_group]["numeric"][std_name]=std_val 
                     elif measure_type=="numeric_overall":

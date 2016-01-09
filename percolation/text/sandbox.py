@@ -132,7 +132,7 @@ def makeTable(lid,es,TOTAL,TDIR,FDIR,tag,offset=0):
     dists=g.textUtils.ksAll(sinais,mkeys=["lens_tok","lens_word","lens_sent"]); check("ks sinais")
     g.textUtils.makeKSTables(dists,TDIR,
             fnames=("ksTokens","ksWords","ksSents"),
-        =("size of tokens","size of known words","size of sentences"),tag=tag)
+        something=("size of tokens","size of known words","size of sentences"),tag=tag)
 
     sinais2=g.textUtils.medidasSinais2_(pos_measures,msg_measures); check("medidas sinais 2")
     dists2=g.textUtils.ksAll(sinais2,mkeys=["adj","sub","pun","verb","chars"]); check("ks sinais 2")
