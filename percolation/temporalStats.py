@@ -1,17 +1,21 @@
-import numpy as n, calendar, datetime, dateutil.parser as DT#, datetime as DT
-
+import percolation as P, numpy as n, calendar, datetime, dateutil.parser as DT#, datetime as DT
+c=P.utils.check
 def userTemporalStatistics(users_times):
     """Make temporal statics for users"""
-    users=set([i for i in users_times])
+    c("in userTermporal")
+    users=set([i[1] for i in users_times])
     user_times={}
     for user in users:
         user_times[user]=[]
-    for user,time in users_times:
-        users_time[user]+=[time]
+    for time,user in users_times:
+        user_times[user]+=[time]
+    c("nusers: %i"%(len(user_times),))
     user_time_stats={}
     for user in users:
-        users_time_stats[user]=TemporalStatistics(user_times[user])
+        c("user: {}, timestamps: {}".format(user,len(user_times[user])))
+        user_time_stats[user]=TemporalStatistics(datetimestrings=user_times[user])
     del user,time,users_times,users
+    c("out of userTermporal")
     return locals()
 def circularStatistics(population, period):
     pop=n.array(population)
@@ -42,15 +46,8 @@ def circularStatistics(population, period):
             circular_dispersion=circular_dispersion)
 
 class TemporalStatistics:
-    def __init__(self,list_datastructures=[],datetimestrings=[]):
-        if (not list_datastructures) and (not datetimestrings):
-            print("input datastructures, please")
-        datetimes=[]
-        if list_datastructures:
-            for datetime in list_datastructures.raw_clean_dates:
-                datetimes.append(datetime[1])
-        for datetime in datetimestrings:
-            datetimes.append(DT.parse(datetime))
+    def __init__(self,datetimestrings=[]):
+        datetimes=[DT.parse(i) for i in datetimestrings]
         self.datetimes=datetimes
         self.n_observations=len(datetimes)
         self.bad_datetimes=[]

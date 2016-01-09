@@ -31,11 +31,11 @@ ddir="/disco/data/"
 # ou 
 c("preboot")
 #boot=P.renderLegacy.topologicalTextualCharacterization.Bootstrap(end_url,ddir,fdir,update=False,write_tables=False)
-boot=P.renderLegacy.topologicalTextualCharacterization.Bootstrap(end_url,ddir,fdir,update=False,write_tables=False)
+boot=P.renderLegacy.topologicalTextualCharacterization.Bootstrap(end_url,ddir,fdir,update=True,write_tables=False,load_translates=True)
 c("preanal")
 #analysis=P.renderLegacy.topologicalTextualCharacterization.Analysis(boot)
 #c("preanals")
-analyses=P.renderLegacy.topologicalTextualCharacterization.Analyses(boot,graphids=[],tables=True,do_time=True)
+analyses=P.renderLegacy.topologicalTextualCharacterization.Analyses(boot,graphids=[],tables=False,do_time=True)
 ##analyses=P.renderLegacy.topologicalTextualCharacterization.Analyses(boot,[],False)
 #c("pretlanals")
 #tl_analysis=P.renderLegacy.topologicalTextualCharacterization.TimelineAnalysis(boot)

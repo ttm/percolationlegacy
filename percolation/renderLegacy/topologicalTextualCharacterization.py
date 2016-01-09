@@ -4,7 +4,7 @@ from scipy import stats
 from SPARQLWrapper import SPARQLWrapper, JSON
 c=P.utils.check
 class Bootstrap:
-    def __init__(self,endpoint_url,data_dir="/disco/data/",fdir="/root/r/repos/documentation/",update=False,write_tables=False):
+    def __init__(self,endpoint_url,data_dir="/disco/data/",fdir="/root/r/repos/documentation/",update=False,write_tables=False,load_translates=False):
         """If fdir=None, don't render latex tables"""
         self.res=[]
         self.trans={}
@@ -40,8 +40,10 @@ class Bootstrap:
         if write_tables:
             self.writeOverallTable()
             self.writeOverallEndpoint(endpoint_url)
-        translates=self.loadTranslates(endpoint_url,update)
+        if load_translates:
+            translates=self.loadTranslates(endpoint_url,update)
         self.endpoint_url=endpoint_url
+        c("boot finished")
     def overallAnalysis(self,endpoint_url):
         """Withour use for now"""
         # análise geral dos grafos, quais atributos, datas, etc
@@ -52,8 +54,6 @@ class Bootstrap:
         keys="ntrip","nsubj","npred","nobj"
         vals=P.utils.mQuery(endpoint_url,qq,keys)[0]
         bdict={i:j for i,j in zip(keys,vals)}
-
-
 
     def loadTranslates(self,endpoint_url,update):
         """Load each of the translate files into appropriate graphs"""
@@ -81,7 +81,8 @@ class Bootstrap:
                     vals_+=files
             vals=[i for i in vals if "gmane" not in i]
             vals+=vals_
-            for val in vals:
+            vals.sort()
+            for val in vals[-1:]:
                 c("LT val %s "%(val,))
                 fname_=val.split("/")[-1]
                 fname2="{}/{}".format(dname,fname_)
@@ -208,7 +209,8 @@ class Analyses:
     def __init__(self,bootstrap_instance,graphids=[],tables=False,do_network=False, \
                  do_topology=False,do_power=False, \
                  do_text=False,do_ks=False, \
-                 do_time=False,do_pca=False, do_network_pca=False, \
+                 do_time=False,do_pca=False,\
+                 do_network_ks=False, do_network_pca=False, \
                  write_back=False,tabledir="./tables/"):
         self.tabledir=tabledir
         if not graphids:
@@ -218,8 +220,8 @@ class Analyses:
         for gid in graphids:
             aa+=[Analysis(bootstrap_instance,gid,self.options)]
         self.aa=aa
-        if do_network_kolmogorov_smirnov:
-            self.makeNetworkKolmogorvSmirnov()
+        if do_network_ks:
+            self.makeNetworkKolmogorovSmirnov()
         if do_network_pca:
             self.makeNetworkPCA()
         if tables:
@@ -343,11 +345,11 @@ class Analysis:
         self.graphid=graphid
         self.boot=bootstrap_instance
         if options.get("do_network"):
-            self.network=self.makeNetwork()
+            self.network=self.makeNetwork(); c("do_network finished")
         if options.get("do_topology"):
-            self.topom_dict=P.topology.measures.topologicalMeasures(self.network)
+            self.topom_dict=P.topology.measures.topologicalMeasures(self.network); c("do_topom finished")
         if options.get("do_sectors"):
-            self.erdos_sectors=P.topology.sectorialize.getErdosSectors(self.topom_dict)
+            self.erdos_sectors=P.topology.sectorialize.getErdosSectors(self.topom_dict); c("do_sectors finished")
         if options.get("do_time"):
             self.tempm_dict=self.temporalMeasures()
         if options.get("do_text"):
@@ -438,11 +440,18 @@ class Analysis:
            OPTIONAL {{ ?s <"+str(P.rdf.ns.gmane.sentAt)+">    ?mdatetime .  }} .          \n \
            OPTIONAL {{ ?s <"+str(P.rdf.ns.tw.sentAt)+">       ?mdatetime .  }} .          \n \
          }} }}"
+        # iniciar dataset com reasoner, adicionamos as triplias in time
+        query= "SELECT ?mdatetime ?author WHERE \
+         {{ GRAPH <"+ self.graphid +"> {{            \
+           ?s <"+str(P.rdf.ns.gmane.author)+">    ?author .            \n \
+           ?s <"+str(P.rdf.ns.gmane.sentAt)+">    ?mdatetime .          \n \
+         }} }}"
+
         keys=("mdatetime","author")
         vals_=P.utils.mQuery(self.boot.endpoint_url,query,keys)
         vals=[i[0]for i in vals_]
         overall_time_statistics=P.temporalStats.TemporalStatistics(datetimestrings=vals)
-        user_time_statistics=P.temporalStats.usersTemporalStatistics(vals_)
+        user_time_statistics=P.temporalStats.userTemporalStatistics(vals_)
 
     def powerlawFit(self):
         """Under the framework developed at: http://arxiv.org/abs/1305.0215"""
