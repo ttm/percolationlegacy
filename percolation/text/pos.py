@@ -91,30 +91,30 @@ def sectorsAnalyseAll(authors_analysis,sectorialized_agents):
     all_texts_measures={}
     for sector in sectorialized_agents:
       for agent in sectorialized_agents[sector]:
-         analysis=authors_analysis[sector][agent]["wordnet"]
-            for data_grouping in analysis:
-                for data_group in analysis[data_grouping]:
-                    for measure_group in data_group:
-                        for measure_type in data_group[measure_group]:
-                            for measure_name in data_group[measure_group][measure_type]:
-                                measure=data_group[measure_group][measure_type][measure_name]
-                                if measure_type=="pos_taggs_overall": # directly from tokens
-                                    measure_type_="pos_tags_overall"
-                                    data_grouping_="strings"
-                                elif measure_type in "numeric_overall": # messages
-                                    measure_type_="numeric_overall_low"
-                                    data_grouping_="texts"
-                                elif measure_type in "numeric": # authors
-                                    measure=[measure]
-                                    measure_type_="numeric_overall"
-                                    data_grouping_="authors"
-                                elif measure_type=="second_numeric": # authors from messages
-                                    measure=[measure]
-                                    data_grouping_="authors_messages"
-                                    measure_type_="second_numeric_overall"
-                                else:
-                                    raise KeyError("data structure not understood")
-                                all_texts_measures[data_grouping_][0][measure_group][measure_type_][measure_name]+=measure
+          analysis=authors_analysis[sector][agent]["wordnet"]
+          for data_grouping in analysis:
+              for data_group in analysis[data_grouping]:
+                  for measure_group in data_group:
+                      for measure_type in data_group[measure_group]:
+                          for measure_name in data_group[measure_group][measure_type]:
+                              measure=data_group[measure_group][measure_type][measure_name]
+                              if measure_type=="pos_taggs_overall": # directly from tokens
+                                  measure_type_="pos_tags_overall"
+                                  data_grouping_="strings"
+                              elif measure_type in "numeric_overall": # messages
+                                  measure_type_="numeric_overall_low"
+                                  data_grouping_="texts"
+                              elif measure_type in "numeric": # authors
+                                  measure=[measure]
+                                  measure_type_="numeric_overall"
+                                  data_grouping_="authors"
+                              elif measure_type=="second_numeric": # authors from messages
+                                  measure=[measure]
+                                  data_grouping_="authors_messages"
+                                  measure_type_="second_numeric_overall"
+                              else:
+                                  raise KeyError("data structure not understood")
+                              all_texts_measures[data_grouping_][0][measure_group][measure_type_][measure_name]+=measure
     for data_grouping in all_texts_measures: # strings, texts, authors, authors_messages
         for data_group in all_texts_measures[data_grouping]:
           for measure_group in data_group: # pos

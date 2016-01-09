@@ -209,7 +209,8 @@ class Analyses:
                  do_topology=False,do_power=False, \
                  do_text=False,do_ks_False, \
                  do_time=False,do_pca=False, do_network_pca=False, \
-                 write_back=False):
+                 write_back=False,tabledir="./tables"):
+        self.tabledir=tabledir
         if not graphids:
             graphids=list(bootstrap_instance.trans.keys())
         self.options=locals()
@@ -241,6 +242,36 @@ class Analyses:
             self.renderTextTable()
         if self.options["do_time"]:
             self.renderTimeTable()
+    def renderPowerlawTable2(self):
+        # get all labels from all dict__.keys()
+        for analysis in self.aa:
+            labelsh+=[i for i in analysis.__dict__.keys() if isinstance(analysis.__dict__[i],numbers.Number)]
+        labelsh=list(set(labelsh))
+        labelsh.sort()
+        labelsh=["graphid"]+labelsh
+        # option: only numbers
+        # arange them in alphabetical
+        # go again in loop through analyses list to get values or put -
+        # make proper latex table rendering functions, with caption and label
+        # put double lines and boldface in top and left borders
+        lines=[]
+        for analysis in self.aa:
+            label=analysis.graphid
+            line=[analysis.powerlaw_degree_fit.fit.__dict__[i] for i in labelsh if i in analysis.keys() else "-"]
+            lines.append(line)
+            labels.append(label)
+            if analysis.gg.is_directed():
+                label=analysis.graphid+"*"
+                line=[analysis.powerlaw_strength_fit.fit.__dict__[i] for i in labelsh if i in analysis.keys() else "-"]
+                lines.append(line)
+                labels.append(label)
+
+        caption="Fit of network connectivity to power-law distributions."
+        fname_=self.tabledir+"powerlawFitTable.tex"
+        P.tableHelpers.lTable(labels,labelsh,lines,caption,fname_,ttype="allFloat")
+        P.tableHelpers.doubleColumn(fname_)
+        self.powerTableLabels=labels
+
     def renderPowerlawTable(self):
         #labels=[i.graphid for i in self.aa]
         labelsh=["id","alpha","xmin","D","sigma","noisy"]
@@ -261,7 +292,7 @@ class Analyses:
             lines.append(data)
             if anal.gg.is_directed():
                 labels.append(anal.graphid+"*")
-                data=[anal.power_res.alpha,anal.power_res.xmin,anal.power_res.D,anal.power_res.sigma,anal.power_res.noise_flag]
+                data=[anal.power_res_.alpha,anal.power_res_.xmin,anal.power_res_.D,anal.power_res_.sigma,anal.power_res_.noise_flag]
                 dcomp=[]
                 for dist in dists:
                     dcomp+=list(anal.power_res_.distribution_compare("power_law",dist))
@@ -271,7 +302,7 @@ class Analyses:
         fname_="aqui.tex"
         P.tableHelpers.lTable(labels,labelsh,lines,caption,fname_,ttype="allFloat")
         P.tableHelpers.doubleColumn(fname_)
-        self.labels=labels
+        self.powerTableLabels=labels
     def renderTopologicalTable(self):
         # self.labels tem os labels
         lines=[]
@@ -280,7 +311,7 @@ class Analyses:
             labels+=[anal.graphid]
             # tem as medidas topologicas, organizar em 1 ou + tabelas
             # renderizar em paisagem ou nem assim?
-            # fazer papel grande, deixar que de zoom pq eh digital
+            # fazer tabela em papel grande, deixar que de zoom pq eh digital
 
             lines+=[line]
         labelsh=["$N$","$E$","$p$","$k_{max}$","$s_{max}$","$w_{max}$",
@@ -332,13 +363,8 @@ class Analysis:
         # explore different scales
     def pcaAnalyses(self):
         # choose some case collections of measures with wich to make PCA analysis
-        pca={}
-        pca["topological"]=P.topology.analysis.pca(self.topom_dict,self.powerm_dict)
-        pca["textual"]=P.text.analysis.pca(        self.textm_dict)
-        pca["temporal"]=P.text.analysis.pca(       self.tempm_dict)
-        pca["hybrid"]=P.pca.PCA(self.topom_dict,self.textm_dict,self.tempm_dict,self.powerm_dict)
-        return pca
-        raise NotImplementedError("PCA analysis must be implemented")
+        pcas=P.renderLegacy.pcaAll(self.topom_dict,self.powerm_dict,self.textm_dict,self.tempm_dict)
+        return pcas
     def textualMeasures(self):
         # get textual content related to each user
         query= "SELECT ?{} ?{} WHERE \
@@ -421,13 +447,11 @@ class Analysis:
     def powerlawFit(self):
         """Under the framework developed at: http://arxiv.org/abs/1305.0215"""
         
-        powerlaw_degree_fit=P.topology.powerlawFit(self.topom_dict["degrees_"])
-        c("degree fit of" + self.graphid)
+        self.powerlaw_degree_fit=P.topology.powerlawFit.fitData(self.topom_dict["degrees_"])
         if self.network["gg"].is_directed():
             powerlaw_strength_fit=P.topology.powerlawFit(self.topom_dict["strengths_"])
         else:
-            powerlaw_strength_fit=self.powerlaw_degree_fit
-        return locals()
+            self.powerlaw_strength_fit=self.powerlaw_degree_fit
 
 class TimelineAnalysis(Analyses):
     # make Analyses with input graphids

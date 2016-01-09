@@ -13,43 +13,49 @@ def topologicalMeasures(gg=x.Graph()):
     Uses: P.topology.measures.overallMeasures()
     ToDo: implement homophily
     """
-    degrees=self.gg.degree()
+    degrees=gg.degree()
     degrees_=list(degrees.values())
-    strengths=self.gg.degree(weight="weight")
-    strengths_=list(strengths.values())
-    clustering=x.clustering( self.gg_ )
+    if gg.is_directed():
+        in_degrees=   gg.in_degree()
+        out_degrees=  gg.out_degree()
+        strengths=    gg.degree(weight="weight")
+        in_strengths= gg.in_degree(weight="weight")
+        out_strengths=gg.out_degree(weight="weight")
+        strengths_=list(strengths.values())
+    betweenness=x.betweenness.betweenness_centrality(gg)
+    clustering=x.clustering( gg_ )
     clustering_=list(clustering.values())
-    clustering_w=x.clustering( self.gg_,weight="weight" )
+    clustering_w=x.clustering( gg_,weight="weight" )
     clustering_w_=list(clustering_w.values())
-    square_clustering=x.square_clustering( self.gg)
+    square_clustering=x.square_clustering( gg)
     square_clustering_=list(square_clustering.values())
-    transitivity=x.transitivity(self.gg)
-    transitivity_u=x.transitivity(self.gg_)
-    closeness=x.closeness_centrality(self.gg)
+    transitivity=x.transitivity(gg)
+    transitivity_u=x.transitivity(gg_)
+    closeness=x.closeness_centrality(gg)
     closeness_=list(closeness.values())
-    eccentricity=x.closeness_centrality(self.gg_)
+    eccentricity=x.closeness_centrality(gg_)
     eccentricity_=list(eccentricity.values())
-    diameter=x.diameter(self.comp_)
-    radius=x.radius(    self.comp_)
-    nperiphery=len(x.periphery(self.comp_))
-    ncenter=   len(x.center(self.comp_)   )
-    size_component=self.comp_.number_of_nodes()
-    ashort_path=x.average_shortest_path_length(   self.comp)
-    ashort_path_w=x.average_shortest_path_length( self.comp,weight="weight")
-    ashort_path_u=x.average_shortest_path_length( self.comp_)
-    ashort_path_uw=x.average_shortest_path_length(self.comp_,weight="weight")
-    nnodes=self.gg.number_of_nodes()
-    nedges=self.gg.number_of_edges()
+    diameter=x.diameter(comp_)
+    radius=x.radius(    comp_)
+    nperiphery=len(x.periphery(comp_))
+    ncenter=   len(x.center(comp_)   )
+    size_component=comp_.number_of_nodes()
+    ashort_path=x.average_shortest_path_length(   comp)
+    ashort_path_w=x.average_shortest_path_length( comp,weight="weight")
+    ashort_path_u=x.average_shortest_path_length( comp_)
+    ashort_path_uw=x.average_shortest_path_length(comp_,weight="weight")
+    nnodes=gg.number_of_nodes()
+    nedges=gg.number_of_edges()
 
     # nodes_edge =100*nnodes/nedges # correlated to degree
     # fraction of participants in the largest component
     # and strongly connected components
-    frac_weakly_connected=   100*self.comp.number_of_nodes()/nnodes
-    frac_connected=100*self.comp_.number_of_nodes()/nnodes
-    if self.gg.is_directed():
-        weights=[i[2]["weight"] for i in self.gg.edges(data=True)]
-        frac_strongly_connected=   100*x.strongly_connected_component_subgraphs(self.gg)[0].number_of_nodes()/nnodes
-        frac_weakly_connected2=   100*x.weakly_connected_component_subgraphs(self.gg)[0].number_of_nodes()/nnodes
+    frac_weakly_connected=   100*comp.number_of_nodes()/nnodes
+    frac_connected=100*comp_.number_of_nodes()/nnodes
+    if gg.is_directed():
+        weights=[i[2]["weight"] for i in gg.edges(data=True)]
+        frac_strongly_connected=   100*x.strongly_connected_component_subgraphs(gg)[0].number_of_nodes()/nnodes
+        frac_weakly_connected2=   100*x.weakly_connected_component_subgraphs(gg)[0].number_of_nodes()/nnodes
         # make weakly connected
     else:
         weights=[1]*nedges
