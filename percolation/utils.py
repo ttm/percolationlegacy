@@ -182,17 +182,20 @@ def zipDir2(odirpath,dpath="./afilename"):
 #    zipdir('tmp/', zipf)
 #    zipf.close()
 
-def check(amsg="string message"):
+def check(*args):
     global TT
-    print(amsg, "{:.7f}".format(time.time()-TT)); TT=time.time()
+    if len(args[0])==args[0].count("\n"):
+        print("{}{:.3f}".format(args[0],time.time()-TT),*args[1:]); TT=time.time()
+    else:
+        print("{:.3f}".format(time.time()-TT),*args); TT=time.time()
 # pdumps aqui tb
 def identifyProvenance(astring):
     if "gmane-" in astring:
-        return P.rdf.ns.po.GmaneSnapshot
+        return P.rdf.NS.po.GmaneSnapshot
     elif "_fb" in astring:
-        return P.rdf.ns.po.FacebookSnapshot
+        return P.rdf.NS.po.FacebookSnapshot
     elif "_tw" in astring:
-        return P.rdf.ns.po.TwitterSnapshot
+        return P.rdf.NS.po.TwitterSnapshot
 
 class Dumper:
     def __init__(self,tfilename):

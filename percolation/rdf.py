@@ -21,15 +21,15 @@ r.namespace.split_uri("http://purl.org/socialparticipation/irc/Participant#labMa
 """
 def LL_(literal,lang=None):
     if type(literal)==type(1123):
-        ttype=ns.xsd.integer
+        ttype=NS.xsd.integer
     elif type(literal)==type(True):
-        ttype=ns.xsd.boolean
+        ttype=NS.xsd.boolean
     elif type(literal)==type(datetime.datetime.now()):
-        ttype=ns.xsd.datetime
+        ttype=NS.xsd.datetime
     elif type(literal)==type(datetime.date(2015,3,4)):
-        ttype=ns.xsd.date
+        ttype=NS.xsd.date
     else:
-        ttype=ns.xsd.string
+        ttype=NS.xsd.string
         literal=utf8(str(literal))
     if not lang:
         return r.Literal(literal,datatype=ttype)
@@ -37,7 +37,7 @@ def LL_(literal,lang=None):
         return r.Literal(literal,lang=lang,datatype=ttype)
 
 COUNT=0
-class ns:
+class NS:
     cm =     r.Namespace("http://purl.org/socialparticipation/cm/")   # caixa mágica
     obs =    r.Namespace("http://purl.org/socialparticipation/obs/") # ontology of the social library
     aa  =    r.Namespace("http://purl.org/socialparticipation/aa/")  # algorithmic autoregulation
@@ -59,9 +59,81 @@ class ns:
     xsd =    r.namespace.XSD
 query_=prepareQuery(
         "SELECT ?name WHERE {?fid fb:name ?name}"
-        ,initNs={"fb":ns.fb})
+        ,initNs={"fb":NS.fb})
+a=NS.rdf.type
+def makeDummyOntology():
+    triples=(
+            (NS.po.InteractionSnapshot, a, NS.rdfs.Class),
+            (NS.po.GmaneSnapshot, a, NS.rdfs.Class),
+            (NS.po.Snapshot, a, NS.rdfs.Class),
+            (NS.po.InteractionSnapshot, NS.rdfs.subClassOf, NS.po.Snapshot), # fb, part, tw, irc, gmane, cidade
+            (NS.po.GmaneSnapshot, NS.rdfs.subClassOf, NS.po.InteractionSnapshot),
+            )
+    return triples
+
+def makeOntology():
+    triples=(
+            (NS.po.InteractionSnapshot, a, NS.rdfs.Class),
+            (NS.po.GmaneSnapshot, a, NS.rdfs.Class),
+            (NS.po.Snapshot, a, NS.rdfs.Class),
+
+            (NS.po.InteractionSnapshot, NS.rdfs.subClassOf, NS.po.Snapshot), # fb, part, tw, irc, gmane, cidade
+            (NS.po.FriendshipSnapshot, NS.rdfs.subClassOf, NS.po.Snapshot), # fb, part
+            (NS.po.ReportSnapshot, NS.rdfs.subClassOf, NS.po.Snapshot), # aa
+
+            (NS.po.FacebookSnapshot, NS.rdfs.subClassOf, NS.po.Snapshot),
+            (NS.po.FacebookInteractionSnapshot, NS.rdfs.subClassOf, NS.po.FacebookSnapshot),
+            (NS.po.FacebookInteractionSnapshot, NS.rdfs.subClassOf, NS.po.InteractionSnapshot),
+
+            (NS.po.FacebookFriendshipSnapshot, NS.rdfs.subClassOf, NS.po.FacebookSnapshot),
+            (NS.po.FacebookFriendshipSnapshot, NS.rdfs.subClassOf, NS.po.FriendshipSnapshot),
+
+            (NS.po.TwitterSnapshot, NS.rdfs.subClassOf, NS.po.InteractionSnapshot),
+
+            (NS.po.GmaneSnapshot, NS.rdfs.subClassOf, NS.po.InteractionSnapshot),
+
+            (NS.po.IRCSnapshot, NS.rdfs.subClassOf, NS.po.InteractionSnapshot),
+
+            (NS.po.AASnapshot, NS.rdfs.subClassOf, NS.po.ReportSnapshot),
+
+            (NS.po.ParticipaSnapshot, NS.rdfs.subClassOf, NS.po.CompleteSnapshot),
+
+            (NS.po.CidadeDemocraticaSnapshot, NS.rdfs.subClassOf, NS.po.InteractionSnapshot),
+
+            (NS.gmane.gmaneID, NS.rdfs.subPropertyOf, NS.po.auxID),
+            (NS.fb.groupID, NS.rdfs.subPropertyOf, NS.po.auxID),
+
+            (NS.po.interactionXMLFile, NS.rdfs.subPropertyOf,NS.po.defaultXML), # fb
+            (NS.po.rdfFile           , NS.rdfs.subPropertyOf,NS.po.defaultXML), # twitter, gmane
+            (NS.po.friendshipXMLFile , NS.rdfs.subPropertyOf,NS.po.defaultXML), # fb
+            # type of relation retrievement: 1, 2 or 3
+
+            # labels equivalence: irc, etc
+            # date equivalence
+            # interaction/relation uris equivalence
+            # textual content equivalence
+
+            # if text is available
+           )
+    return triples
+def renderOntology(triples_dir="/disco/triplas/",dummy=False):
+    if dummy:
+        triples=makeDummyOntology()
+    else:
+        triples=makeOntology()
+    P.rdf.writeTriples(triples,"{}po.ttl".format(triples_dir))
+    c("po ttl written")
 def G(g,S,P,O):
     g.add((S,P,O))
+def writeTriples(triples,filename,format_="ttl"):
+    g=r.Graph()
+    for triple in triples:
+        g.add(triple)
+    with open(filename,"wb") as f:
+        if format=="ttl":
+            f.write(g.serialize(format="turtle"))
+        else:
+            f.write(g.serialize())
 def writeAll(per_graph,sname="img_and_rdf",sdir="./",full=False,remove=False,dot=False,sizelimit=None):
     nome_=sname
     g,A=per_graph
@@ -144,10 +216,10 @@ def makeBasicGraph(extra_namespaces=[],glabel="Ontologia da tese"):
     """each namespace a tuple (tag,URI)"""
     g,A=r.Graph(),gv.AGraph(directed=True,strict=False)
     A.graph_attr["label"]=glabel
-    g.namespace_manager.bind("rdf", ns.rdf)    
-    g.namespace_manager.bind("rdfs",ns.rdfs)    
-    g.namespace_manager.bind("xsd", ns.xsd)    
-    g.namespace_manager.bind("owl", ns.owl)    
+    g.namespace_manager.bind("rdf", NS.rdf)    
+    g.namespace_manager.bind("rdfs",NS.rdfs)    
+    g.namespace_manager.bind("xsd", NS.xsd)    
+    g.namespace_manager.bind("owl", NS.owl)    
     for tag, namespace in zip(*extra_namespaces):
         g.namespace_manager.bind(tag, namespace)
     return g,A
@@ -160,10 +232,10 @@ def startGraphs(ids=("mid1","mid2"),titles=("Ontology1","ConceptX"),extra_namesp
 def C(ag=[makeBasicGraph()],uri="foo",label="bar",superclass=None,comment=None,label_pt=None,comment_pt=None,color=None,graph_lang="en"):
     for gg in ag:
         g,A=gg
-        G(g,uri,ns.rdf.type,ns.owl.Class)
-        G(g,uri,ns.rdfs.label,LL_(label,lang="en"))
+        G(g,uri,NS.rdf.type,NS.owl.Class)
+        G(g,uri,NS.rdfs.label,LL_(label,lang="en"))
         if label_pt:
-            G(g,uri,ns.rdfs.label,LL_(label_pt,lang="pt"))
+            G(g,uri,NS.rdfs.label,LL_(label_pt,lang="pt"))
         if graph_lang=="pt":
             A.add_node(label_pt,style="filled")
             nd=A.get_node(label_pt)
@@ -173,28 +245,28 @@ def C(ag=[makeBasicGraph()],uri="foo",label="bar",superclass=None,comment=None,l
         if superclass:
             if type(superclass) in (type([1,2]),type((1,2))):
                 for sp in superclass:
-                    G(g,uri,ns.rdfs.subClassOf,sp)
+                    G(g,uri,NS.rdfs.subClassOf,sp)
                     #print([i for i in g.objects(sp,ns.rdfs.label)])
                     if graph_lang=="pt":
-                        lsuperclass=[i for i in g.objects(sp,ns.rdfs.label) if i.language=="pt"][0].title()
+                        lsuperclass=[i for i in g.objects(sp,NS.rdfs.label) if i.language=="pt"][0].title()
 #                        lsuperclass=[i for i in g.objects(sp,ns.rdfs.label) if i.lang=="pt"][0].title()
                         A.add_edge(  label_pt, lsuperclass)
                         e=A.get_edge(label_pt, lsuperclass)
                     else:
-                        lsuperclass=[i for i in g.objects(sp,ns.rdfs.label) if i.language=="en"][0].title()
+                        lsuperclass=[i for i in g.objects(sp,NS.rdfs.label) if i.language=="en"][0].title()
                         A.add_edge(  label, lsuperclass)
                         e=A.get_edge(label, lsuperclass)
                     e.attr["arrowhead"]="empty"
                     e.attr["arrowsize"]=2
             else:
-                G(g,uri,ns.rdfs.subClassOf,superclass)
+                G(g,uri,NS.rdfs.subClassOf,superclass)
                 #lsuperclass=[i for i in g.objects(superclass,rdfs.label)][-1]
                 if graph_lang=="pt":
-                    lsuperclass=[i for i in g.objects(superclass,ns.rdfs.label) if i.language=="pt"][0]
+                    lsuperclass=[i for i in g.objects(superclass,NS.rdfs.label) if i.language=="pt"][0]
                     A.add_edge(  label_pt, lsuperclass)
                     e=A.get_edge(label_pt, lsuperclass)
                 else:
-                    lsuperclass=[i for i in g.objects(superclass,ns.rdfs.label) if i.language=="en"][0]
+                    lsuperclass=[i for i in g.objects(superclass,NS.rdfs.label) if i.language=="en"][0]
                     A.add_edge(  label, lsuperclass)
                     e=A.get_edge(label, lsuperclass)
                 e.attr["arrowhead"]="empty"
@@ -202,24 +274,24 @@ def C(ag=[makeBasicGraph()],uri="foo",label="bar",superclass=None,comment=None,l
         if comment:
             if type(comment) in (type([1,2]),type((1,2))):
                 for co in comment:
-                    G(g,uri,ns.rdfs.comment,LL_(co,lang="en"))
+                    G(g,uri,NS.rdfs.comment,LL_(co,lang="en"))
             else:
-                G(g,uri,ns.rdfs.comment,LL_(comment,lang="en"))
+                G(g,uri,NS.rdfs.comment,LL_(comment,lang="en"))
         if comment_pt:
             if type(comment_pt) in (type([1,2]),type((1,2))):
                 for co in comment_pt:
-                    G(g,uri,ns.rdfs.comment,LL_(co,lang="pt"))
+                    G(g,uri,NS.rdfs.comment,LL_(co,lang="pt"))
             else:
-                G(g,uri,ns.rdfs.comment,LL_(comment_pt,lang="pt"))
+                G(g,uri,NS.rdfs.comment,LL_(comment_pt,lang="pt"))
         if color:
             nd.attr['color']=color
 def IC_(ga=None,uri="turiref",string="astringid",label="alabel",clabel=True):
     ind=uri+"#"+str(string)
     if ga:
         for g,A in ga:
-            G(g,ind,ns.rdf.type,uri)
+            G(g,ind,NS.rdf.type,uri)
             if clabel:
-                G(g,ind,ns.rdfs.label,LL_(label))
+                G(g,ind,NS.rdfs.label,LL_(label))
         if label:
             A.add_node(label,style="filled")
             nd=A.get_node(label)
@@ -231,9 +303,9 @@ def IC(ga=None,uri="turiref",string="astringid",label=None,clabel=True,draw=Fals
     ind=uri+"#"+str(string)
     if ga:
         for g,A in ga:
-            G(g,ind,ns.rdf.type,uri)
+            G(g,ind,NS.rdf.type,uri)
             if clabel and label:
-                G(g,ind,ns.rdfs.label,LL_(label))
+                G(g,ind,NS.rdfs.label,LL_(label))
         if label and draw:
             A.add_node(label,style="filled")
             nd=A.get_node(label)
@@ -289,24 +361,24 @@ def P(ag=[makeBasicGraph()],uri="foo",label="bar",label_pt=None,comment=None):
     """Add object property to RDF graph"""
     for gg in ag:
         g=gg[0]
-        G(g,uri,ns.rdf.type,ns.owl.ObjectProperty)
-        G(g,uri,ns.rdfs.label,LL_(label,lang="en"))
+        G(g,uri,NS.rdf.type,NS.owl.ObjectProperty)
+        G(g,uri,NS.rdfs.label,LL_(label,lang="en"))
         if label_pt:
-            G(g,uri,ns.rdfs.label,LL_(label_pt,lang="pt"))
+            G(g,uri,NS.rdfs.label,LL_(label_pt,lang="pt"))
         if comment:
-            G(g,uri,ns.rdfs.comment,LL_(comment,lang="en"))
+            G(g,uri,NS.rdfs.comment,LL_(comment,lang="en"))
 
-def D(ag=[makeBasicGraph()],uri="foo",label="bar",dtype=ns.xsd.string,comment=None,label_pt=None):
+def D(ag=[makeBasicGraph()],uri="foo",label="bar",dtype=NS.xsd.string,comment=None,label_pt=None):
     """Add data property to RDF graph"""
     for gg in ag:
         g=gg[0]
-        G(g,uri,ns.rdf.type,ns.owl.DatatypeProperty)
-        G(g,uri,ns.rdfs.label,LL_(label,lang="pt"))
-        G(g,uri,ns.rdfs.range,dtype)
+        G(g,uri,NS.rdf.type,NS.owl.DatatypeProperty)
+        G(g,uri,NS.rdfs.label,LL_(label,lang="pt"))
+        G(g,uri,NS.rdfs.range,dtype)
         if comment:
-            G(g,uri,ns.rdfs.comment,LL_(comment,lang="en"))
+            G(g,uri,NS.rdfs.comment,LL_(comment,lang="en"))
         if label_pt:
-            G(g,uri,ns.rdfs.label,LL_(label_pt,lang="pt"))
+            G(g,uri,NS.rdfs.label,LL_(label_pt,lang="pt"))
 def L_(ga,sub,pred,obj):
     for g,A in ga:
         G(g,sub,pred,obj)

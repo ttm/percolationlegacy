@@ -4,8 +4,8 @@ import time, os
 import rdflib as r, networkx as x, percolation as P
 from SPARQLWrapper import SPARQLWrapper, JSON
 c=P.utils.check
-NS=P.rdf.ns
-a=P.rdf.ns.rdf.type
+NS=P.rdf.NS
+a=NS.rdf.type
 class EndpointInterface:
     def __init__(self,endpoint_url):
         self.endpoint_url=endpoint_url
@@ -23,7 +23,7 @@ class EndpointInterface:
         snapshot_uri=r.URIRef(self.getQuery(query_triples)["results"]["bindings"][0]["s"]["value"])
 
         if not snapshotclass:
-            snapshotclass=P.rdf.ns.po.Snapshot
+            snapshotclass=NS.po.Snapshot
         if autoid_graph:
             snapshotclass=P.utils.identifyProvenance(tfile)
         triples=(
@@ -47,8 +47,10 @@ class EndpointInterface:
     def getGraphs(self):
         qtriples=(
 #                ("?snapshot", a, NS.po.Snapshot),
+#                ("?snapshot", a, NS.po.GmaneSnapshot),
 #                ("?snapshot", a, NS.po.InteractionSnapshot),
-                ("?snapshot", a, NS.po.GmaneSnapshot),
+                ("?snapshot", a, NS.po.InteractionSnapshot),
+                ("?snapshot", NS.po.graphName, "?graph"),
                 )
         self.graphs=dictQueryValues(self.getQuery(qtriples))
     def insertTriples(self,triples,graphid=None):
@@ -65,7 +67,7 @@ class EndpointInterface:
         if isinstance(querystring_or_triples,(tuple,list)):
             tvars=[]
             for line in querystring_or_triples:
-                tvars+=[i for i in line if i[0]=="?"]
+                tvars+=[i for i in line if i[0]=="?" and "foo" not in i]
             tvars=P.utils.uniqueItems(tvars)
             tvars_string=(" %s "*len(tvars))%tuple(tvars)
             body=""
@@ -107,68 +109,8 @@ class EndpointInterface:
         f.close()
         c("dummy ttl written")
 
-    def renderOntology(self,triples_dir="/disco/triplas/"):
-
-        triples_=(
-                (NS.po.InteractionSnapshot, a, NS.rdfs.Class),
-                (NS.po.GmaneSnapshot, a, NS.rdfs.Class),
-                (NS.po.Snapshot, a, NS.rdfs.Class),
-                (NS.po.InteractionSnapshot, NS.rdfs.subClassOf, NS.po.Snapshot), # fb, part, tw, irc, gmane, cidade
-                (NS.po.GmaneSnapshot, NS.rdfs.subClassOf, NS.po.InteractionSnapshot),
-                )
-        triples=(
-                (NS.po.InteractionSnapshot, a, NS.rdfs.Class),
-                (NS.po.GmaneSnapshot, a, NS.rdfs.Class),
-                (NS.po.Snapshot, a, NS.rdfs.Class),
-
-
-                (NS.po.InteractionSnapshot, NS.rdfs.subClassOf, NS.po.Snapshot), # fb, part, tw, irc, gmane, cidade
-                (NS.po.FriendshipSnapshot, NS.rdfs.subClassOf, NS.po.Snapshot), # fb, part
-                (NS.po.ReportSnapshot, NS.rdfs.subClassOf, NS.po.Snapshot), # aa
-
-                (NS.po.FacebookSnapshot, NS.rdfs.subClassOf, NS.po.Snapshot),
-                (NS.po.FacebookInteractionSnapshot, NS.rdfs.subClassOf, NS.po.FacebookSnapshot),
-                (NS.po.FacebookInteractionSnapshot, NS.rdfs.subClassOf, NS.po.InteractionSnapshot),
-
-                (NS.po.FacebookFriendshipSnapshot, NS.rdfs.subClassOf, NS.po.FacebookSnapshot),
-                (NS.po.FacebookFriendshipSnapshot, NS.rdfs.subClassOf, NS.po.FriendshipSnapshot),
-
-                (NS.po.TwitterSnapshot, NS.rdfs.subClassOf, NS.po.InteractionSnapshot),
-
-                (NS.po.GmaneSnapshot, NS.rdfs.subClassOf, NS.po.InteractionSnapshot),
-
-                (NS.po.IRCSnapshot, NS.rdfs.subClassOf, NS.po.InteractionSnapshot),
-
-                (NS.po.AASnapshot, NS.rdfs.subClassOf, NS.po.ReportSnapshot),
-
-                (NS.po.ParticipaSnapshot, NS.rdfs.subClassOf, NS.po.CompleteSnapshot),
-
-                (NS.po.CidadeDemocraticaSnapshot, NS.rdfs.subClassOf, NS.po.InteractionSnapshot),
-
-                (NS.gmane.gmaneID, NS.rdfs.subPropertyOf, NS.po.auxID),
-                (NS.fb.groupID, NS.rdfs.subPropertyOf, NS.po.auxID),
-
-                (P.rdf.ns.po.interactionXMLFile, NS.rdfs.subPropertyOf,NS.po.defaultXML), # fb
-                (P.rdf.ns.po.rdfFile           , NS.rdfs.subPropertyOf,NS.po.defaultXML), # twitter, gmane
-                (P.rdf.ns.po.friendshipXMLFile , NS.rdfs.subPropertyOf,NS.po.defaultXML), # fb
-                # type of relation retrievement: 1, 2 or 3
-
-                # labels equivalence: irc, etc
-                # date equivalence
-                # interaction/relation uris equivalence
-                # textual content equivalence
-
-                # if text is available
-               )
-        g=r.Graph()
-        for triple in triples_:
-            g.add(triple)
-        f=open("{}po.ttl".format(triples_dir),"wb")
-        f.write(g.serialize(format="turtle"))
-        f.close()
-        c("po ttl written")
-        self.insertTriples(triples)
-
+    def insertOntology(self,triples_dir="/disco/triplas/"):
+        self.insertTriples(P.rdf.makeOntology())
 
 def addToFusekiEndpoint(end_url,tfiles):
     aa=[]
