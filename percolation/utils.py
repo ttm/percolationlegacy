@@ -1,11 +1,15 @@
 import time, pickle, os, zipfile, string, networkx as x, re
 import builtins as B
+import percolation as P
 from SPARQLWrapper import SPARQLWrapper, JSON
 TT=time.time()
 
 nestedDict = lambda: collections.defaultdict(nestedDict)
 # use with tdict=nestedDict(); tdict["akey1"]["akey2"]="anything"
-
+def uniqueItems(seq):
+    seen = set()
+    seen_add = seen.add
+    return [x for x in seq if not (x in seen or seen_add(x))]
 def min3(narray):
     narray_=n.array(narray)
     args=narray_.argsort()
