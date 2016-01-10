@@ -42,15 +42,6 @@ def urifyFilename(fname,digits=True):
     if digits:
         fname="".join(i for i in fname if i not in string.digits)
     return "http://{}".format(fname.split("/")[-1].replace("_","").lower())
-def addToEndpoint(end_url,tfiles):
-    aa=[]
-    for tfile in tfiles:
-        time.sleep(.1)
-        tgraph=urifyFilename(tfile)
-        cmd="s-put {} {} {}".format(end_url, tgraph, tfile)
-        check(cmd)
-        aa+=[os.system(cmd)]; check("pos")
-
 def testRdfs(path,end_url,do_query=True,write_back=True):
     files=os.listdir(path)
     for afile in files:
@@ -189,8 +180,16 @@ def zipDir2(odirpath,dpath="./afilename"):
 
 def check(amsg="string message"):
     global TT
-    print(amsg, time.time()-TT); TT=time.time()
+    print(amsg, "{:.7f}".format(time.time()-TT)); TT=time.time()
 # pdumps aqui tb
+def identifyProvenance(astring):
+    if "gmane-" in astring:
+        return P.rdf.ns.po.GmaneSnapshot
+    elif "_fb" in astring:
+        return P.rdf.ns.po.FacebookSnapshot
+    elif "_tw" in astring:
+        return P.rdf.ns.po.TwitterSnapshot
+
 class Dumper:
     def __init__(self,tfilename):
         if os.path.isfile(tfilename):

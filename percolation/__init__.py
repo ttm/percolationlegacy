@@ -7,3 +7,4 @@ from . import renderLegacy
 from . import temporalStats
 from . import text
 from . import topology
+from . import sparql
