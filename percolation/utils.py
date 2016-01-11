@@ -184,10 +184,16 @@ def zipDir2(odirpath,dpath="./afilename"):
 
 def check(*args):
     global TT
-    if len(args[0])==args[0].count("\n"):
+    prompt=0
+    if args[0]==1:
+        prompt=1
+        args=args[1:]
+    if args and isinstance(args[0],str) and (len(args[0])==args[0].count("\n")):
         print("{}{:.3f}".format(args[0],time.time()-TT),*args[1:]); TT=time.time()
     else:
         print("{:.3f}".format(time.time()-TT),*args); TT=time.time()
+    if prompt:
+        input("ANY KEY TO CONTINUE")
 # pdumps aqui tb
 def identifyProvenance(astring):
     if "gmane-" in astring:

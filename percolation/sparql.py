@@ -1,6 +1,7 @@
 __doc__="useful sparql queries or routines"
 
 import time, os
+from IPython import embed
 import rdflib as r, networkx as x, percolation as P
 from SPARQLWrapper import SPARQLWrapper, JSON
 c=P.utils.check
@@ -12,58 +13,118 @@ class EndpointInterface:
         self.endpoint=SPARQLWrapper(endpoint_url)
         self.endpoint.method = 'POST'
         self.endpoint.setReturnFormat(JSON)
-    def addFileToEndpoint(self,tfile,snapshotclass=None,autoid_graph=False):
-        tgraph=P.utils.urifyFilename(tfile)
-        cmd="s-post {} {} {}".format(self.endpoint_url, "default", tfile)
-        os.system(cmd)
+    def addTranslatesFromMetas(self,metagraphids=None):
+        if metagraphids==None:
+            if not hasattr(self,"metagraphids"):
+                self.getMetaGraphs()
+            metagraphids=self.metagraphids
+        # query each metagraph to get translates through ontology
+        for metagraphid in metagraphids:
+            self.addTranslatesFromMeta(metagraphid)
+    def addTranslatesFromMeta(self,metagraphid):
+        # busco SnapshotURI no grafo com o nome fo urified metagraphid
+        triples=(
+                    ("?foometagraph",NS.po.graphID,metagraphid),
+                    ("?snapshot_uri",NS.po.metaGraph,"?foometagraph"),
+                    ("?snapshot_uri",NS.po.localDir,"?localdir"),
+                )
+        snapshot_uri,localdir=plainQueryValues(self.performRetrieveQuery(triples))[0]
+        #snapshot_uri,local_dir=plainQueryValues(self.performRetrieveQuery(triples))
+#        embed()
+        # com SnapshotURI pego no defaultgraph os translates
+        triples=(
+            (snapshot_uri, NS.po.defaultXML,"?xmlfilename"),
+            )
+        translates=plainQueryValues(self.performRetrieveQuery(triples))
+        self.tmp=locals()
+        # com os translates e o dir, carrego os translates
+        for translate in translates:
+            fname=translate.split("/")[-1]
+            fname2="{}/{}".format(localdir,fname)
+            graphid=self.addFileToEndpoint(fname2)
+            # add the relation of po:associatedTranslate to the "graphs" graph
+
+    def addMetafileToEndpoint(self,tfile,snapshotclass=None,autoid_graph=True):
+#        self.addFileToEndpoint(tfile)
+        graphuri=self.addFileToEndpoint(tfile,None)
         # ask in tgraph what is the snapshot uri
         query_triples=(
                 ("?s",a,NS.po.Snapshot),
                 )
-        snapshot_uri=r.URIRef(self.getQuery(query_triples)["results"]["bindings"][0]["s"]["value"])
-
-        if not snapshotclass:
-            snapshotclass=NS.po.Snapshot
+        snapshot_uri=r.URIRef(self.performRetrieveQuery(query_triples,graphuri)["results"]["bindings"][0]["s"]["value"])
         if autoid_graph:
             snapshotclass=P.utils.identifyProvenance(tfile)
+        elif not snapshotclass:
+            snapshotclass=NS.po.Snapshot
         triples=(
-                    (snapshot_uri,a,snapshotclass),
-                    (snapshot_uri,NS.po.graphName,tgraph),
+                    (snapshot_uri,a,snapshotclass), # Gmane, FB, TW, ETC
                 )
-        c("\n\n{}\n\n".format(triples))
-        self.insertTriples(triples)
-    def getAllTriples(self):
+        self.insertTriples(triples,graphuri)
+        # add the existance of this graph to the "graphs" named graph
+        triples=(
+                    (snapshot_uri,NS.po.metaGraph,NS.po.NamedGraph+"#"+graphuri),
+                    (snapshot_uri,NS.po.localDir,os.path.dirname(tfile)),
+                    (NS.po.NamedGraph+"#"+graphuri,NS.po.localFilepath,tfile),
+                    (NS.po.NamedGraph+"#"+graphuri,NS.po.graphID,graphuri),
+                    (NS.po.NamedGraph+"#"+graphuri,a,NS.po.MetaNamedGraph),
+                )
+        self.insertTriples(triples,graphuri)
+#        self.insertTriples(triples)
+        self.graphuri=graphuri
+        return graphuri
+
+    def addTranslationFileToEndpoint(self,tfile):
+        self.addFileToEndpoint(tfile)
+        graphid=self.addFileToEndpoint(tfile,None)
+        triples=(
+                    (NS.po.NamedGraph+"#"+graphid,a,NS.po.TranslationNamedGraph),
+                    (NS.po.NamedGraph+"#"+graphid,NS.po.graphID,graphid),
+                )
+        self.insertTriples(triples,"graphs")
+        return graphid
+    def addFileToEndpoint(self,tfile,graphid="default"):
+        if not graphid:
+            graphid=P.utils.urifyFilename(tfile)
+        cmd="s-post {} {} {}".format(self.endpoint_url, graphid, tfile)
+        os.system(cmd)
+        cmd="s-post {} {} {}".format(self.endpoint_url, "default", tfile)
+        os.system(cmd)
+        return graphid
+    def getAllTriples(self,graphid=None):
         qtriples=(
                 ("?s", "?p", "?o"),
                 )
-        self.triples=plainQueryValues(self.getQuery(qtriples))
-    def getFoo(self):
+        if not graphid:
+            self.triples=plainQueryValues(self.performRetrieveQuery(qtriples))
+        else:
+            self.triples=plainQueryValues(self.performRetrieveQuery(qtriples,graphid))
+    def getMetaGraphs(self):
         qtriples=(
-                ("?snapshot", a, NS.po.BananaSnapshot),
-                ("?snapshot", NS.po.graphName, "?graph"),
+                ("?foonamedgraph", a, NS.po.NamedGraph),
+                ("?foonamedgraph", NS.po.graphID, "?graphid"),
                 )
-        self.graphs=dictQueryValues(self.getQuery(qtriples))
-
+        
+        self.metagraphids=plainQueryValues(self.performRetrieveQuery(qtriples))
     def getGraphs(self):
         qtriples=(
 #                ("?snapshot", a, NS.po.Snapshot),
 #                ("?snapshot", a, NS.po.GmaneSnapshot),
 #                ("?snapshot", a, NS.po.InteractionSnapshot),
-                ("?snapshot", a, NS.po.InteractionSnapshot),
-                ("?snapshot", NS.po.graphName, "?graph"),
+                ("?snapshot", NS.po.graphID, "?graph"),
                 )
-        self.graphs=dictQueryValues(self.getQuery(qtriples))
+        self.graphids=plainQueryValues(self.performRetrieveQuery(qtriples))
     def insertTriples(self,triples,graphid=None):
         lines=""
         for triple in triples:
             line=self.formatQueryLine(triple)
             lines+=line
         if graphid:
+            self.insertTriples(triples)
             querystring = 'INSERT DATA { GRAPH <%s> { %s } }'%(graphid,lines)
         else:
             querystring = 'INSERT DATA {  %s  }'%(lines,)
         self.result=self.postQuery(querystring)
-    def getQuery(self,querystring_or_triples,graphid=None):
+    def performRetrieveQuery(self,querystring_or_triples,graphid=None):
         if isinstance(querystring_or_triples,(tuple,list)):
             tvars=[]
             for line in querystring_or_triples:
@@ -74,9 +135,15 @@ class EndpointInterface:
             for line in querystring_or_triples:
                 body+=self.formatQueryLine(line)
             if graphid:
+
                 querystring="SELECT "+tvars_string+" WHERE { GRAPH <"+graphid+"> { "+body+" } }"
             else:
                 querystring="SELECT "+tvars_string+" WHERE { "+body+" } "
+                #union=" UNION { GRAPH ?g { ?s ?p ?o } } "
+                #querystring="SELECT DISTINCT %s WHERE { { %s } %s }"%(tvars_string,body,union)
+                #union=" GRAPH ?anygraph "
+                #querystring="SELECT %s WHERE { %s { %s }  }"%(tvars_string,union,body)
+#                querystring="SELECT "+tvars_string+" WHERE { { "+body+" } "+union+" }"
         elif isinstance(querystring_or_triples,str):
             querystring=querystring_or_triples
         self.query=querystring
@@ -93,8 +160,10 @@ class EndpointInterface:
                 line+=" <%s> "%(term,)
             elif term[0]=="?":
                 line+=" %s "%(term,)
+#            elif isinstance(term,str) and term[0]!="?":
+#                line+=' "%s" '%(term,)
             else:
-                line+=" '%s' "%(term,)
+                line+=' "%s" '%(term,)
         line+= " . "
         return line
     def renderDummyGraph(self,triples_dir="/disco/triplas/"):
@@ -109,8 +178,8 @@ class EndpointInterface:
         f.close()
         c("dummy ttl written")
 
-    def insertOntology(self,triples_dir="/disco/triplas/"):
-        self.insertTriples(P.rdf.makeOntology())
+    def insertOntology(self,triples_dir="/disco/triplas/",graphid=None):
+        self.insertTriples(P.rdf.makeOntology(),graphid)
 
 def addToFusekiEndpoint(end_url,tfiles):
     aa=[]
@@ -191,7 +260,12 @@ def dictQueryValues(result_dict):
         results+=[this_result]
     return results
 
-def plainQueryValues(result_dict):
+def plainQueryValues(result_dict,join_queries=False):
+    """Return query values as simplest list.
+    
+    Set join_queries="hard" to keep list of lists structure
+    when each result hold only one variable"""
+
     keys=result_dict["head"]["vars"]
     results=[]
     for result in result_dict["results"]["bindings"]:
@@ -204,15 +278,26 @@ def plainQueryValues(result_dict):
             elif type_ in ("literal","bnode"):
                 pass
             elif type_=="typed-literal":
-                if result[key]["datatype"]==(P.rdf.ns.xsd.integer).toPython():
+                if result[key]["datatype"]==(NS.xsd.integer).toPython():
                     value=int(value)
-                elif result[key]["datatype"]==(P.rdf.ns.xsd.datetime).toPython():
-                    value=value
+                elif result[key]["datatype"]==(NS.xsd.datetime).toPython():
+                    pass
+                elif result[key]["datatype"]==(NS.xsd.date).toPython():
+                    pass
+                elif result[key]["datatype"]==(NS.xsd.boolean).toPython():
+                    if value=="true":
+                        value=True
+                    elif value=="false":
+                        value=False
+                    else:
+                        raise TypeError("Incomming boolean not understood")
                 else:
-                    raise TypeError("Type of incomming variable not understood")
+                    raise TypeError("Incomming typed-literal variable not understood")
             else:
                 raise TypeError("Type of incomming variable not understood")
             this_result+=[value]
         results+=[this_result]
+    if len(results) and len(keys)==1 and join_queries !="hard":
+        results=[i[0] for i in results]
     return results
 

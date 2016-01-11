@@ -25,31 +25,34 @@ remote_urls="http://200.144.255.210:8082/ds","http://200.144.255.210:8082/dstdb"
 remote_urls="http://200.144.255.210:8082/ds","http://200.144.255.210:8082/dstdb",\
             "http://200.144.255.210:8082/REmpty","http://200.144.255.210:8082/RTDB",\
 
+remote_urls="http://200.144.255.210:8082/REmpty","http://200.144.255.210:8082/RTDB"
+remote_urls=("http://200.144.255.210:8082/RTDB",)
 
+urls=remote_urls
 urls=remote_urls
 metafiles=P.utils.getFiles(data_dir,".owl")
 c('identifiers="gmane-", "_fb", "_tw"')
 metafiles_=[i for i in metafiles if "gmane-" in i]
-metafiles__=metafiles_[8:12]
 metafiles__=metafiles_[10:11]
+metafiles__=metafiles_[8:12]
 services=[]
 for url in urls:
     service=P.sparql.EndpointInterface(url)
     services+=[service]
     for metafile in metafiles__:
+        service.addMetafileToEndpoint(metafile,autoid_graph=True)
         pass
-#        service.addFileToEndpoint(metafile,autoid_graph=True)
 #        service.getGraphs()
     #    services[-1].getGraphs()
 for service in services:
-#    service.insertOntology()
+    service.insertOntology()
     service.getGraphs()
     if service.graphs:
         c("\n\n","---> ",service.endpoint_url)
         c(service.graphs)
-#    service.getAllTriples()
+    service.getAllTriples()
     #service.renderDummyGraph()
-#    c(len(service.triples))
+    c(len(service.triples))
 
 # partir somente da URI de informação.
 # colocar nela as infos necessárias:

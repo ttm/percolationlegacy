@@ -106,6 +106,14 @@ def makeOntology():
             (NS.po.interactionXMLFile, NS.rdfs.subPropertyOf,NS.po.defaultXML), # fb
             (NS.po.rdfFile           , NS.rdfs.subPropertyOf,NS.po.defaultXML), # twitter, gmane
             (NS.po.friendshipXMLFile , NS.rdfs.subPropertyOf,NS.po.defaultXML), # fb
+
+            (NS.po.MetaNamedGraph, NS.rdfs.subClassOf,NS.po.NamedGraph), 
+            (NS.po.TranslationNamedGraph, NS.rdfs.subClassOf, NS.po.NamedGraph),
+
+            (NS.po.metaGraph , NS.rdfs.subPropertyOf,NS.po.namedGraph), # fb
+            (NS.po.metaGraph , NS.rdfs.range,NS.po.MetaNamedGraph), # fb
+            (NS.po.translationGraph , NS.rdfs.subPropertyOf,NS.po.namedGraph), # fb
+            (NS.po.translationGraph , NS.rdfs.range,NS.po.TranslationNamedGraph), # fb
             # type of relation retrievement: 1, 2 or 3
 
             # labels equivalence: irc, etc
