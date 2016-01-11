@@ -22,12 +22,16 @@ remote_urls="http://200.144.255.210:8082/ds","http://200.144.255.210:8082/dstdb"
             "http://200.144.255.210:8082/inf","http://200.144.255.210:8082/infEmpty",\
             "http://200.144.255.210:8082/infT","http://200.144.255.210:8082/infTEmpty",\
 
+remote_urls="http://200.144.255.210:8082/ds","http://200.144.255.210:8082/dstdb",\
+            "http://200.144.255.210:8082/REmpty","http://200.144.255.210:8082/RTDB",\
+
+
 urls=remote_urls
 metafiles=P.utils.getFiles(data_dir,".owl")
 c('identifiers="gmane-", "_fb", "_tw"')
 metafiles_=[i for i in metafiles if "gmane-" in i]
-metafiles__=metafiles_[10:11]
 metafiles__=metafiles_[8:12]
+metafiles__=metafiles_[10:11]
 services=[]
 for url in urls:
     service=P.sparql.EndpointInterface(url)

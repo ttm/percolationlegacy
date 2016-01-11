@@ -73,9 +73,9 @@ def makeDummyOntology():
 
 def makeOntology():
     triples=(
-            (NS.po.InteractionSnapshot, a, NS.rdfs.Class),
-            (NS.po.GmaneSnapshot, a, NS.rdfs.Class),
-            (NS.po.Snapshot, a, NS.rdfs.Class),
+            #(NS.po.InteractionSnapshot, a, NS.rdfs.Class),
+            #(NS.po.GmaneSnapshot, a, NS.rdfs.Class),
+            #(NS.po.Snapshot, a, NS.rdfs.Class),
 
             (NS.po.InteractionSnapshot, NS.rdfs.subClassOf, NS.po.Snapshot), # fb, part, tw, irc, gmane, cidade
             (NS.po.FriendshipSnapshot, NS.rdfs.subClassOf, NS.po.Snapshot), # fb, part

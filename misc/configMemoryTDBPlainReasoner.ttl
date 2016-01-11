@@ -1,0 +1,172 @@
+
+
+## A collection of example configurations for Fuseki
+
+@prefix :        <#> .
+@prefix fuseki:  <http://jena.apache.org/fuseki#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix tdb:     <http://jena.hpl.hp.com/2008/tdb#> .
+@prefix ja:      <http://jena.hpl.hp.com/2005/11/Assembler#> .
+
+[] rdf:type fuseki:Server ;
+   # Timeout - server-wide default: milliseconds.
+   # Format 1: "1000" -- 1 second timeout
+   # Format 2: "10000,60000" -- 10s timeout to first result, then 60s timeout to for rest of query.
+   # See java doc for ARQ.queryTimeout
+   # ja:context [ ja:cxtName "arq:queryTimeout" ;  ja:cxtValue "10000" ] ;
+
+   # ja:loadClass "your.code.Class" ;
+
+   fuseki:services (
+     <#service1>
+     <#service1tdb> #
+     <#serviceRempty>
+     <#serviceRTDB>
+   ) .
+## ---------------------------------------------------------------
+## Updatable in-memory dataset.
+
+<#service1> rdf:type fuseki:Service ;
+    # URI of the dataset -- http://host:port/ds
+    fuseki:name                     "ds" ; 
+
+    # SPARQL query services e.g. http://host:port/ds/sparql?query=...
+    fuseki:serviceQuery             "sparql" ;
+    fuseki:serviceQuery             "query" ;
+    # SPARQL Update service -- http://host:port/ds/update?request=...
+    fuseki:serviceUpdate            "update" ;   # SPARQL query service -- /ds/update
+
+    # Upload service -- http://host:port/ds/upload?graph=default or ?graph=URI or ?default
+    # followed by a multipart body, each part being RDF syntax.
+    # Syntax determined by the file name extension.
+    fuseki:serviceUpload            "upload" ;   # Non-SPARQL upload service
+
+    # SPARQL Graph store protocol (read and write)
+    # GET, PUT, POST DELETE to http://host:port/ds/data?graph= or ?default=
+    fuseki:serviceReadWriteGraphStore      "data" ;     
+
+    # A separate read-only graph store endpoint:
+    fuseki:serviceReadGraphStore       "get" ;   # Graph store protocol (read only) -- /ds/get
+
+    fuseki:dataset           <#emptyDataset> ;
+    .
+
+## In-memory, initially empty.
+<#emptyDataset> rdf:type ja:RDFDataset .
+
+<#service1tdb> rdf:type fuseki:Service ;
+    # URI of the dataset -- http://host:port/ds
+    fuseki:name                     "dstdb" ; 
+
+    # SPARQL query services e.g. http://host:port/ds/sparql?query=...
+    fuseki:serviceQuery             "sparql" ;
+    fuseki:serviceQuery             "query" ;
+    # SPARQL Update service -- http://host:port/ds/update?request=...
+    fuseki:serviceUpdate            "update" ;   # SPARQL query service -- /ds/update
+
+    # Upload service -- http://host:port/ds/upload?graph=default or ?graph=URI or ?default
+    # followed by a multipart body, each part being RDF syntax.
+    # Syntax determined by the file name extension.
+    fuseki:serviceUpload            "upload" ;   # Non-SPARQL upload service
+
+    # SPARQL Graph store protocol (read and write)
+    # GET, PUT, POST DELETE to http://host:port/ds/data?graph= or ?default=
+    fuseki:serviceReadWriteGraphStore      "data" ;     
+
+    # A separate read-only graph store endpoint:
+    fuseki:serviceReadGraphStore       "get" ;   # Graph store protocol (read only) -- /ds/get
+
+    fuseki:dataset           <#emptyTDBDataset> ;
+    .
+
+
+# Custom code.
+#[] ja:loadClass "com.hp.hpl.jena.tdb.TDB" .
+#[] ja:loadClass "org.apache.jena.tdb.TDB" .
+
+# TDB
+#tdb:DatasetTDB  rdfs:subClassOf  ja:RDFDataset .
+#tdb:GraphTDB    rdfs:subClassOf  ja:Model .
+
+## Make TDB empty. TTM
+<#emptyTDBDataset> rdf:type      tdb:DatasetTDB ;
+     tdb:location "emptyTDBDataset" ;
+     .
+
+<#model_inf_Rempty> a ja:InfModel ;
+    rdfs:label "Inf-2" ;
+    ja:baseModel 
+        [ a ja:MemoryModel ;
+#          ja:content [ja:externalContent <file:////disco/endpoint/tempo/jena-fuseki-1.1.0/Data/test_abox.ttl>] ;
+#          ja:content [ja:externalContent <file:////disco/endpoint/tempo/jena-fuseki-1.1.0/Data/test_tbox.ttl>] ;
+#          ja:content [ja:externalContent <file:////disco/triplas/po.ttl>] ;
+#          ja:content [ja:externalContent <file:////disco/triplas/dummy.ttl>] ;
+        ] ;
+    ja:reasoner
+         [ ja:reasonerURL <http://jena.hpl.hp.com/2003/RDFSExptRuleReasoner> ] 
+    . 
+<#serviceRempty>  rdf:type fuseki:Service ;
+    fuseki:name              "REmpty" ;
+    fuseki:serviceQuery      "sparql" ; 
+    fuseki:serviceQuery                "query" ;
+    fuseki:serviceQuery                "sparql" ;
+    fuseki:serviceUpdate               "update" ;
+    fuseki:serviceUpload               "upload" ;
+    fuseki:serviceReadWriteGraphStore  "data" ;     
+    fuseki:dataset           <#datasetRempty> ;
+    .
+
+<#datasetRempty> rdf:type       ja:RDFDataset ;
+    ja:defaultGraph       <#model_inf_Rempty> ;
+     .
+
+##### Resoner + TDB
+
+
+
+<#serviceRTDB>  rdf:type fuseki:Service ;
+    fuseki:name              "RTDB" ;
+    fuseki:serviceQuery      "sparql" ; 
+    fuseki:serviceQuery                "query" ;
+    fuseki:serviceUpdate               "update" ;
+    fuseki:serviceUpload               "upload" ;
+    fuseki:serviceReadWriteGraphStore  "data" ;     
+    fuseki:dataset           <#datasetRTDB> ;
+    .
+
+<#datasetRTDB> rdf:type       ja:RDFDataset ;
+    ja:defaultGraph       <#model_rtdb> ;
+     .
+# ERROR Exception in initialization: the root file:///disco/endpoint/apache-jena-fuseki-2.3.1/newConfigReasoner3.ttl#model_inf_RTDB has no most specific type that is a subclass of ja:Object
+<#model_rtdb> a ja:InfModel ;
+    ja:baseModel <#RTDBGraph> ;
+    ja:reasoner
+         [ ja:reasonerURL <http://jena.hpl.hp.com/2003/RDFSExptRuleReasoner> ] ;
+    . 
+
+<#RTDBGraph> rdf:type      tdb:GraphTDB ;
+    tdb:dataset <#rtdbDataset> .
+
+<#rtdbDataset> rdf:type tdb:DatasetTDB ;
+    tdb:location "RTDB" ;
+#tdb:unionDefaultGraph true;
+ .
+
+
+
+#     tdb:location "RTDBDataset" ;
+#     .
+
+
+
+### SEP
+#[] ja:loadClass "org.apache.jena.tdb.TDB" .
+
+# TDB
+#tdb:DatasetTDB  rdfs:subClassOf  ja:RDFDataset .
+#tdb:GraphTDB    rdfs:subClassOf  ja:Model .
+
+## Make TDB empty. TTM
+
