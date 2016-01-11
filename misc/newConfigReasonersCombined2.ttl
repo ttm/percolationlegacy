@@ -1,0 +1,100 @@
+
+
+## A collection of example configurations for Fuseki
+
+@prefix :        <#> .
+@prefix fuseki:  <http://jena.apache.org/fuseki#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix tdb:     <http://jena.hpl.hp.com/2008/tdb#> .
+@prefix ja:      <http://jena.hpl.hp.com/2005/11/Assembler#> .
+
+[] ja:loadClass "org.apache.jena.tdb.TDB" .
+
+tdb:DatasetTDB  rdfs:subClassOf  ja:RDFDataset .
+tdb:GraphTDB    rdfs:subClassOf  ja:Model .
+
+
+[] rdf:type fuseki:Server ;
+   # Timeout - server-wide default: milliseconds.
+   # Format 1: "1000" -- 1 second timeout
+   # Format 2: "10000,60000" -- 10s timeout to first result, then 60s timeout to for rest of query.
+   # See java doc for ARQ.queryTimeout
+   # ja:context [ ja:cxtName "arq:queryTimeout" ;  ja:cxtValue "10000" ] ;
+
+   # ja:loadClass "your.code.Class" ;
+
+   fuseki:services (
+     <#serviceRTDB>
+   ) .
+## ---------------------------------------------------------------
+## Updatable in-memory dataset.
+
+<#serviceRTDB>  rdf:type fuseki:Service ;
+    fuseki:name              "RTDB" ;
+    fuseki:serviceQuery      "sparql" ; 
+    fuseki:serviceQuery                "query" ;
+    fuseki:serviceUpdate               "update" ;
+    fuseki:serviceUpload               "upload" ;
+    fuseki:serviceReadWriteGraphStore  "data" ;     
+    fuseki:dataset           <#datasetRTDB> ;
+    .
+
+<#datasetRTDB> rdf:type       ja:RDFDataset ;
+    ja:defaultGraph       <#model_rtdb> ;
+#    ja:namedGraph [ ja:graph <#yourgraph> ; 
+    ja:namedGraph [ ja:graph <#model_raux> ; 
+#    ja:namedGraph [ 
+                    ja:graphName <http://purl.org/socialparticipation/po/AuxGraph#1>; ];
+#    ja:namedGraph        <#model_raux> ;
+     .
+<#model_raux> a ja:InfModel ;
+    ja:baseModel <#RAuxGraph> ;
+    ja:reasoner
+         [ ja:reasonerURL <http://jena.hpl.hp.com/2003/RDFSExptRuleReasoner> ] ;
+    . 
+<#RAuxGraph> rdf:type      ja:MemoryModel .
+
+
+# ERROR Exception in initialization: the root file:///disco/endpoint/apache-jena-fuseki-2.3.1/newConfigReasoner3.ttl#model_inf_RTDB has no most specific type that is a subclass of ja:Object
+<#model_rtdb> a ja:InfModel ;
+    ja:baseModel <#RTDBGraph> ;
+    ja:reasoner
+         [ ja:reasonerURL <http://jena.hpl.hp.com/2003/RDFSExptRuleReasoner> ] ;
+    . 
+
+<#RTDBGraph> rdf:type      tdb:GraphTDB ;
+    tdb:dataset <#rtdbDataset> ;
+.
+
+<#rtdbDataset> rdf:type tdb:DatasetTDB ;
+    tdb:location "RTDB" ;
+#    tdb:unionDefaultGraph true 
+ .
+
+
+#<#serviceRAux>  rdf:type fuseki:Service ;
+#    fuseki:name              "RAux" ;
+#    fuseki:serviceQuery      "sparql" ; 
+#    fuseki:serviceQuery                "query" ;
+#    fuseki:serviceUpdate               "update" ;
+#    fuseki:serviceUpload               "upload" ;
+#    fuseki:serviceReadWriteGraphStore  "data" ;     
+#    fuseki:dataset           <#datasetRAux> ;
+#    .
+#
+#<#datasetRAux> rdf:type       ja:RDFDataset ;
+#    ja:defaultGraph       <#model_raux> ;
+#     .
+# ERROR Exception in initialization: the root file:///disco/endpoint/apache-jena-fuseki-2.3.1/newConfigReasoner3.ttl#model_inf_RTDB has no most specific type that is a subclass of ja:Object
+
+
+#     tdb:location "RTDBDataset" ;
+#     .
+
+
+
+### SEP
+## Make TDB empty. TTM
+

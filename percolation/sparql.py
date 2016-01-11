@@ -9,10 +9,11 @@ NS=P.rdf.NS
 a=NS.rdf.type
 class EndpointInterface:
     def __init__(self,endpoint_url):
-        self.endpoint_url=endpoint_url
         self.endpoint=SPARQLWrapper(endpoint_url)
+        self.endpoint_url=endpoint_url
         self.endpoint.method = 'POST'
         self.endpoint.setReturnFormat(JSON)
+
     def addTranslatesFromMetas(self,metagraphids=None):
         if metagraphids==None:
             if not hasattr(self,"metagraphids"):
@@ -41,8 +42,23 @@ class EndpointInterface:
         for translate in translates:
             fname=translate.split("/")[-1]
             fname2="{}/{}".format(localdir,fname)
-            graphid=self.addFileToEndpoint(fname2)
+            graphid=self.addTranslationFileToEndpoint(fname2,metagraphid)
             # add the relation of po:associatedTranslate to the "graphs" graph
+    def addTranslationFileToEndpoint(self,tfile,metagraphid):
+        graphid=P.utils.urifyFilename(tfile)
+        #http://purl.org/socialparticipation/po/AuxGraph#1
+        graphid_=NS.po.AuxGraph+"#1"
+        cmd="s-post {} {} {}".format(self.endpoint_url, graphid_, tfile)
+
+        # make updates on auxgraph
+        triples=(
+                UPDATE=("?a",NS.po.referenceSnapshot,snapshot_uri)
+              WHERE=  ("?a", a ,NS.po.Participant),
+                ("?m", a ,NS.po.Message),
+                )
+        # write all triples from auxgraph to defaultgraph
+
+        return graphid
 
     def addMetafileToEndpoint(self,tfile,snapshotclass=None,autoid_graph=True):
 #        self.addFileToEndpoint(tfile)
@@ -73,15 +89,6 @@ class EndpointInterface:
         self.graphuri=graphuri
         return graphuri
 
-    def addTranslationFileToEndpoint(self,tfile):
-        self.addFileToEndpoint(tfile)
-        graphid=self.addFileToEndpoint(tfile,None)
-        triples=(
-                    (NS.po.NamedGraph+"#"+graphid,a,NS.po.TranslationNamedGraph),
-                    (NS.po.NamedGraph+"#"+graphid,NS.po.graphID,graphid),
-                )
-        self.insertTriples(triples,"graphs")
-        return graphid
     def addFileToEndpoint(self,tfile,graphid="default"):
         if not graphid:
             graphid=P.utils.urifyFilename(tfile)
