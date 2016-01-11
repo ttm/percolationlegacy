@@ -8,47 +8,41 @@ c=P.utils.check
 NS=P.rdf.NS
 a=NS.rdf.type
 class EndpointInterface:
+    graphidAUX=NS.po.AuxGraph+"#1"
     def __init__(self,endpoint_url):
         self.endpoint=SPARQLWrapper(endpoint_url)
         self.endpoint_url=endpoint_url
         self.endpoint.method = 'POST'
         self.endpoint.setReturnFormat(JSON)
 
-    def addTranslatesFromMetas(self,metagraphids=None):
-        if metagraphids==None:
-            if not hasattr(self,"metagraphids"):
-                self.getMetaGraphs()
-            metagraphids=self.metagraphids
-        # query each metagraph to get translates through ontology
-        for metagraphid in metagraphids:
-            self.addTranslatesFromMeta(metagraphid)
-    def addTranslatesFromMeta(self,metagraphid):
-        # busco SnapshotURI no grafo com o nome fo urified metagraphid
+    def addTranslatesFromSnapshots(self,snapshots=None):
+        if snapshots==None:
+            if not hasattr(self,"snapshots"):
+                self.getMetaSnapshots()
+            snapshots=self.snapshots
+        # query each snapshot to get translates through ontology
+        for snapshot in snapshots:
+            self.addTranslatesFromMeta(snapshot)
+    def addTranslatesFromSnapshot(self,snapshot):
+        # busco localdir e translates (GROUP BY?)
         triples=(
-                    ("?foometagraph",NS.po.graphID,metagraphid),
-                    ("?snapshot_uri",NS.po.metaGraph,"?foometagraph"),
-                    ("?snapshot_uri",NS.po.localDir,"?localdir"),
+                    (snapshot,NS.po.defaultXML,"?translate"),
+                    (snapshot,NS.po.localDir,"?localdir"),
+                    # GROUP BY localDir
                 )
-        snapshot_uri,localdir=plainQueryValues(self.performRetrieveQuery(triples))[0]
-        #snapshot_uri,local_dir=plainQueryValues(self.performRetrieveQuery(triples))
-#        embed()
-        # com SnapshotURI pego no defaultgraph os translates
-        triples=(
-            (snapshot_uri, NS.po.defaultXML,"?xmlfilename"),
-            )
-        translates=plainQueryValues(self.performRetrieveQuery(triples))
+        result=plainQueryValues(self.performRetrieveQuery(triples))[0]
         self.tmp=locals()
         # com os translates e o dir, carrego os translates
+        translates="BANANA"
         for translate in translates:
             fname=translate.split("/")[-1]
             fname2="{}/{}".format(localdir,fname)
-            graphid=self.addTranslationFileToEndpoint(fname2,metagraphid)
+            graphid=self.addTranslationFileToEndpoint(fname2,snapshot)
             # add the relation of po:associatedTranslate to the "graphs" graph
     def addTranslationFileToEndpoint(self,tfile,metagraphid):
         graphid=P.utils.urifyFilename(tfile)
         #http://purl.org/socialparticipation/po/AuxGraph#1
-        graphid_=NS.po.AuxGraph+"#1"
-        cmd="s-post {} {} {}".format(self.endpoint_url, graphid_, tfile)
+        cmd="s-post {} {} {}".format(self.endpoint_url, self.graphidAUX, tfile)
 
         # make updates on auxgraph
         triples=(
@@ -58,80 +52,40 @@ class EndpointInterface:
                 )
         # write all triples from auxgraph to defaultgraph
 
-        return graphid
 
-    def addMetafileToEndpoint(self,tfile,snapshotclass=None,autoid_graph=True):
+    def addMetafileToEndpoint(self,tfile):
 #        self.addFileToEndpoint(tfile)
-        graphuri=self.addFileToEndpoint(tfile,None)
-        # ask in tgraph what is the snapshot uri
-        query_triples=(
-                ("?s",a,NS.po.Snapshot),
-                )
-        snapshot_uri=r.URIRef(self.performRetrieveQuery(query_triples,graphuri)["results"]["bindings"][0]["s"]["value"])
-        if autoid_graph:
-            snapshotclass=P.utils.identifyProvenance(tfile)
-        elif not snapshotclass:
-            snapshotclass=NS.po.Snapshot
+        self.addFileToEndpoint(tfile)
+        snapshot_uri=performFileGetQuery(tfile,(("?s",a,NS.po.Snapshot),))[0][0]
+        snapshotsubclass=P.utils.identifyProvenance(tfile)
         triples=(
-                    (snapshot_uri,a,snapshotclass), # Gmane, FB, TW, ETC
+                    (snapshoturi,a,snapshotsubclass), # Gmane, FB, TW, ETC
+                    (snapshoturi,NS.po.localDir,os.path.dirname(tfile)),
+                    (snapshoturi,NS.po.metaFilepath,tfile),
                 )
-        self.insertTriples(triples,graphuri)
-        # add the existance of this graph to the "graphs" named graph
-        triples=(
-                    (snapshot_uri,NS.po.metaGraph,NS.po.NamedGraph+"#"+graphuri),
-                    (snapshot_uri,NS.po.localDir,os.path.dirname(tfile)),
-                    (NS.po.NamedGraph+"#"+graphuri,NS.po.localFilepath,tfile),
-                    (NS.po.NamedGraph+"#"+graphuri,NS.po.graphID,graphuri),
-                    (NS.po.NamedGraph+"#"+graphuri,a,NS.po.MetaNamedGraph),
-                )
-        self.insertTriples(triples,graphuri)
-#        self.insertTriples(triples)
-        self.graphuri=graphuri
-        return graphuri
+        self.insertTriples(triples)
 
-    def addFileToEndpoint(self,tfile,graphid="default"):
-        if not graphid:
-            graphid=P.utils.urifyFilename(tfile)
-        cmd="s-post {} {} {}".format(self.endpoint_url, graphid, tfile)
-        os.system(cmd)
+    def addFileToEndpoint(self,tfile):
         cmd="s-post {} {} {}".format(self.endpoint_url, "default", tfile)
         os.system(cmd)
-        return graphid
-    def getAllTriples(self,graphid=None):
+    def getAllTriples(self):
+        qtriples=(("?s", "?p", "?o"),)
+        self.triples=plainQueryValues(self.performRetrieveQuery(qtriples))
+    def getSnapshots(self):
         qtriples=(
-                ("?s", "?p", "?o"),
-                )
-        if not graphid:
-            self.triples=plainQueryValues(self.performRetrieveQuery(qtriples))
-        else:
-            self.triples=plainQueryValues(self.performRetrieveQuery(qtriples,graphid))
-    def getMetaGraphs(self):
-        qtriples=(
-                ("?foonamedgraph", a, NS.po.NamedGraph),
-                ("?foonamedgraph", NS.po.graphID, "?graphid"),
-                )
-        
-        self.metagraphids=plainQueryValues(self.performRetrieveQuery(qtriples))
-    def getGraphs(self):
-        qtriples=(
-#                ("?snapshot", a, NS.po.Snapshot),
+                ("?snapshot", a, NS.po.Snapshot),
 #                ("?snapshot", a, NS.po.GmaneSnapshot),
 #                ("?snapshot", a, NS.po.InteractionSnapshot),
-                ("?snapshot", NS.po.graphID, "?graph"),
                 )
-        self.graphids=plainQueryValues(self.performRetrieveQuery(qtriples))
-    def insertTriples(self,triples,graphid=None):
+        self.snapshots=plainQueryValues(self.performRetrieveQuery(qtriples))
+    def insertTriples(self,triples):
         lines=""
         for triple in triples:
-            line=self.formatQueryLine(triple)
+            line=formatQueryLine(triple)
             lines+=line
-        if graphid:
-            self.insertTriples(triples)
-            querystring = 'INSERT DATA { GRAPH <%s> { %s } }'%(graphid,lines)
-        else:
-            querystring = 'INSERT DATA {  %s  }'%(lines,)
+        querystring = 'INSERT DATA {  %s  }'%(lines,)
         self.result=self.postQuery(querystring)
-    def performRetrieveQuery(self,querystring_or_triples,graphid=None):
+    def performRetrieveQuery(self,querystring_or_triples):
         if isinstance(querystring_or_triples,(tuple,list)):
             tvars=[]
             for line in querystring_or_triples:
@@ -140,53 +94,24 @@ class EndpointInterface:
             tvars_string=(" %s "*len(tvars))%tuple(tvars)
             body=""
             for line in querystring_or_triples:
-                body+=self.formatQueryLine(line)
-            if graphid:
-
-                querystring="SELECT "+tvars_string+" WHERE { GRAPH <"+graphid+"> { "+body+" } }"
-            else:
-                querystring="SELECT "+tvars_string+" WHERE { "+body+" } "
-                #union=" UNION { GRAPH ?g { ?s ?p ?o } } "
-                #querystring="SELECT DISTINCT %s WHERE { { %s } %s }"%(tvars_string,body,union)
-                #union=" GRAPH ?anygraph "
-                #querystring="SELECT %s WHERE { %s { %s }  }"%(tvars_string,union,body)
-#                querystring="SELECT "+tvars_string+" WHERE { { "+body+" } "+union+" }"
+                body+=formatQueryLine(line)
+            querystring="SELECT "+tvars_string+" WHERE { "+body+" } "
         elif isinstance(querystring_or_triples,str):
             querystring=querystring_or_triples
         self.query=querystring
-        self.endpoint.setQuery(querystring) 
-        return self.endpoint.query().convert()
+        return self.retrieveQuery(querystring) 
+    def retrieveQuery(self,querystring):
+        return self.postQuery(querystring)
     def postQuery(self,querystring):
         self.endpoint.setQuery(querystring) 
         return self.endpoint.query().convert()
 #        return self.endpoint.query()
-    def formatQueryLine(self,triple):
-        line=""
-        for term in triple:
-            if isinstance(term,(r.Namespace,r.URIRef)):
-                line+=" <%s> "%(term,)
-            elif term[0]=="?":
-                line+=" %s "%(term,)
-#            elif isinstance(term,str) and term[0]!="?":
-#                line+=' "%s" '%(term,)
-            else:
-                line+=' "%s" '%(term,)
-        line+= " . "
-        return line
     def renderDummyGraph(self,triples_dir="/disco/triplas/"):
         self.getAllTriples()
-        g=r.Graph()
-        for triple in self.triples:
-            if not isinstance(triple[2],r.URIRef):
-                triple[2]=r.Literal(triple[2])
-            g.add(triple)
-        f=open("{}dummy.ttl".format(triples_dir),"wb")
-        f.write(g.serialize(format="turtle"))
-        f.close()
+        P.utils.writeTriples(self.triples,"{}dummy.ttl".format(triples_dir))
         c("dummy ttl written")
-
-    def insertOntology(self,triples_dir="/disco/triplas/",graphid=None):
-        self.insertTriples(P.rdf.makeOntology(),graphid)
+    def insertOntology(self):
+        self.insertTriples(P.rdf.makeOntology())
 
 def addToFusekiEndpoint(end_url,tfiles):
     aa=[]
@@ -307,4 +232,29 @@ def plainQueryValues(result_dict,join_queries=False):
     if len(results) and len(keys)==1 and join_queries !="hard":
         results=[i[0] for i in results]
     return results
+def performFileGetQuery(tfile,triples=(("?s",a,NS.po.Snapshot),)):
+    g=r.Graph()
+    g.parse(tfile)
+    for line in triples:
+        tvars+=[i for i in line if i[0]=="?" and "foo" not in i]
+    tvars=P.utils.uniqueItems(tvars)
+    tvars_string=(" %s "*len(tvars))%tuple(tvars)
+    body=""
+    for line in querystring_or_triples:
+        body+=formatQueryLine(line)
+    querystring="SELECT "+tvars_string+" WHERE { "+body+" } "
+    return g.query(querystring)
+def formatQueryLine(triple):
+    line=""
+    for term in triple:
+        if isinstance(term,(r.Namespace,r.URIRef)):
+            line+=" <%s> "%(term,)
+        elif term[0]=="?":
+            line+=" %s "%(term,)
+         elif isinstance(term,str) and term[0]!="?":
+             line+=' "%s" '%(term,)
+        else:
+            line+=' "%s" '%(term,)
+    line+= " . "
+    return line
 

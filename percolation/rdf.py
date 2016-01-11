@@ -133,15 +133,25 @@ def renderOntology(triples_dir="/disco/triplas/",dummy=False):
     c("po ttl written")
 def G(g,S,P,O):
     g.add((S,P,O))
-def writeTriples(triples,filename,format_="ttl"):
+
+        g=r.Graph()
+        for triple in self.triples:
+            if not isinstance(triple[2],r.URIRef):
+                triple[2]=r.Literal(triple[2])
+            g.add(triple)
+        f=open("{}dummy.ttl".format(triples_dir),"wb")
+        f.write(g.serialize(format="turtle"))
+        f.close()
+
+
+def writeTriples(triples,filename,format_="turtle"):
     g=r.Graph()
     for triple in triples:
+        if not isinstance(triple[2],r.URIRef):
+            triple[2]=r.Literal(triple[2])
         g.add(triple)
     with open(filename,"wb") as f:
-        if format=="ttl":
-            f.write(g.serialize(format="turtle"))
-        else:
-            f.write(g.serialize())
+        f.write(g.serialize(format=format_))
 def writeAll(per_graph,sname="img_and_rdf",sdir="./",full=False,remove=False,dot=False,sizelimit=None):
     nome_=sname
     g,A=per_graph
