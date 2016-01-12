@@ -3,7 +3,7 @@ import percolation as P, rdflib as r
 NS=P.rdf.NS
 a=NS.rdf.type
 
-def buildQuery(triples1,graph1=None,triples2=None,graph2=None,modifier1="",modifier2="",distinct1=None,method="select"):
+def buildQuery(triples1,graph1=None,triples2=None,graph2=None,modifier1="",modifier2="",distinct1=None,method="select",startB_=None):
     """The general query builder from fields and respective triples or uris"""
     if isinstance(triples1,str):
         querystring=triples1
@@ -36,6 +36,8 @@ def buildQuery(triples1,graph1=None,triples2=None,graph2=None,modifier1="",modif
             startB=" { "
         elif method.lower()=="delete":
             pass
+        if startB_:
+            startB=startB_
         querystring=start+startB+graphpart1+body+body1close+modifier1
     if isinstance(triples2,str):
         querystring+=triples2

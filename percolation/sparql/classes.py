@@ -35,8 +35,8 @@ class SparQLQueries:
     def insertTriples(self,triples,graph=None):
         querystring=P.sparql.functions.buildQuery(triples,method="insert")
         self.result=self.updateQuery(querystring)
-    def retrieveFromTriples(self,querystring_or_triples,modifier1="",graph1=None):
-        querystring=P.sparql.functions.buildQuery(querystring_or_triples,graph1=graph1,modifier1=modifier1)
+    def retrieveFromTriples(self,querystring_or_triples,modifier1="",graph1=None,startB_=None):
+        querystring=P.sparql.functions.buildQuery(querystring_or_triples,graph1=graph1,modifier1=modifier1,startB_=startB_)
         return self.retrieveQuery(querystring)
     def retrieveQuery(self,querystring):
         """Query for retrieving information (e.g. through select)"""
@@ -51,9 +51,9 @@ class SparQLQueries:
          # self.method=POST
         self.endpoint.setQuery(querystring) 
         return self.endpoint.queryAndConvert()
-    def getAllTriples(self):
+    def getAllTriples(self,graph1=None):
         qtriples=(("?s", "?p", "?o"),)
-        self.triples=P.sparql.functions.plainQueryValues(self.retrieveFromTriples(qtriples))
+        self.ntriples=P.sparql.functions.plainQueryValues(self.retrieveFromTriples(qtriples,graph1=graph1,startB_=" (COUNT(*) as ?nt) WHERE { "))
     def insertOntology(self):
         self.insertTriples(P.rdf.makeOntology())
         # self.getAllTriples(), P.utils.writeTriples(self.triples,"{}dummy.ttl".format(triples_dir))
