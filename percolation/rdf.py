@@ -116,12 +116,14 @@ def makeOntology():
             (NS.po.translationGraph , NS.rdfs.range,NS.po.TranslationNamedGraph), # fb
 
             (NS.gmane.Message,NS.rdfs.subClassOf,NS.po.Message), 
-            (NS.gmane.Participant,NS.rdfs.subClassOf,NS.po.Participant), 
-
-            (NS.fb.Participant,NS.rdfs.subClassOf,NS.po.Participant), 
-
             (NS.tw.Message,NS.rdfs.subClassOf,NS.po.Message), 
-            (NS.tw.Participant,NS.rdfs.subClassOf,NS.po.Participant), 
+            (NS.po.Message,NS.rdfs.subClassOf,NS.InteractionInstance), 
+            (NS.fb.Interaction,NS.rdfs.subClassOf,NS.InteractionInstance), 
+
+            (NS.gmane.Participant,NS.rdfs.subClassOf,NS.po.Participant), 
+            (NS.fb.Participant,NS.rdfs.subClassOf,NS.po.Participant), 
+            (NS.tw.Participant,NS.rdfs.subClassOf,NS.po.Participant),  
+            # ADD IRC and other instances
 
             # type of relation retrievement: 1, 2 or 3
 

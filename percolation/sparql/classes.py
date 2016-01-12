@@ -9,7 +9,6 @@ class SparQLLegacy(SparQLEndpoint,SparQLQueries,SparQLLegacy):
     def __init__(self,endpoint_url):
         SparQLEndpoint.__init__(self,endpoint_url)
 
-
 class SparQLEndpoint:
     """Fuseki connection maintainer through rdflib"""
     def __init__(self,endpoint_url):
@@ -17,144 +16,118 @@ class SparQLEndpoint:
         self.endpoint_url=endpoint_url
         self.endpoint.method = 'POST'
         self.endpoint.setReturnFormat(JSON)
+    def addLocalFileToEndpoint(self,tfile,tgraph="default"):
+        cmd="s-post {} {} {}".format(self.endpoint_url,tgraph,tfile)
+        os.system(cmd)
+    def restablishConnection(self,endpoint_url=None):
+        if not endpoint_url:
+            endpoint_url=self.endpoint_url
+        self.endpoint=SPARQLWrapper(endpoint_url)
+        self.endpoint_url=endpoint_url
+        self.endpoint.method = 'POST'
+        self.endpoint.setReturnFormat(JSON)
 class SparQLQueries:
     """Covenience class for inheritance with SparQLEndpoint and SparQLLegacy"""
-    def addFileToEndpoint(self,tfile):
-        cmd="s-post {} {} {}".format(self.endpoint_url, "default", tfile)
-        os.system(cmd)
+
+    def addRepmoteFileToEndpoint(self,tfile):
+        raise NotImplementedError("Need to implemet through a sparql query probably.")
+    def insertTriples(self,triples,graph=None):
+        querystring=P.sparql.functions.buildQuery(triples,method="insert")
+        self.result=self.updateQuery(querystring)
+    def performRetrieve(self,querystring_or_triples,modifier="",graph1=None):
+        self.query=P.sparql.functions.buildQuery(querystring_or_triples,graph1=graph1,modifier=modifier)
+        return self.retrieveQuery(querystring)
+
+    def retrieveQuery(self,querystring):
+        """Query for retrieving information (e.g. through select)"""
+         # self.method=POST
+        return self.performQuery(querystring)
+    def updateQuery(self,querystring):
+        """Query to insert, delete and modify knowledge https://www.w3.org/Submission/SPARQL-Update/"""
+         # self.method=POST
+        return self.performQuery(querystring)
+    def performQuery(self,querystring):
+        """Query method is defined at SparQLEndpoint initialization."""
+         # self.method=POST
+        self.endpoint.setQuery(querystring) 
+        return self.endpoint.queryAndConvert()
     def getAllTriples(self):
         qtriples=(("?s", "?p", "?o"),)
         self.triples=plainQueryValues(self.performRetrieveQuery(qtriples))
-    def insertTriples(self,triples,graph=None):
-        lines=""
-        for triple in triples:
-            line=formatQueryLine(triple)
-            lines+=line
-        if not graph:
-            querystring = 'INSERT DATA {  %s  }'%(lines,)
-        else:
-            graphpart=" GRAPH <%s> { "%(graph,)
-            querystring = 'INSERT DATA { %s %s } }'%(graphpart,lines,)
-        self.result=self.postQuery(querystring)
-    def performRetrieveQuery(self,querystring_or_triples,group_by=None):
-        if isinstance(querystring_or_triples,(tuple,list)):
-            if len(querystring_or_triples[0])!=3:
-                querystring_or_triples=(querystring_or_triples,)
-            tvars=[]
-            body=""
-            for line in querystring_or_triples:
-                tvars+=[i for i in line if i[0]=="?" and "foo" not in i]
-                body+=formatQueryLine(line)
-            tvars=P.utils.uniqueItems(tvars)
-            tvars_string=(" %s "*len(tvars))%tuple(tvars)
-            querystring="SELECT "+tvars_string+" WHERE { "+body+" } "
-        elif isinstance(querystring_or_triples,str):
-            querystring=querystring_or_triples
-        if group_by:
-            querystring+="GROUP BY "+group_by
-        self.query=querystring
-        return self.retrieveQuery(querystring) 
-    def retrieveQuery(self,querystring):
-        return self.postQuery(querystring)
-    def postQuery(self,querystring):
-        self.endpoint.setQuery(querystring) 
-        return self.endpoint.queryAndConvert()
-#        return self.endpoint.query().convert()
-#        return self.endpoint.query()
-    def renderDummyGraph(self,triples_dir="/disco/triplas/"):
-        self.getAllTriples()
-        P.utils.writeTriples(self.triples,"{}dummy.ttl".format(triples_dir))
-        c("dummy ttl written")
     def insertOntology(self):
         self.insertTriples(P.rdf.makeOntology())
+        # self.getAllTriples(), P.utils.writeTriples(self.triples,"{}dummy.ttl".format(triples_dir))
 
-
-    pass
 class SparQLLegacyConvenience:
     """Convenience class for query and renderind analysis strictures, tables and figures"""
     graphidAUX=NS.po.AuxGraph+"#1"
-    def getSnapshots(self,snap_type=None):
-        if not snap_type:
+    def getSnapshots(self,snaphot_type=None):
+        if not snaphot_type:
             uri=NS.po.Snapshot
         else:
-            uri=eval("NS.po.{}Snapshot".format(snap_type.title()))
+            uri=eval("NS.po.{}Snapshot".format(snaphot_type.title()))
             # NS.po.InteractionSnapshot, NS.po.GmaneSnapshot
-        qtriple="?snapshot", a, uri
-        self.snapshots=plainQueryValues(self.performRetrieveQuery(qtriple)) # SparQLQuery
+        triples=(("?snapshot", a, uri),)
+        self.snapshots=plainQueryValues(self.performRetrieveQuery(triples)) # SparQLQuery
     def addTranslatesFromSnapshots(self,snapshots=None):
         if snapshots==None:
             if not hasattr(self,"snapshots"):
-                self.getMetaSnapshots()
+                self.getSnapshots()
             snapshots=self.snapshots
         # query each snapshot to get translates through ontology
         for snapshot in snapshots:
             self.addTranslatesFromSnapshot(snapshot)
     def addTranslatesFromSnapshot(self,snapshot):
         # busco localdir e translates (GROUP BY?)
-        triple=snapshot,NS.po.defaultXML,"?translate"
+        triples=(snapshot,NS.po.defaultXML,"?translate"),
         translates=plainQueryValues(self.performRetrieveQuery(triple))
-        triple=snapshot,NS.po.localDir,"?localdir"
-        localdir=plainQueryValues(self.performRetrieveQuery(triple))
+        triples=(snapshot,NS.po.localDir,"?localdir"),
+        localdir=plainQueryValues(self.performRetrieveQuery(triples))[0]
         self.tmp=locals()
         # com os translates e o dir, carrego os translates
-        translates="BANANA"
         for translate in translates:
             fname=translate.split("/")[-1]
-            fname2="{}/{}".format(localdir,fname)
+            fname2="{}{}".format(localdir,fname)
             graphid=self.addTranslationFileToEndpoint(fname2,snapshot)
             # add the relation of po:associatedTranslate to the "graphs" graph
     def addTranslationFileToEndpoint(self,tfile,snapshot):
         #http://purl.org/socialparticipation/po/AuxGraph#1
-        cmd="s-post {} {} {}".format(self.endpoint_url, self.graphidAUX, tfile)
+        self.addLocalFileToEndpoint(tfile,self.graphidAUX)
         ontology_triples=P.rdf.makeOntology()
-        self.insertTriples(ontology_triples) # SparQLQueries TTM
-        # make updates on auxgraph
-        messages=plainQueryValues(self.performRetrieveQuery("?message",a,NS.po.Message))
-        participants=plainQueryValues(self.performRetrieveQuery("?participant",a,NS.po.Participant))
-        triple="?foomsg",NS.gmane.author,"?participant" # ??? TTM Relacionar toda classe ao snapshot???
-        participants2=list(set(plainQueryValues(self.performRetrieveQuery(triple))))
-        inds=messages+participants
-        triples=[]
-        for ind in inds:
-            triples+=[(ind,NS.po.snapshot, snapshot)]
+        self.insertTriples(ontology_triples,self.grapgidAUX) # SparQLQueries TTM
+
         insert=(
-                (), # X po:snapshot `snapshot`
-                )
+                ("_:mblank",a,NS.po.ParticipantAttributes),
+                ("_:mblank",NS.po.participant,"?i"),
+                ("_:mblank","?p","?o"),
+                ("_:mblank",NS.po.snapshot,snapshot),
+               )
         where=(
-               (),  # X a Anythyng # X is an instance
-                )
-        #WITH <http://example/addresses>
-        #DELETE { ?person foaf:givenName 'Bill' }
-        #INSERT { ?person foaf:givenName 'William' }
-        #WHERE
-        #  { ?person foaf:givenName 'Bill'
-        #            } 
-        # write fb friendships as classes with friends and snapshot
-        # write other fb participant attributes as classes with a snapshot
-        # associate fb interaction to snapshot
+                ("?i1",a,NS.po.Participant),
+                ("?i1","?p","?o"),
+              )
+        querystring=P.buildQuery(triples1=insert,graph1=self.graphidAUX,triples2=where,graph2=self.graphidAUX,method="insert_where")
+        self.updateQuery(querystring)
 
-        # write tw participant attributes as classes with a snapshot
+        insert=("?m",NS.po.snapshot,snapshot),
+        where= ("?m",a,P.po.InteractionInstance), # tw,gmane:message or fb interaction
+        querystring=P.buildQuery(triples1=insert,graph1=self.graphidAUX,triples2=where,graph2=self.graphidAUX,method="insert_where")
+        self.updateQuery(querystring)
 
-        # delete trash
-        # DELETE { GRAPH IRIref { ?s ?p ?o } } WHERE { GRAPH IRIref { ?s ?p ?o } }
+        querystring="MOVE <%s> TO DEFAULT"%(self.graphidAUX,)
+        self.updateQuery(querystring)
 
-        # verify snaps to see if any other thing is associated to snaps
-        # WITH <http://example/bookStore>
-        triples=(
-#                UPDATE=("?a",NS.po.referenceSnapshot,snapshot_uri)
-#              WHERE=  ("?a", a ,NS.po.Participant),
-                ("?m", a ,NS.po.Message),
-                )
-        # write all triples from auxgraph to defaultgraph
-        # ADD/MOVE <self.graphidAux> TO DEFAULT 
+        triples=(snapshot,NS.po.translateFilePath,tfile),
+        querystring=P.buildQuery(triples)
+        # if empty afterwards, make dummy inference graph to copy triples from or load rdfs file
+        self.updateQuery(querystring)
     def addMetafileToEndpoint(self,tfile):
-#        self.addFileToEndpoint(tfile)
-        self.addFileToEndpoint(tfile) # SparQLQueries
+        self.addLocalFileToEndpoint(tfile) # SparQLQueries
         snapshoturi=[i for i in performFileGetQuery(tfile,(("?s",a,NS.po.Snapshot),))][0][0]
         snapshotsubclass=P.utils.identifyProvenance(tfile)
         triples=(
                     (snapshoturi,a,snapshotsubclass), # Gmane, FB, TW, ETC
-#                    (snapshoturi,NS.po.localDir,os.path.dirname(tfile)), # jah adicionado quando adicionado o metafile
+                    (snapshoturi,NS.po.localDir,os.path.dirname(tfile)),
                     (snapshoturi,NS.po.metaFilepath,tfile),
                 )
         self.insertTriples(triples) # SparQLQueries

@@ -1,11 +1,55 @@
 __doc__="""generic routines that don't require a sparql connection"""
 
-def buildQuery(triples1,graph1=None,triples2=None,graph2=None):
+def buildQuery(triples1,graph1=None,triples2=None,graph2=None,modifier1="",modifier2="",distinct1=None,method="select"):
     """The general query builder from fields and respective triples or uris"""
-    pass
-
-
-
+    if isinstance(triples1,str):
+        querystring=triples1
+    elif isinstance(triples1,(tuple,list)):
+        if distinct1:
+            distinct1=" DISTINCT "
+        if graph1:
+            graphpart1=" GRAPH <%s> { "%(graph1,)
+            body1close=" } } "
+        else:
+            graphpart1=""
+            body1close=" } "
+        if len(triples1[0])!=3:
+            triples1=(triples1,)
+        tvars=[]
+        body=""
+        for line in triples1:
+            tvars+=[i for i in line if i[0]=="?" and "foo" not in i]
+            body+=formatQueryLine(line)
+        tvars=P.utils.uniqueItems(tvars)
+        tvars_string=(" %s "*len(tvars))%tuple(tvars)
+        if "select"==method.lower():
+            start="SELECT "
+            start2=tvars_string+" WHERE { "
+        elif "insert" in method.lower():
+            start="INSERT DATA "
+            startB=" { "
+        elif method.lower()=="delete":
+            pass
+        querystring=start+startB+graphpart1+body+body1close+modifier1
+    if isinstance(triples2,str):
+        querystring+=triples2
+    elif isinstance(triples2,(tuple,list)):
+        if graph2:
+            graphpart2=" GRAPH <%s> { "%(graph2,)
+            body2close=" } } "
+        else:
+            graphpart2=""
+            body2close=" } "
+        if len(triples2[0])!=3:
+            triples2=(triples1,)
+        body2=""
+        for line in triples2:
+            body2+=formatQueryLine(line)
+        elif "insert_where"==method.lower():
+            start2=" WHERE  "
+            startB2=" { "
+            queryestring+=start2+startB2++graphpart2+body2+body2close+modifier2
+    return querystring
 
 def dictQueryValues(result_dict):
     keys=result_dict["head"]["vars"]
