@@ -85,6 +85,8 @@ class SparQLLegacyConvenience:
         localdir=P.sparql.functions.plainQueryValues(self.retrieveFromTriples(triples))[0]
         self.tmp=locals()
         # com os translates e o dir, carrego os translates
+        c("into translates from snapshot")
+#        P.utils.callDebugger()
         for translate in translates:
             fname=translate.split("/")[-1]
             fname2="{}/{}".format(localdir,fname)
@@ -95,7 +97,7 @@ class SparQLLegacyConvenience:
         self.addLocalFileToEndpoint(tfile,self.graphidAUX)
         ontology_triples=P.rdf.makeOntology()
         self.insertTriples(ontology_triples,self.graphidAUX) # SparQLQueries TTM
-
+        c("first insert")
         insert=(
                 ("_:mblank",a,NS.po.ParticipantAttributes),
                 ("_:mblank",NS.po.participant,"?i"),
@@ -109,18 +111,22 @@ class SparQLLegacyConvenience:
         querystring=P.sparql.functions.buildQuery(triples1=insert,graph1=self.graphidAUX,triples2=where,graph2=self.graphidAUX,method="insert_where")
         self.updateQuery(querystring)
 
+        c("second insert")
         insert=("?m",NS.po.snapshot,snapshot),
         where= ("?m",a,NS.po.InteractionInstance), # tw,gmane:message or fb interaction
         querystring=P.sparql.functions.buildQuery(triples1=insert,graph1=self.graphidAUX,triples2=where,graph2=self.graphidAUX,method="insert_where")
         self.updateQuery(querystring)
 
+        c("graph move")
         querystring="MOVE <%s> TO DEFAULT"%(self.graphidAUX,)
         self.updateQuery(querystring)
 
+        c("insert triple to default")
         triples=(snapshot,NS.po.translateFilePath,tfile),
-        querystring=P.sparql.functions.buildQuery(triples,method="insert")
+        self.insertTriples(triples)
+        c("end of translation add")
+#        querystring=P.sparql.functions.buildQuery(triples,method="insert")
         # if empty afterwards, make dummy inference graph to copy triples from or load rdfs file
-        self.updateQuery(querystring)
     def addMetafileToEndpoint(self,tfile):
         self.addLocalFileToEndpoint(tfile) # SparQLQueries
         snapshoturi=[i for i in P.sparql.functions.performFileGetQuery(tfile,(("?s",a,NS.po.Snapshot),))][0][0]
