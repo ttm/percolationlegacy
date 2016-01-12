@@ -1,4 +1,4 @@
 __doc__="module for sparql querying data."
-from classes import SparQL, SparqLLegacy
-
+from . import classes, functions
+from .classes import SparQL, SparQLLegacy
 

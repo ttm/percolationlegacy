@@ -3,8 +3,24 @@ import builtins as B
 import percolation as P
 from SPARQLWrapper import SPARQLWrapper, JSON
 TT=time.time()
+from IPython import embed
 
 nestedDict = lambda: collections.defaultdict(nestedDict)
+PROVENANCE_IDS="gmane-", "_fb", "_tw"
+def fileProvenanceDict(files):
+    gmane=sorted([i for i in files if PROVENANCE_IDS[0] in i])
+    fb=   sorted([i for i in files if PROVENANCE_IDS[1] in i]) # FB
+    tw=   sorted([i for i in files if PROVENANCE_IDS[2] in i]) # TW
+    dummy2=gmane[8:12]
+    dummy_diversified=gmane[3:4] +fb[3:4]+tw[3:4]
+    dummy=gmane[10:11]
+    all_ok=gmane+fb+tw
+    all_=files
+    del files
+    return locals()
+def callInterpreter():
+    """Helper function to call interpreter in the midle of execution for testing and debugging"""
+    embed()
 # use with tdict=nestedDict(); tdict["akey1"]["akey2"]="anything"
 def uniqueItems(seq):
     seen = set()

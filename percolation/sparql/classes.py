@@ -1,13 +1,9 @@
-from functions import *
-
-class SparQL(SparQLEndpoint,SparQLQueries):
-    """Class that holds sparql endpoint connection and convenienves for query"""
-    def __init__(self,endpoint_url):
-        SparQLEndpoint.__init__(self,endpoint_url)
-class SparQLLegacy(SparQLEndpoint,SparQLQueries,SparQLLegacy):
-    """Class that holds sparql endpoint connection and convenienves for query and renderind analysis strictures, tables and figures"""
-    def __init__(self,endpoint_url):
-        SparQLEndpoint.__init__(self,endpoint_url)
+import os
+import rdflib as r, networkx as x, percolation as P
+from SPARQLWrapper import SPARQLWrapper, JSON
+c=P.utils.check
+NS=P.rdf.NS
+a=NS.rdf.type
 
 class SparQLEndpoint:
     """Fuseki connection maintainer through rdflib"""
@@ -28,16 +24,20 @@ class SparQLEndpoint:
         self.endpoint.setReturnFormat(JSON)
 class SparQLQueries:
     """Covenience class for inheritance with SparQLEndpoint and SparQLLegacy"""
-
+    def clearEndpoint(self,tgraph=None):
+        if tgraph:
+            query="CLEAR GRAPH <%s>"%(tgraph,)
+        else:
+            query="CLEAR DEFAULT"
+        self.updateQuery(query)
     def addRepmoteFileToEndpoint(self,tfile):
         raise NotImplementedError("Need to implemet through a sparql query probably.")
     def insertTriples(self,triples,graph=None):
         querystring=P.sparql.functions.buildQuery(triples,method="insert")
         self.result=self.updateQuery(querystring)
-    def performRetrieve(self,querystring_or_triples,modifier="",graph1=None):
-        self.query=P.sparql.functions.buildQuery(querystring_or_triples,graph1=graph1,modifier=modifier)
+    def retrieveFromTriples(self,querystring_or_triples,modifier1="",graph1=None):
+        querystring=P.sparql.functions.buildQuery(querystring_or_triples,graph1=graph1,modifier1=modifier1)
         return self.retrieveQuery(querystring)
-
     def retrieveQuery(self,querystring):
         """Query for retrieving information (e.g. through select)"""
          # self.method=POST
@@ -53,7 +53,7 @@ class SparQLQueries:
         return self.endpoint.queryAndConvert()
     def getAllTriples(self):
         qtriples=(("?s", "?p", "?o"),)
-        self.triples=plainQueryValues(self.performRetrieveQuery(qtriples))
+        self.triples=P.sparql.functions.plainQueryValues(self.retrieveFromTriples(qtriples))
     def insertOntology(self):
         self.insertTriples(P.rdf.makeOntology())
         # self.getAllTriples(), P.utils.writeTriples(self.triples,"{}dummy.ttl".format(triples_dir))
@@ -68,7 +68,7 @@ class SparQLLegacyConvenience:
             uri=eval("NS.po.{}Snapshot".format(snaphot_type.title()))
             # NS.po.InteractionSnapshot, NS.po.GmaneSnapshot
         triples=(("?snapshot", a, uri),)
-        self.snapshots=plainQueryValues(self.performRetrieveQuery(triples)) # SparQLQuery
+        self.snapshots=P.sparql.functions.plainQueryValues(self.retrieveFromTriples(triples)) # SparQLQuery
     def addTranslatesFromSnapshots(self,snapshots=None):
         if snapshots==None:
             if not hasattr(self,"snapshots"):
@@ -80,21 +80,21 @@ class SparQLLegacyConvenience:
     def addTranslatesFromSnapshot(self,snapshot):
         # busco localdir e translates (GROUP BY?)
         triples=(snapshot,NS.po.defaultXML,"?translate"),
-        translates=plainQueryValues(self.performRetrieveQuery(triple))
+        translates=P.sparql.functions.plainQueryValues(self.retrieveFromTriples(triples))
         triples=(snapshot,NS.po.localDir,"?localdir"),
-        localdir=plainQueryValues(self.performRetrieveQuery(triples))[0]
+        localdir=P.sparql.functions.plainQueryValues(self.retrieveFromTriples(triples))[0]
         self.tmp=locals()
         # com os translates e o dir, carrego os translates
         for translate in translates:
             fname=translate.split("/")[-1]
-            fname2="{}{}".format(localdir,fname)
+            fname2="{}/{}".format(localdir,fname)
             graphid=self.addTranslationFileToEndpoint(fname2,snapshot)
             # add the relation of po:associatedTranslate to the "graphs" graph
     def addTranslationFileToEndpoint(self,tfile,snapshot):
         #http://purl.org/socialparticipation/po/AuxGraph#1
         self.addLocalFileToEndpoint(tfile,self.graphidAUX)
         ontology_triples=P.rdf.makeOntology()
-        self.insertTriples(ontology_triples,self.grapgidAUX) # SparQLQueries TTM
+        self.insertTriples(ontology_triples,self.graphidAUX) # SparQLQueries TTM
 
         insert=(
                 ("_:mblank",a,NS.po.ParticipantAttributes),
@@ -106,24 +106,24 @@ class SparQLLegacyConvenience:
                 ("?i1",a,NS.po.Participant),
                 ("?i1","?p","?o"),
               )
-        querystring=P.buildQuery(triples1=insert,graph1=self.graphidAUX,triples2=where,graph2=self.graphidAUX,method="insert_where")
+        querystring=P.sparql.functions.buildQuery(triples1=insert,graph1=self.graphidAUX,triples2=where,graph2=self.graphidAUX,method="insert_where")
         self.updateQuery(querystring)
 
         insert=("?m",NS.po.snapshot,snapshot),
-        where= ("?m",a,P.po.InteractionInstance), # tw,gmane:message or fb interaction
-        querystring=P.buildQuery(triples1=insert,graph1=self.graphidAUX,triples2=where,graph2=self.graphidAUX,method="insert_where")
+        where= ("?m",a,NS.po.InteractionInstance), # tw,gmane:message or fb interaction
+        querystring=P.sparql.functions.buildQuery(triples1=insert,graph1=self.graphidAUX,triples2=where,graph2=self.graphidAUX,method="insert_where")
         self.updateQuery(querystring)
 
         querystring="MOVE <%s> TO DEFAULT"%(self.graphidAUX,)
         self.updateQuery(querystring)
 
         triples=(snapshot,NS.po.translateFilePath,tfile),
-        querystring=P.buildQuery(triples)
+        querystring=P.sparql.functions.buildQuery(triples,method="insert")
         # if empty afterwards, make dummy inference graph to copy triples from or load rdfs file
         self.updateQuery(querystring)
     def addMetafileToEndpoint(self,tfile):
         self.addLocalFileToEndpoint(tfile) # SparQLQueries
-        snapshoturi=[i for i in performFileGetQuery(tfile,(("?s",a,NS.po.Snapshot),))][0][0]
+        snapshoturi=[i for i in P.sparql.functions.performFileGetQuery(tfile,(("?s",a,NS.po.Snapshot),))][0][0]
         snapshotsubclass=P.utils.identifyProvenance(tfile)
         triples=(
                     (snapshoturi,a,snapshotsubclass), # Gmane, FB, TW, ETC
@@ -184,3 +184,14 @@ class SparQLLegacyConvenience:
             else:       dg.add_edge(id1,id2,weight=2.)
         c("graph done")
         return dg
+
+class SparQL(SparQLEndpoint,SparQLQueries):
+    """Class that holds sparql endpoint connection and convenienves for query"""
+    def __init__(self,endpoint_url):
+        SparQLEndpoint.__init__(self,endpoint_url)
+class SparQLLegacy(SparQLEndpoint,SparQLQueries,SparQLLegacyConvenience):
+    """Class that holds sparql endpoint connection and convenienves for query and renderind analysis strictures, tables and figures"""
+    def __init__(self,endpoint_url):
+        SparQLEndpoint.__init__(self,endpoint_url)
+
+

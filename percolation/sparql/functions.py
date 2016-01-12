@@ -1,4 +1,7 @@
 __doc__="""generic routines that don't require a sparql connection"""
+import percolation as P, rdflib as r
+NS=P.rdf.NS
+a=NS.rdf.type
 
 def buildQuery(triples1,graph1=None,triples2=None,graph2=None,modifier1="",modifier2="",distinct1=None,method="select"):
     """The general query builder from fields and respective triples or uris"""
@@ -24,9 +27,12 @@ def buildQuery(triples1,graph1=None,triples2=None,graph2=None,modifier1="",modif
         tvars_string=(" %s "*len(tvars))%tuple(tvars)
         if "select"==method.lower():
             start="SELECT "
-            start2=tvars_string+" WHERE { "
-        elif "insert" in method.lower():
+            startB=tvars_string+" WHERE { "
+        elif "insert"==method.lower():
             start="INSERT DATA "
+            startB=" { "
+        elif "insert_where"==method.lower():
+            start="INSERT "
             startB=" { "
         elif method.lower()=="delete":
             pass
@@ -45,10 +51,10 @@ def buildQuery(triples1,graph1=None,triples2=None,graph2=None,modifier1="",modif
         body2=""
         for line in triples2:
             body2+=formatQueryLine(line)
-        elif "insert_where"==method.lower():
+        if "insert_where"==method.lower():
             start2=" WHERE  "
             startB2=" { "
-            queryestring+=start2+startB2++graphpart2+body2+body2close+modifier2
+            querystring+=start2+startB2+graphpart2+body2+body2close+modifier2
     return querystring
 
 def dictQueryValues(result_dict):
@@ -126,7 +132,7 @@ def formatQueryLine(triple):
     for term in triple:
         if isinstance(term,(r.Namespace,r.URIRef)):
             line+=" <%s> "%(term,)
-        elif term[0]=="?":
+        elif (term[0]=="?") or (term[:2]=="_:"):
             line+=" %s "%(term,)
         elif isinstance(term,str) and term[0]!="?":
              line+=' "%s" '%(term,)

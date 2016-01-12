@@ -117,8 +117,8 @@ def makeOntology():
 
             (NS.gmane.Message,NS.rdfs.subClassOf,NS.po.Message), 
             (NS.tw.Message,NS.rdfs.subClassOf,NS.po.Message), 
-            (NS.po.Message,NS.rdfs.subClassOf,NS.InteractionInstance), 
-            (NS.fb.Interaction,NS.rdfs.subClassOf,NS.InteractionInstance), 
+            (NS.po.Message,NS.rdfs.subClassOf,NS.po.InteractionInstance), 
+            (NS.fb.Interaction,NS.rdfs.subClassOf,NS.po.InteractionInstance), 
 
             (NS.gmane.Participant,NS.rdfs.subClassOf,NS.po.Participant), 
             (NS.fb.Participant,NS.rdfs.subClassOf,NS.po.Participant), 
