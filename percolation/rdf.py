@@ -114,6 +114,15 @@ def makeOntology():
             (NS.po.metaGraph , NS.rdfs.range,NS.po.MetaNamedGraph), # fb
             (NS.po.translationGraph , NS.rdfs.subPropertyOf,NS.po.namedGraph), # fb
             (NS.po.translationGraph , NS.rdfs.range,NS.po.TranslationNamedGraph), # fb
+
+            (NS.gmane.Message,NS.rdfs.subClassOf,NS.po.Message), 
+            (NS.gmane.Participant,NS.rdfs.subClassOf,NS.po.Participant), 
+
+            (NS.fb.Participant,NS.rdfs.subClassOf,NS.po.Participant), 
+
+            (NS.tw.Message,NS.rdfs.subClassOf,NS.po.Message), 
+            (NS.tw.Participant,NS.rdfs.subClassOf,NS.po.Participant), 
+
             # type of relation retrievement: 1, 2 or 3
 
             # labels equivalence: irc, etc
@@ -133,17 +142,6 @@ def renderOntology(triples_dir="/disco/triplas/",dummy=False):
     c("po ttl written")
 def G(g,S,P,O):
     g.add((S,P,O))
-
-        g=r.Graph()
-        for triple in self.triples:
-            if not isinstance(triple[2],r.URIRef):
-                triple[2]=r.Literal(triple[2])
-            g.add(triple)
-        f=open("{}dummy.ttl".format(triples_dir),"wb")
-        f.write(g.serialize(format="turtle"))
-        f.close()
-
-
 def writeTriples(triples,filename,format_="turtle"):
     g=r.Graph()
     for triple in triples:

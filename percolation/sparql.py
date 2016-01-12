@@ -22,15 +22,13 @@ class EndpointInterface:
             snapshots=self.snapshots
         # query each snapshot to get translates through ontology
         for snapshot in snapshots:
-            self.addTranslatesFromMeta(snapshot)
+            self.addTranslatesFromSnapshot(snapshot)
     def addTranslatesFromSnapshot(self,snapshot):
         # busco localdir e translates (GROUP BY?)
-        triples=(
-                    (snapshot,NS.po.defaultXML,"?translate"),
-                    (snapshot,NS.po.localDir,"?localdir"),
-                    # GROUP BY localDir
-                )
-        result=plainQueryValues(self.performRetrieveQuery(triples))[0]
+        triple=snapshot,NS.po.defaultXML,"?translate"
+        translates=plainQueryValues(self.performRetrieveQuery(triple))
+        triple=snapshot,NS.po.localDir,"?localdir"
+        localdir=plainQueryValues(self.performRetrieveQuery(triple))
         self.tmp=locals()
         # com os translates e o dir, carrego os translates
         translates="BANANA"
@@ -39,24 +37,56 @@ class EndpointInterface:
             fname2="{}/{}".format(localdir,fname)
             graphid=self.addTranslationFileToEndpoint(fname2,snapshot)
             # add the relation of po:associatedTranslate to the "graphs" graph
-    def addTranslationFileToEndpoint(self,tfile,metagraphid):
-        graphid=P.utils.urifyFilename(tfile)
+    def addTranslationFileToEndpoint(self,tfile,snapshot):
         #http://purl.org/socialparticipation/po/AuxGraph#1
         cmd="s-post {} {} {}".format(self.endpoint_url, self.graphidAUX, tfile)
-
+        ontology_triples=P.rdf.makeOntology()
+        self.insertTriples(ontology_triples)
         # make updates on auxgraph
+        messages=plainQueryValues(self.performRetrieveQuery("?message",a,NS.po.Message))
+        participants=plainQueryValues(self.performRetrieveQuery("?participant",a,NS.po.Participant))
+        triple="?foomsg",NS.gmane.author,"?participant"
+        participants2=list(set(plainQueryValues(self.performRetrieveQuery(triple))))
+        inds=messages+participants
+        triples=[]
+        for ind in inds:
+            triples+=[(ind,NS.po.snapshot, snapshot)]
+
+        insert=(
+               (), 
+                )
+        where=(
+               (), 
+                )
+        #WITH <http://example/addresses>
+        #DELETE { ?person foaf:givenName 'Bill' }
+        #INSERT { ?person foaf:givenName 'William' }
+        #WHERE
+        #  { ?person foaf:givenName 'Bill'
+        #            } 
+        # write fb friendships as classes with friends and snapshot
+        # write other fb participant attributes as classes with a snapshot
+        # associate fb interaction to snapshot
+
+        # write tw participant attributes as classes with a snapshot
+
+        # delete trash
+        # DELETE { GRAPH IRIref { ?s ?p ?o } } WHERE { GRAPH IRIref { ?s ?p ?o } }
+
+        # verify snaps to see if any other thing is associated to snaps
+        # WITH <http://example/bookStore>
+
         triples=(
-                UPDATE=("?a",NS.po.referenceSnapshot,snapshot_uri)
-              WHERE=  ("?a", a ,NS.po.Participant),
+#                UPDATE=("?a",NS.po.referenceSnapshot,snapshot_uri)
+#              WHERE=  ("?a", a ,NS.po.Participant),
                 ("?m", a ,NS.po.Message),
                 )
         # write all triples from auxgraph to defaultgraph
-
-
+        # ADD/MOVE <self.graphidAux> TO DEFAULT 
     def addMetafileToEndpoint(self,tfile):
 #        self.addFileToEndpoint(tfile)
         self.addFileToEndpoint(tfile)
-        snapshot_uri=performFileGetQuery(tfile,(("?s",a,NS.po.Snapshot),))[0][0]
+        snapshoturi=[i for i in performFileGetQuery(tfile,(("?s",a,NS.po.Snapshot),))][0][0]
         snapshotsubclass=P.utils.identifyProvenance(tfile)
         triples=(
                     (snapshoturi,a,snapshotsubclass), # Gmane, FB, TW, ETC
@@ -78,26 +108,33 @@ class EndpointInterface:
 #                ("?snapshot", a, NS.po.InteractionSnapshot),
                 )
         self.snapshots=plainQueryValues(self.performRetrieveQuery(qtriples))
-    def insertTriples(self,triples):
+    def insertTriples(self,triples,graph=None):
         lines=""
         for triple in triples:
             line=formatQueryLine(triple)
             lines+=line
-        querystring = 'INSERT DATA {  %s  }'%(lines,)
+        if not graph:
+            querystring = 'INSERT DATA {  %s  }'%(lines,)
+        else:
+            graphpart=" GRAPH <%s> { "%(graph,)
+            querystring = 'INSERT DATA { %s %s } }'%(graphpart,lines,)
         self.result=self.postQuery(querystring)
-    def performRetrieveQuery(self,querystring_or_triples):
+    def performRetrieveQuery(self,querystring_or_triples,group_by=None):
         if isinstance(querystring_or_triples,(tuple,list)):
+            if len(querystring_or_triples[0])!=3:
+                querystring_or_triples=(querystring_or_triples,)
             tvars=[]
-            for line in querystring_or_triples:
-                tvars+=[i for i in line if i[0]=="?" and "foo" not in i]
-            tvars=P.utils.uniqueItems(tvars)
-            tvars_string=(" %s "*len(tvars))%tuple(tvars)
             body=""
             for line in querystring_or_triples:
+                tvars+=[i for i in line if i[0]=="?" and "foo" not in i]
                 body+=formatQueryLine(line)
+            tvars=P.utils.uniqueItems(tvars)
+            tvars_string=(" %s "*len(tvars))%tuple(tvars)
             querystring="SELECT "+tvars_string+" WHERE { "+body+" } "
         elif isinstance(querystring_or_triples,str):
             querystring=querystring_or_triples
+        if group_by:
+            querystring+="GROUP BY "+group_by
         self.query=querystring
         return self.retrieveQuery(querystring) 
     def retrieveQuery(self,querystring):
@@ -235,13 +272,13 @@ def plainQueryValues(result_dict,join_queries=False):
 def performFileGetQuery(tfile,triples=(("?s",a,NS.po.Snapshot),)):
     g=r.Graph()
     g.parse(tfile)
+    tvars=[]
+    body=""
     for line in triples:
         tvars+=[i for i in line if i[0]=="?" and "foo" not in i]
+        body+=formatQueryLine(line)
     tvars=P.utils.uniqueItems(tvars)
     tvars_string=(" %s "*len(tvars))%tuple(tvars)
-    body=""
-    for line in querystring_or_triples:
-        body+=formatQueryLine(line)
     querystring="SELECT "+tvars_string+" WHERE { "+body+" } "
     return g.query(querystring)
 def formatQueryLine(triple):
@@ -251,7 +288,7 @@ def formatQueryLine(triple):
             line+=" <%s> "%(term,)
         elif term[0]=="?":
             line+=" %s "%(term,)
-         elif isinstance(term,str) and term[0]!="?":
+        elif isinstance(term,str) and term[0]!="?":
              line+=' "%s" '%(term,)
         else:
             line+=' "%s" '%(term,)
