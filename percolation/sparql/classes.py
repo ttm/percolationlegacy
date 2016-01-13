@@ -76,10 +76,13 @@ class SparQLQueries:
         return self.endpoint.queryAndConvert()
     def getAllTriples(self,graph1=None):
         qtriples=(("?s", "?p", "?o"),)
-        self.ntriples=P.sparql.functions.plainQueryValues(self.retrieveFromTriples(qtriples,graph1=graph1,startB_=" (COUNT(*) as ?nt) WHERE { "))
+        self.triples=P.sparql.functions.plainQueryValues(self.retrieveFromTriples(qtriples,graph1=graph1))
+    def getNTriples(self,graph1=None):
+        qtriples=(("?s", "?p", "?o"),)
+        self.ntriples=P.sparql.functions.plainQueryValues(self.retrieveFromTriples(qtriples,graph1=graph1,startB_=" (COUNT(*) as ?nt) WHERE { "))[0]
     def insertOntology(self):
         self.insertTriples(P.rdf.makeOntology())
-        # self.getAllTriples(), P.utils.writeTriples(self.triples,"{}dummy.ttl".format(triples_dir))
+        # self.getNTriples(), P.utils.writeTriples(self.triples,"{}dummy.ttl".format(triples_dir))
 
 class SparQLLegacyConvenience:
     """Convenience class for query and renderind analysis strictures, tables and figures"""
@@ -87,8 +90,10 @@ class SparQLLegacyConvenience:
     def __init__(self):
         ontology_triples=P.rdf.makeOntology()
         self.insertTriples(ontology_triples,self.graphidAUX) # SparQLQueries TTM
+        self.getNTriples(self.graphidAUX)
         self.getAllTriples(self.graphidAUX)
         self.ntriplesAUX=self.ntriples
+        self.triplesAUX=self.triples
         triples=("?s","?p","?o")
         self.alltriplesAUX=self.retrieveFromTriples(triples,graph1=self.graphidAUX)
     def getSnapshots(self,snaphot_type=None):
@@ -127,16 +132,22 @@ class SparQLLegacyConvenience:
         self.addLocalFileToEndpoint(tfile,self.graphidAUX)
         c("first insert")
         insert=(
+                ("?i1",NS.po.snapshot,snapshot),
                 ("_:mblank",a,NS.po.ParticipantAttributes),
-                ("_:mblank",NS.po.participant,"?i"),
+                ("_:mblank",NS.po.participant,"?i1"),
                 ("_:mblank","?p","?o"),
                 ("_:mblank",NS.po.snapshot,snapshot),
                )
         where=(
                 ("?i1",a,NS.po.Participant),
                 ("?i1","?p","?o"),
+
               )
-        querystring=P.sparql.functions.buildQuery(triples1=insert,graph1=self.graphidAUX,triples2=where,graph2=self.graphidAUX,method="insert_where")
+        querystring=P.sparql.functions.buildQuery(triples1=insert,graph1=self.graphidAUX,
+                                                  #triples2=where,graph2=self.graphidAUX,modifier2=" MINUS {?i1 a ?foovar} "
+                                                  triples2=where,graph2=self.graphidAUX,modifier2=" FILTER(?p!=<%s>) "%(a,),
+                                                  method="insert_where")
+        self.mquery2=querystring
         self.updateQuery(querystring)
 
         c("second insert")
@@ -147,33 +158,48 @@ class SparQLLegacyConvenience:
 
 #        querystring="MOVE <%s> TO DEFAULT"%(self.graphidAUX,)
         c("graph move")
-        insert=("?s","?p","?o") # DEFAULT
-        delete=("?s","?p","?o") # aux
-        where=("?s",NS.po.snapshot,snapshot) # aux
+        delete=("?s","?p","?o"), # aux
+        insert=("?s","?p","?o"), # DEFAULT
+        self.getAllTriples(self.graphidAUX)
+        self.triplesAUXINT=self.triples
+        where=(
+                ("?s",NS.po.snapshot,snapshot), # aux
+                ("?s","?p","?o"), 
+                )
         querystring=P.sparql.functions.buildQuery(
-                                                  #triples1=delete,graph1=self.graphidAUX,
+                                                  #triples1=insert,graph1="urn:x-arq:DefaultGraph",#graph2="DEFAULT",
+                                                  #triples2=delete,graph2=self.graphidAUX,
+                                                  triples1=delete,graph1=self.graphidAUX,
+                                                  triples2=insert,graph2="urn:x-arq:DefaultGraph",#graph2="DEFAULT",
                                                   #triples2=insert,graph2="urn:x-arq:DefaultGraph",#graph2="DEFAULT",
-                                                  triples1=insert,graph1="urn:x-arq:DefaultGraph",#graph2="DEFAULT",
-                                                  triples2=delete,graph2=self.graphidAUX,
                                                   triples3=where,graph3=self.graphidAUX,
                                                   method="delete_insert_where")
         # tentar soh o insert depois 
         # tentar soh o delete depois 
         self.updateQuery(querystring)
         self.mquery=querystring
-        self.getAllTriples(self.graphidAUX)
+        self.getNTriples(self.graphidAUX)
         if self.ntriples==self.ntriplesAUX:
             c("graphAUX restored correctly")
         else:
             c("somethig went wrong in restoring graphidAUX")
             self.ntriplesAUX2=self.ntriples
-            triples=("?s","?p","?o")
-            self.alltriplesAUX2=self.retrieveFromTriples(triples,graph1=self.graphidAUX)
+            self.getAllTriples(self.graphidAUX)
+            self.triplesAUX2=self.triples
         c("insert triple to default")
         triples=(snapshot,NS.po.translateFilePath,tfile),
         self.insertTriples(triples)
         c("end of translation add")
-#        querystring=P.sparql.functions.buildQuery(triples,method="insert")
+        # delete trash:
+        delete=("?s","?p","?o"),
+        where=(
+                ("OPTIONAL","?s","?p",NS.owl.SymmetricProperty),
+                ("OPTIONAL",NS.owl.SymmetricProperty,"?p","?o"),
+                )
+        querystring=P.sparql.functions.buildQuery(triples1=delete,graph1=self.graphidAUX,
+                                                  triples2=where,graph2=self.graphidAUX,
+                                                  method="delete_where")
+        self.updateQuery(querystring)
         # if empty afterwards, make dummy inference graph to copy triples from or load rdfs file
     def addMetafileToEndpoint(self,tfile):
         self.addLocalFileToEndpoint(tfile) # SparQLQueries

@@ -23,7 +23,7 @@ def buildQuery(triples1,graph1=None,modifier1="",\
         else:
             graphpart1=""
             body1close=" } "
-        if len(triples1[0])!=3:
+        if len(triples1)==3 and not isinstance(triples1[0],(tuple,list)):
             triples1=(triples1,)
         tvars=[]
         body=""
@@ -62,7 +62,7 @@ def buildQuery(triples1,graph1=None,modifier1="",\
         else:
             graphpart2=""
             body2close=" } "
-        if len(triples2[0])!=3:
+        if len(triples2)==3 and not isinstance(triples2,(list,tuple)):
             triples2=(triples2,)
         body2=""
         for line in triples2:
@@ -73,7 +73,7 @@ def buildQuery(triples1,graph1=None,modifier1="",\
         elif "insert" in method.lower():
             start2=" INSERT "
             startB2=" { "
-        querystring2=start2+startB2+graphpart2+body2+body2close+modifier2
+        querystring2=start2+startB2+graphpart2+body2+modifier2+body2close
     else:
         querystring2=""
     if isinstance(triples3,str):
@@ -172,6 +172,13 @@ def performFileGetQuery(tfile,triples=(("?s",a,NS.po.Snapshot),)):
     querystring="SELECT "+tvars_string+" WHERE { "+body+" } "
     return g.query(querystring)
 def formatQueryLine(triple):
+    if len(triple)==4:
+        start=" %s { "%(triple[0],)
+        end=" } "
+        triple=triple[1:]
+    else:
+        start=""
+        end=""
     line=""
     for term in triple:
         if isinstance(term,(r.Namespace,r.URIRef)):
@@ -182,6 +189,7 @@ def formatQueryLine(triple):
              line+=' "%s" '%(term,)
         else:
             line+=' "%s" '%(term,)
+    line=start+line+end
     line+= " . "
     return line
 
