@@ -123,6 +123,8 @@ def makeOntology():
             (NS.gmane.Participant,NS.rdfs.subClassOf,NS.po.Participant), 
             (NS.fb.Participant,NS.rdfs.subClassOf,NS.po.Participant), 
             (NS.tw.Participant,NS.rdfs.subClassOf,NS.po.Participant),  
+
+            (NS.fb.friend,a,NS.owl.SymmetricProperty), 
             # ADD IRC and other instances
 
             # type of relation retrievement: 1, 2 or 3

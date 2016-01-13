@@ -33,6 +33,9 @@ class SparQLEndpoint:
     def addLocalFileToEndpoint(self,tfile,tgraph="default"):
         cmd="s-post {} {} {}".format(self.endpoint_url,tgraph,tfile)
         os.system(cmd)
+    def removeLocalFileFromEndpoint(self,tfile,tgraph="default"):
+        cmd="s-delete {} {} {}".format(self.endpoint_url,tgraph,tfile)
+        os.system(cmd)
     def restablishConnection(self,endpoint_url=None):
         if not endpoint_url:
             endpoint_url=self.endpoint_url
@@ -131,6 +134,11 @@ class SparQLLegacyConvenience:
         #http://purl.org/socialparticipation/po/AuxGraph#1
         self.addLocalFileToEndpoint(tfile,self.graphidAUX)
         c("first insert")
+        # separate participants
+        # separate friendships in Friendships
+        # remove direct friendships?
+        # or replace participant uri with participant uri+snapshot
+        # and write that the general name of the participant is the original URI
         insert=(
                 ("?i1",NS.po.snapshot,snapshot),
                 ("_:mblank",a,NS.po.ParticipantAttributes),
@@ -141,7 +149,6 @@ class SparQLLegacyConvenience:
         where=(
                 ("?i1",a,NS.po.Participant),
                 ("?i1","?p","?o"),
-
               )
         querystring=P.sparql.functions.buildQuery(triples1=insert,graph1=self.graphidAUX,
                                                   #triples2=where,graph2=self.graphidAUX,modifier2=" MINUS {?i1 a ?foovar} "
@@ -156,7 +163,6 @@ class SparQLLegacyConvenience:
         querystring=P.sparql.functions.buildQuery(triples1=insert,graph1=self.graphidAUX,triples2=where,graph2=self.graphidAUX,method="insert_where")
         self.updateQuery(querystring)
 
-#        querystring="MOVE <%s> TO DEFAULT"%(self.graphidAUX,)
         c("graph move")
         delete=("?s","?p","?o"), # aux
         insert=("?s","?p","?o"), # DEFAULT
@@ -167,17 +173,37 @@ class SparQLLegacyConvenience:
                 ("?s","?p","?o"), 
                 )
         querystring=P.sparql.functions.buildQuery(
-                                                  #triples1=insert,graph1="urn:x-arq:DefaultGraph",#graph2="DEFAULT",
-                                                  #triples2=delete,graph2=self.graphidAUX,
                                                   triples1=delete,graph1=self.graphidAUX,
                                                   triples2=insert,graph2="urn:x-arq:DefaultGraph",#graph2="DEFAULT",
-                                                  #triples2=insert,graph2="urn:x-arq:DefaultGraph",#graph2="DEFAULT",
                                                   triples3=where,graph3=self.graphidAUX,
                                                   method="delete_insert_where")
         # tentar soh o insert depois 
         # tentar soh o delete depois 
         self.updateQuery(querystring)
         self.mquery=querystring
+        # delete trash:
+        delete=("?s","?p","?o"),
+        where=(
+                ("?s","?p",NS.owl.SymmetricProperty),
+                ("?s","?p","?o"),
+                #("OPTIONAL","?s","?p",NS.owl.SymmetricProperty),
+                #("OPTIONAL",NS.owl.SymmetricProperty,"?p","?o"),
+                #("OPTIONAL","?s","?p","?o"),
+                )
+        querystring=P.sparql.functions.buildQuery(triples1=delete,graph1=self.graphidAUX,
+                                                  triples2=where,graph2=self.graphidAUX,
+                                                  method="delete_where")
+
+        delete=("?s","?p","?o"),
+        where=(
+                (snapshot,"?p","?o"),
+                ("?s","?p","?o"),
+                )
+        querystring=P.sparql.functions.buildQuery(triples1=delete,graph1=self.graphidAUX,
+                                                  triples2=where,graph2=self.graphidAUX,
+                                                  method="delete_where")
+        self.updateQuery(querystring)
+
         self.getNTriples(self.graphidAUX)
         if self.ntriples==self.ntriplesAUX:
             c("graphAUX restored correctly")
@@ -190,16 +216,6 @@ class SparQLLegacyConvenience:
         triples=(snapshot,NS.po.translateFilePath,tfile),
         self.insertTriples(triples)
         c("end of translation add")
-        # delete trash:
-        delete=("?s","?p","?o"),
-        where=(
-                ("OPTIONAL","?s","?p",NS.owl.SymmetricProperty),
-                ("OPTIONAL",NS.owl.SymmetricProperty,"?p","?o"),
-                )
-        querystring=P.sparql.functions.buildQuery(triples1=delete,graph1=self.graphidAUX,
-                                                  triples2=where,graph2=self.graphidAUX,
-                                                  method="delete_where")
-        self.updateQuery(querystring)
         # if empty afterwards, make dummy inference graph to copy triples from or load rdfs file
     def addMetafileToEndpoint(self,tfile):
         self.addLocalFileToEndpoint(tfile) # SparQLQueries
@@ -208,7 +224,7 @@ class SparQLLegacyConvenience:
         triples=(
                     (snapshoturi,a,snapshotsubclass), # Gmane, FB, TW, ETC
                     (snapshoturi,NS.po.localDir,os.path.dirname(tfile)),
-                    (snapshoturi,NS.po.metaFilepath,tfile),
+                    (snapshoturi,NS.po.metaFilePath,tfile),
                 )
         self.insertTriples(triples) # SparQLQueries
     def makeNetwork(self,relation_uri,label_uri=None,rtype=1,directed=False):

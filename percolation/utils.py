@@ -13,7 +13,7 @@ def fileProvenanceDict(files):
     tw=   sorted([i for i in files if PROVENANCE_IDS[2] in i]) # TW
     dummy2=gmane[8:12]
     dummy_diversified=gmane[3:4] +fb[3:4]+tw[3:4]
-    dummy=gmane[10:11]
+    dummy=gmane[-10:-9]
     dummyfb=fb[10:11]
     all_ok=gmane+fb+tw
     all_=files
