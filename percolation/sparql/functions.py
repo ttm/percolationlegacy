@@ -3,15 +3,22 @@ import percolation as P, rdflib as r
 NS=P.rdf.NS
 a=NS.rdf.type
 
-def buildQuery(triples1,graph1=None,triples2=None,graph2=None,modifier1="",modifier2="",distinct1=None,method="select",startB_=None):
+def buildQuery(triples1,graph1=None,modifier1="",\
+               triples2=None,graph2=None,modifier2="",\
+               triples3=None,graph3=None,modifier3="",\
+               distinct1=None,startB_=None,method="select"):
     """The general query builder from fields and respective triples or uris"""
+    DATA_QUERY=method.count("_")==0
     if isinstance(triples1,str):
-        querystring=triples1
+        querystring1=triples1
     elif isinstance(triples1,(tuple,list)):
         if distinct1:
             distinct1=" DISTINCT "
         if graph1:
-            graphpart1=" GRAPH <%s> { "%(graph1,)
+            if graph1.lower()=="default":
+                graphpart1=" GRAPH %s { "%(graph1,)
+            else:
+                graphpart1=" GRAPH <%s> { "%(graph1,)
             body1close=" } } "
         else:
             graphpart1=""
@@ -28,35 +35,70 @@ def buildQuery(triples1,graph1=None,triples2=None,graph2=None,modifier1="",modif
         if "select"==method.lower():
             start="SELECT "
             startB=tvars_string+" WHERE { "
-        elif "insert"==method.lower():
-            start="INSERT DATA "
+        elif "delete" in method.lower():
+            start="DELETE "
+            if DATA_QUERY:
+                start+=" DATA "
             startB=" { "
-        elif "insert_where"==method.lower():
+        elif "insert" in method.lower():
             start="INSERT "
+            if DATA_QUERY:
+                start+=" DATA "
             startB=" { "
-        elif method.lower()=="delete":
-            pass
         if startB_:
             startB=startB_
-        querystring=start+startB+graphpart1+body+body1close+modifier1
+        querystring1=start+startB+graphpart1+body+body1close+modifier1
+    else:
+        querystring1=""
     if isinstance(triples2,str):
-        querystring+=triples2
+        querystring2=triples2
     elif isinstance(triples2,(tuple,list)):
         if graph2:
-            graphpart2=" GRAPH <%s> { "%(graph2,)
+            if graph2.lower()=="default":
+                graphpart2=" GRAPH %s { "%(graph2,)
+            else:
+                graphpart2=" GRAPH <%s> { "%(graph2,)
             body2close=" } } "
         else:
             graphpart2=""
             body2close=" } "
         if len(triples2[0])!=3:
-            triples2=(triples1,)
+            triples2=(triples2,)
         body2=""
         for line in triples2:
             body2+=formatQueryLine(line)
-        if "insert_where"==method.lower():
+        if ("where" in method.lower()) and (method.count("_")==1):
             start2=" WHERE  "
             startB2=" { "
-            querystring+=start2+startB2+graphpart2+body2+body2close+modifier2
+        elif "insert" in method.lower():
+            start2=" INSERT "
+            startB2=" { "
+        querystring2=start2+startB2+graphpart2+body2+body2close+modifier2
+    else:
+        querystring2=""
+    if isinstance(triples3,str):
+        querystring3=triples3
+    elif isinstance(triples3,(tuple,list)):
+        if graph3:
+            if graph3.lower()=="default":
+                graphpart3=" GRAPH %s { "%(graph3,)
+            else:
+                graphpart3=" GRAPH <%s> { "%(graph3,)
+            body3close=" } } "
+        else:
+            graphpart3=""
+            body3close=" } "
+        if len(triples3[0])!=3:
+            triples3=(triples3,)
+        body3=""
+        for line in triples3:
+            body3+=formatQueryLine(line)
+        start3=" WHERE  "
+        startB3=" { "
+        querystring3=start3+startB3+graphpart3+body3+body3close+modifier3
+    else:
+        querystring3=""
+    querystring=querystring1+querystring2+querystring3
     return querystring
 
 def dictQueryValues(result_dict):
@@ -134,7 +176,7 @@ def formatQueryLine(triple):
     for term in triple:
         if isinstance(term,(r.Namespace,r.URIRef)):
             line+=" <%s> "%(term,)
-        elif (term[0]=="?") or (term[:2]=="_:"):
+        elif (term[0]=="?") or (term[:2]=="_:") or "urn" in term:
             line+=" %s "%(term,)
         elif isinstance(term,str) and term[0]!="?":
              line+=' "%s" '%(term,)

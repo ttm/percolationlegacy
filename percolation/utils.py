@@ -14,6 +14,7 @@ def fileProvenanceDict(files):
     dummy2=gmane[8:12]
     dummy_diversified=gmane[3:4] +fb[3:4]+tw[3:4]
     dummy=gmane[10:11]
+    dummyfb=fb[10:11]
     all_ok=gmane+fb+tw
     all_=files
     del files

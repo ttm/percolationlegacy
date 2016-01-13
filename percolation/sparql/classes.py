@@ -1,9 +1,27 @@
+__doc__="""
+
+NOTES:
+    INSERTs and DELETEs without a WHERE clause have the DATA keyword: INSERT DATA { ... } DELETE DATA { ... }.
+    DELETE INSERT WHERE queries can't swap to INSERT DELETE WHERE. (The DELETE WHERE is in fact a D I W query without I) 
+    
+    Even so, I cant get this query to work: DELETE  {  GRAPH <http://purl.org/socialparticipation/po/AuxGraph#1> {  ?s  ?p  ?o  .  } }  INSERT  {      GRAPH <urn:x-arq:DefaultGraph> {  ?s  ?p  ?o  .  } }  WHERE   {  GRAPH <http://purl.org/socialparticipation/po/AuxGraph#1> {  ?s  <http://purl.org/socialparticipation/po/snapshot>  <http://purl.org/socialparticipation/po/Snapshot#GeorgeSanders08032014_fb>  .  } } '
+
+    URI: tdb:unionDefaultGraph the union graph (don't seem to work now, maybe bugged)
+    URI: urn:x-arq:DefaultGraph the default graph (seem to work)
+
+    Legacy have had to split delete insert where query in 2: a insert where and delete where because of the bug above.
+
+
+    
+"""
+
 import os
 import rdflib as r, networkx as x, percolation as P
 from SPARQLWrapper import SPARQLWrapper, JSON
 c=P.utils.check
 NS=P.rdf.NS
 a=NS.rdf.type
+
 
 class SparQLEndpoint:
     """Fuseki connection maintainer through rdflib"""
@@ -30,13 +48,18 @@ class SparQLQueries:
         else:
             query="CLEAR DEFAULT"
         self.updateQuery(query)
-    def addRepmoteFileToEndpoint(self,tfile):
-        raise NotImplementedError("Need to implemet through a sparql query probably.")
-    def insertTriples(self,triples,graph=None):
-        querystring=P.sparql.functions.buildQuery(triples,method="insert")
+    def addRepmoteFileToEndpoint(self,remote_file_url,tgraph=None):
+        part1="LOAD <%s> "%(remote_file_url)
+        if tgraph:
+            part2=" [ INTO <%s> ] "%(tgraph,)
+        query=part1+part2
+        self.updateQuery(query)
+        raise NotImplementedError("Need to validate. Never been used")
+    def insertTriples(self,triples,graph1=None):
+        querystring=P.sparql.functions.buildQuery(triples,graph1=graph1,method="insert")
         self.result=self.updateQuery(querystring)
-    def retrieveFromTriples(self,querystring_or_triples,modifier1="",graph1=None,startB_=None):
-        querystring=P.sparql.functions.buildQuery(querystring_or_triples,graph1=graph1,modifier1=modifier1,startB_=startB_)
+    def retrieveFromTriples(self,triples,graph1=None,modifier1="",startB_=None):
+        querystring=P.sparql.functions.buildQuery(triples,graph1=graph1,modifier1=modifier1,startB_=startB_)
         return self.retrieveQuery(querystring)
     def retrieveQuery(self,querystring):
         """Query for retrieving information (e.g. through select)"""
@@ -61,6 +84,13 @@ class SparQLQueries:
 class SparQLLegacyConvenience:
     """Convenience class for query and renderind analysis strictures, tables and figures"""
     graphidAUX=NS.po.AuxGraph+"#1"
+    def __init__(self):
+        ontology_triples=P.rdf.makeOntology()
+        self.insertTriples(ontology_triples,self.graphidAUX) # SparQLQueries TTM
+        self.getAllTriples(self.graphidAUX)
+        self.ntriplesAUX=self.ntriples
+        triples=("?s","?p","?o")
+        self.alltriplesAUX=self.retrieveFromTriples(triples,graph1=self.graphidAUX)
     def getSnapshots(self,snaphot_type=None):
         if not snaphot_type:
             uri=NS.po.Snapshot
@@ -95,8 +125,6 @@ class SparQLLegacyConvenience:
     def addTranslationFileToEndpoint(self,tfile,snapshot):
         #http://purl.org/socialparticipation/po/AuxGraph#1
         self.addLocalFileToEndpoint(tfile,self.graphidAUX)
-        ontology_triples=P.rdf.makeOntology()
-        self.insertTriples(ontology_triples,self.graphidAUX) # SparQLQueries TTM
         c("first insert")
         insert=(
                 ("_:mblank",a,NS.po.ParticipantAttributes),
@@ -117,10 +145,30 @@ class SparQLLegacyConvenience:
         querystring=P.sparql.functions.buildQuery(triples1=insert,graph1=self.graphidAUX,triples2=where,graph2=self.graphidAUX,method="insert_where")
         self.updateQuery(querystring)
 
+#        querystring="MOVE <%s> TO DEFAULT"%(self.graphidAUX,)
         c("graph move")
-        querystring="MOVE <%s> TO DEFAULT"%(self.graphidAUX,)
+        insert=("?s","?p","?o") # DEFAULT
+        delete=("?s","?p","?o") # aux
+        where=("?s",NS.po.snapshot,snapshot) # aux
+        querystring=P.sparql.functions.buildQuery(
+                                                  #triples1=delete,graph1=self.graphidAUX,
+                                                  #triples2=insert,graph2="urn:x-arq:DefaultGraph",#graph2="DEFAULT",
+                                                  triples1=insert,graph1="urn:x-arq:DefaultGraph",#graph2="DEFAULT",
+                                                  triples2=delete,graph2=self.graphidAUX,
+                                                  triples3=where,graph3=self.graphidAUX,
+                                                  method="delete_insert_where")
+        # tentar soh o insert depois 
+        # tentar soh o delete depois 
         self.updateQuery(querystring)
-
+        self.mquery=querystring
+        self.getAllTriples(self.graphidAUX)
+        if self.ntriples==self.ntriplesAUX:
+            c("graphAUX restored correctly")
+        else:
+            c("somethig went wrong in restoring graphidAUX")
+            self.ntriplesAUX2=self.ntriples
+            triples=("?s","?p","?o")
+            self.alltriplesAUX2=self.retrieveFromTriples(triples,graph1=self.graphidAUX)
         c("insert triple to default")
         triples=(snapshot,NS.po.translateFilePath,tfile),
         self.insertTriples(triples)
@@ -199,5 +247,6 @@ class SparQLLegacy(SparQLEndpoint,SparQLQueries,SparQLLegacyConvenience):
     """Class that holds sparql endpoint connection and convenienves for query and renderind analysis strictures, tables and figures"""
     def __init__(self,endpoint_url):
         SparQLEndpoint.__init__(self,endpoint_url)
+        SparQLLegacyConvenience.__init__(self)
 
 
