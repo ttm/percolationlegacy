@@ -121,8 +121,8 @@ def makeOntology():
             (NS.fb.Interaction,NS.rdfs.subClassOf,NS.po.InteractionInstance), 
 
             (NS.gmane.Participant,NS.rdfs.subClassOf,NS.po.Participant), 
-            (NS.fb.Participant,NS.rdfs.subClassOf,NS.po.Participant), 
-            (NS.tw.Participant,NS.rdfs.subClassOf,NS.po.Participant),  
+            (   NS.fb.Participant,NS.rdfs.subClassOf,NS.po.Participant), 
+            (   NS.tw.Participant,NS.rdfs.subClassOf,NS.po.Participant),  
 
             (NS.fb.friend,a,NS.owl.SymmetricProperty), 
             # ADD IRC and other instances

@@ -2,27 +2,38 @@ __doc__="""generic routines that don't require a sparql connection"""
 import percolation as P, rdflib as r
 NS=P.rdf.NS
 a=NS.rdf.type
-
-def buildQuery(triples1,graph1=None,modifier1="",\
-               triples2=None,graph2=None,modifier2="",\
-               triples3=None,graph3=None,modifier3="",\
-               distinct1=None,startB_=None,method="select"):
+default=("urn:x-arq:DefaultGraph",)
+default="default"
+def buildQuery(triples1,     graph1=default,modifier1="",\
+               triples2=None,graph2=default,modifier2="",\
+               triples3=None,graph3=default,modifier3="",\
+               distinct1=None,startB_=None,startB3_=None,body3close_=None,body3modifier="",\
+               method="select"):
     """The general query builder from fields and respective triples or uris"""
+    if graph1 != default:
+        graphpart1=" GRAPH <%s> { "%(graph1,)
+        body1close=" } } "
+    else:
+        graphpart1=""
+        body1close=" } "
+    if graph2 != default:
+        graphpart2=" GRAPH <%s> { "%(graph2,)
+        body2close=" } } "
+    else:
+        graphpart2=""
+        body2close=" } "
+    if graph3 != default:
+        graphpart3=" GRAPH <%s> { "%(graph3,)
+        body3close=" } } "
+    else:
+        graphpart3=""
+        body3close=" } "
     DATA_QUERY=method.count("_")==0
     if isinstance(triples1,str):
         querystring1=triples1
     elif isinstance(triples1,(tuple,list)):
         if distinct1:
             distinct1=" DISTINCT "
-        if graph1:
-            if graph1.lower()=="default":
-                graphpart1=" GRAPH %s { "%(graph1,)
-            else:
-                graphpart1=" GRAPH <%s> { "%(graph1,)
-            body1close=" } } "
-        else:
-            graphpart1=""
-            body1close=" } "
         if len(triples1)==3 and not isinstance(triples1[0],(tuple,list)):
             triples1=(triples1,)
         tvars=[]
@@ -53,15 +64,6 @@ def buildQuery(triples1,graph1=None,modifier1="",\
     if isinstance(triples2,str):
         querystring2=triples2
     elif isinstance(triples2,(tuple,list)):
-        if graph2:
-            if graph2.lower()=="default":
-                graphpart2=" GRAPH %s { "%(graph2,)
-            else:
-                graphpart2=" GRAPH <%s> { "%(graph2,)
-            body2close=" } } "
-        else:
-            graphpart2=""
-            body2close=" } "
         if len(triples2)==3 and not isinstance(triples2,(list,tuple)):
             triples2=(triples2,)
         body2=""
@@ -79,15 +81,6 @@ def buildQuery(triples1,graph1=None,modifier1="",\
     if isinstance(triples3,str):
         querystring3=triples3
     elif isinstance(triples3,(tuple,list)):
-        if graph3:
-            if graph3.lower()=="default":
-                graphpart3=" GRAPH %s { "%(graph3,)
-            else:
-                graphpart3=" GRAPH <%s> { "%(graph3,)
-            body3close=" } } "
-        else:
-            graphpart3=""
-            body3close=" } "
         if len(triples3[0])!=3:
             triples3=(triples3,)
         body3=""
@@ -95,7 +88,11 @@ def buildQuery(triples1,graph1=None,modifier1="",\
             body3+=formatQueryLine(line)
         start3=" WHERE  "
         startB3=" { "
-        querystring3=start3+startB3+graphpart3+body3+body3close+modifier3
+        if startB3_:
+            startB3=startB3_
+        if body3close_:
+            body3close=body3close_
+        querystring3=start3+startB3+graphpart3+body3modifier+body3+body3close+modifier3
     else:
         querystring3=""
     querystring=querystring1+querystring2+querystring3
@@ -183,14 +180,13 @@ def formatQueryLine(triple):
     for term in triple:
         if isinstance(term,(r.Namespace,r.URIRef)):
             line+=" <%s> "%(term,)
-        elif (term[0]=="?") or (term[:2]=="_:") or "urn" in term:
+        elif (term[0]=="?") or (term[:2]=="_:"):
             line+=" %s "%(term,)
-        elif isinstance(term,str) and term[0]!="?":
+        elif isinstance(term,str) and term[0]!="?": 
              line+=' "%s" '%(term,)
         else:
             line+=' "%s" '%(term,)
-    line=start+line+end
-    line+= " . "
+    line=start+line+end+" . "
     return line
 
 def addToFusekiEndpoint(end_url,tfiles):
