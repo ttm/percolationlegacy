@@ -40,6 +40,33 @@ NOTES:
                FILTER regex(str(?s), "^http://some.domain.org/")
              }}
         }
+
+
+BACKUP
+
+        delete=(
+                 ("?s","?p","?o"),
+                ("?s3","?p3","?s"),
+               )
+        insert=(
+                 ("?s1","?p","?o"),
+                 ("?s1",NS.po.genericURI,"?s"),
+                 ("?s1",NS.po.snapshot,snapshot),
+                 ("?s3","?p3","?s1"),
+               )
+        where=(
+                ("?s",a,NS.po.Participant),
+                ("?s","?p","?o"),
+                ("OPTIONAL","?s3","?p3","?s"),
+              )
+        startB3_=" SELECT ?s ?p ?o ?s3 ?p3 (uri(concat(?s,'--','%s') ) AS ?s1) {"%(snapshot,)
+        body3close_= " } } } "
+        querystring=P.sparql.functions.buildQuery(
+                                                  triples1=delete,graph1=self.graphidAUX,
+                                                  triples2=insert,graph2=self.graphidAUX,
+                                                  triples3=where, graph3=self.graphidAUX,
+                                                           body3modifier=startB3_,body3close_=body3close_,
+                                                  method="delete_insert_where")
 """
 
 import os
@@ -124,6 +151,10 @@ class SparQLQueries:
 class SparQLLegacyConvenience:
     """Convenience class for query and renderind analysis strictures, tables and figures"""
     graphidAUX=NS.po.AuxGraph+"#1"
+    graphidAUX2=NS.po.AuxGraph+"#2"
+    graphidAUX3=NS.po.AuxGraph+"#3"
+    graphidAUX4=NS.po.AuxGraph+"#4"
+    graphidAUX5=NS.po.AuxGraph+"#5"
     def __init__(self):
 #        ontology_triples=P.rdf.makeOntology()
 #        self.insertTriples(ontology_triples,self.graphidAUX) # SparQLQueries TTM
@@ -186,16 +217,18 @@ class SparQLLegacyConvenience:
                 ("?s","?p","?o"),
                 ("OPTIONAL","?s3","?p3","?s"),
               )
-        startB3_=""" SELECT (uri(concat(?s,'-_-','%s') ) AS ?s1) {"""%(snapshot,)
-        body3close_= " } } } "
+#        startB3_=""" SELECT ?s ?p ?o ?s3 ?p3 (uri(concat(?s,'--','%s') ) AS ?s1) {"""%(snapshot,)
+        bindline=" BIND(uri(concat(str(?s),'--','%s')) AS ?s1) "%(snapshot,)
+        body3close_= " } "+bindline +" } "
+        body3close_= bindline +" . } } "
         querystring=P.sparql.functions.buildQuery(
                                                   triples1=delete,graph1=self.graphidAUX,
                                                   triples2=insert,graph2=self.graphidAUX,
                                                   triples3=where, graph3=self.graphidAUX,
-                                                           body3modifier=startB3_,body3close_=body3close_,
+                                                           body3close_=body3close_,
                                                   method="delete_insert_where")
-        self.mquery2=querystring
-        self.updateQuery(querystring)
+        #self.mquery2=querystring
+        #self.updateQuery(querystring)
 
         c("second insert")
         insert=("?m",NS.po.snapshot,snapshot),
@@ -221,7 +254,7 @@ class SparQLLegacyConvenience:
                                                   triples2=insert,#graph2=default,#graph2="DEFAULT",
                                                   triples3=where,graph3=self.graphidAUX,
                                                   method="delete_insert_where")
-        self.updateQuery(querystring)
+        #self.updateQuery(querystring)
         self.mquery=querystring
         querystring=P.sparql.functions.buildQuery(
                                                   triples1=delete,graph1=self.graphidAUX,

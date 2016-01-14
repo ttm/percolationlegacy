@@ -1,5 +1,6 @@
 __doc__="""generic routines that don't require a sparql connection"""
 import percolation as P, rdflib as r
+c=P.utils.check
 NS=P.rdf.NS
 a=NS.rdf.type
 default=("urn:x-arq:DefaultGraph",)
@@ -39,11 +40,11 @@ def buildQuery(triples1,     graph1=default,modifier1="",\
         tvars=[]
         body=""
         for line in triples1:
-            tvars+=[i for i in line if i[0]=="?" and "foo" not in i]
+            tvars+=[i for i in line if str(i)[0]=="?" and "foo" not in i]
             body+=formatQueryLine(line)
         tvars=P.utils.uniqueItems(tvars)
         tvars_string=(" %s "*len(tvars))%tuple(tvars)
-        if "select"==method.lower():
+        if "select" in method.lower():
             start="SELECT "
             startB=tvars_string+" WHERE { "
         elif "delete" in method.lower():
@@ -99,17 +100,31 @@ def buildQuery(triples1,     graph1=default,modifier1="",\
     return querystring
 
 def dictQueryValues(result_dict):
-    keys=result_dict["head"]["vars"]
     results=[]
     for result in result_dict["results"]["bindings"]:
+        keys=result.keys()
         this_result={}
         for key in keys:
             value=result[key]["value"]
             type_=result[key]["type"]
             if type_=="uri":
                 value=r.URIRef(value)
-            elif type_=="literal":
+            elif type_ in ("literal","bnode"):
                 pass
+            elif type_=="typed-literal":
+                if result[key]["datatype"]==(NS.xsd.integer).toPython():
+                    value=int(value)
+                elif result[key]["datatype"]==(NS.xsd.datetime).toPython():
+                    pass
+                elif result[key]["datatype"]==(NS.xsd.date).toPython():
+                    pass
+                elif result[key]["datatype"]==(NS.xsd.boolean).toPython():
+                    if value=="true":
+                        value=True
+                    elif value=="false":
+                        value=False
+                    else:
+                        raise TypeError("Incomming boolean not understood")
             else:
                 raise TypeError("Type of incomming variable not understood")
             this_result[key]=[value]
@@ -122,9 +137,9 @@ def plainQueryValues(result_dict,join_queries=False):
     Set join_queries="hard" to keep list of lists structure
     when each result hold only one variable"""
 
-    keys=result_dict["head"]["vars"]
     results=[]
     for result in result_dict["results"]["bindings"]:
+        keys=sorted(result.keys())
         this_result=[]
         for key in keys:
             value=result[key]["value"]
@@ -180,7 +195,7 @@ def formatQueryLine(triple):
     for term in triple:
         if isinstance(term,(r.Namespace,r.URIRef)):
             line+=" <%s> "%(term,)
-        elif (term[0]=="?") or (term[:2]=="_:"):
+        elif (str(term)[0]=="?") or (str(term)[:2]=="_:") or "uri(" in str(term):
             line+=" %s "%(term,)
         elif isinstance(term,str) and term[0]!="?": 
              line+=' "%s" '%(term,)

@@ -1,0 +1,80 @@
+@prefix :        <#> .
+@prefix fuseki:  <http://jena.apache.org/fuseki#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix tdb:     <http://jena.hpl.hp.com/2008/tdb#> .
+@prefix ja:      <http://jena.hpl.hp.com/2005/11/Assembler#> .
+
+[] ja:loadClass "org.apache.jena.tdb.TDB" .
+tdb:DatasetTDB  rdfs:subClassOf  ja:RDFDataset .
+tdb:GraphTDB    rdfs:subClassOf  ja:Model .
+
+[] rdf:type fuseki:Server ;
+   fuseki:services (
+     <#serviceRTDB>
+   ) .
+<#serviceRTDB>  rdf:type fuseki:Service ;
+    fuseki:name              "RTDB" ;
+    fuseki:serviceQuery      "sparql" ; 
+    fuseki:serviceQuery                "query" ;
+    fuseki:serviceUpdate               "update" ;
+    fuseki:serviceUpload               "upload" ;
+    fuseki:serviceReadWriteGraphStore  "data" ;     
+    fuseki:dataset           <#datasetRTDB> ;
+    .
+<#datasetRTDB> rdf:type       ja:RDFDataset ;
+    ja:defaultGraph       <#model_rtdb> ;
+    ja:namedGraph [ ja:graph <#model_raux> ; 
+                    ja:graphName <http://purl.org/socialparticipation/po/AuxGraph#1>; ];
+    ja:namedGraph [ ja:graph <#model_raux2> ; 
+                    ja:graphName <http://purl.org/socialparticipation/po/AuxGraph#2>; ];
+    ja:namedGraph [ ja:graph <#model_raux3> ; 
+                    ja:graphName <http://purl.org/socialparticipation/po/AuxGraph#3>; ];
+    ja:namedGraph [ ja:graph <#model_raux4> ; 
+                    ja:graphName <http://purl.org/socialparticipation/po/AuxGraph#4>; ];
+    ja:namedGraph [ ja:graph <#model_raux5> ; 
+                    ja:graphName <http://purl.org/socialparticipation/po/AuxGraph#5>; ];
+     .
+<#model_rtdb> a ja:InfModel ;
+    ja:baseModel <#RTDBGraph> ;
+    ja:reasoner
+         [ ja:reasonerURL <http://jena.hpl.hp.com/2003/RDFSExptRuleReasoner> ] ;
+    . 
+<#RTDBGraph> rdf:type      tdb:GraphTDB ;
+    tdb:dataset <#rtdbDataset> ;
+    .
+<#rtdbDataset> rdf:type tdb:DatasetTDB ;
+    tdb:location "RTDB" ;
+    . #### END default+tdb
+<#model_raux> a ja:InfModel ;
+    ja:baseModel <#RAuxGraph> ;
+    ja:reasoner
+         [ ja:reasonerURL <http://jena.hpl.hp.com/2003/RDFSExptRuleReasoner> ] ;
+    . 
+<#RAuxGraph> rdf:type      ja:MemoryModel . # end aux 1
+<#model_raux2> a ja:InfModel ;
+    ja:baseModel <#RAuxGraph2> ;
+    ja:reasoner
+         [ ja:reasonerURL <http://jena.hpl.hp.com/2003/RDFSExptRuleReasoner> ] ;
+    . 
+<#RAuxGraph2> rdf:type      ja:MemoryModel . # end aux 2
+<#model_raux3> a ja:InfModel ;
+    ja:baseModel <#RAuxGraph3> ;
+    ja:reasoner
+         [ ja:reasonerURL <http://jena.hpl.hp.com/2003/RDFSExptRuleReasoner> ] ;
+    . 
+<#RAuxGraph3> rdf:type      ja:MemoryModel . # end aux 3
+<#model_raux4> a ja:InfModel ;
+    ja:baseModel <#RAuxGraph4> ;
+    ja:reasoner
+         [ ja:reasonerURL <http://jena.hpl.hp.com/2003/RDFSExptRuleReasoner> ] ;
+    . 
+<#RAuxGraph4> rdf:type      ja:MemoryModel . # end aux 4
+<#model_raux5> a ja:InfModel ;
+    ja:baseModel <#RAuxGraph5> ;
+    ja:reasoner
+         [ ja:reasonerURL <http://jena.hpl.hp.com/2003/RDFSExptRuleReasoner> ] ;
+    . 
+<#RAuxGraph5> rdf:type      ja:MemoryModel . # end aux 5
+
