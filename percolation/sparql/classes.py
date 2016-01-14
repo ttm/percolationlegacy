@@ -1,6 +1,9 @@
 __doc__="""
 
 NOTES:
+    See https://rdflib.readthedocs.org/en/4.2.1/_modules/rdflib/plugins/stores/sparqlstore.html
+        where SparQLEndpoint + SparQLQuery is called a "sparql store"
+
     INSERTs and DELETEs without a WHERE clause have the DATA keyword: INSERT DATA { ... } DELETE DATA { ... }.
     DELETE INSERT WHERE queries can't swap to INSERT DELETE WHERE. (The DELETE WHERE is in fact a D I W query without I) 
     

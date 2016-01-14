@@ -126,6 +126,25 @@ def makeOntology():
 
             (NS.fb.friend,a,NS.owl.SymmetricProperty), 
             # ADD IRC and other instances
+            
+            (NS.fb.ID, NS.rdfs.subPropertyOf,NS.po.ID),
+            (NS.po.numericID, NS.rdfs.subPropertyOf,NS.po.ID),
+            (NS.po.stringID, NS.rdfs.subPropertyOf,NS.po.ID),
+
+            (NS.fb.numericID,NS.rdfs.subPropertyOf,NS.fb.ID),
+            (NS.fb.numericID,NS.rdfs.subPropertyOf,NS.po.numericID),
+            (NS.fb.stringID, NS.rdfs.subPropertyOf,NS.fb.ID),
+            (NS.fb.stringID, NS.rdfs.subPropertyOf,NS.po.stringID),
+
+            (NS.gmane.stringID,NS.rdfs.subPropertyOf,NS.po.stringID),
+            (NS.gmane.email,   NS.rdfs.subPropertyOf,NS.gmane.stringID),
+
+            # TW IRC AA Part CD
+            (NS.tw.stringID,NS.rdfs.subPropertyOf,NS.po.stringID),
+            (NS.tw.email,   NS.rdfs.subPropertyOf,NS.tw.stringID),
+
+            # User ID somente, na msg a ID eh a URI pois nao diferem em listas/grupos diferentes
+            # Mas IDs podem existir para grupos e pessoas, pois se repetem em datasets diferentes
 
             # type of relation retrievement: 1, 2 or 3
 
@@ -203,45 +222,47 @@ def writeAll(per_graph,sname="img_and_rdf",sdir="./",full=False,remove=False,dot
             g_.add((sub,pred,obj))
             i+=1
             if i%sizelimit==0:
-                f=open(sdir+"rdf/{}{:05d}.owl".format(nome_,j),"wb")
+                f=open(sdir+"rdf/{}{:05d}.rdf".format(nome_,j),"wb")
                 f.write(g_.serialize())
                 f.close()
-                check("owl written")
+                check("rdf written")
                 f=open(sdir+"rdf/{}{:05d}.ttl".format(nome_,j),"wb")
                 f.write(g_.serialize(format="turtle"))
                 f.close()
                 check("ttl written")
                 g_=r.Graph()
                 j+=1
-        f=open(sdir+"rdf/{}{:05d}.owl".format(nome_,j),"wb")
+        f=open(sdir+"rdf/{}{:05d}.rdf".format(nome_,j),"wb")
         f.write(g_.serialize())
         f.close()
-        check("owl written")
+        check("rdf written")
         f=open(sdir+"rdf/{}{:05d}.ttl".format(nome_,j),"wb")
         f.write(g_.serialize(format="turtle"))
         f.close()
         check("ttl written")
     else:
-        f=open(sdir+"rdf/%s.owl"%(nome_,),"wb")
+        f=open(sdir+"rdf/%s.rdf"%(nome_,),"wb")
         f.write(g.serialize())
         f.close()
-        check("owl written")
+        check("rdf written")
         f=open(sdir+"rdf/%s.ttl"%(nome_,),"wb")
         f.write(g.serialize(format="turtle"))
         f.close()
         check("ttl written")
 
 
-def makeBasicGraph(extra_namespaces=[],glabel="Ontologia da tese"):
-    """each namespace a tuple (tag,URI)"""
-    g,A=r.Graph(),gv.AGraph(directed=True,strict=False)
-    A.graph_attr["label"]=glabel
+def makeBasicGraph(extra_namespaces=[],graphlabel=None):
+    """each namespace a tuple (tag,URI) in extra_namespaces"""
+    g,A=r.Graph()
     g.namespace_manager.bind("rdf", NS.rdf)    
     g.namespace_manager.bind("rdfs",NS.rdfs)    
     g.namespace_manager.bind("xsd", NS.xsd)    
     g.namespace_manager.bind("owl", NS.owl)    
     for tag, namespace in zip(*extra_namespaces):
         g.namespace_manager.bind(tag, namespace)
+    if graphlabel:
+        gv.AGraph(directed=True,strict=False)
+        A.graph_attr["label"]=graphlabel
     return g,A
 def startGraphs(ids=("mid1","mid2"),titles=("Ontology1","ConceptX"),extra_namespaces=[]):
     ags={}
@@ -305,69 +326,44 @@ def C(ag=[makeBasicGraph()],uri="foo",label="bar",superclass=None,comment=None,l
                 G(g,uri,NS.rdfs.comment,LL_(comment_pt,lang="pt"))
         if color:
             nd.attr['color']=color
-def IC_(ga=None,uri="turiref",string="astringid",label="alabel",clabel=True):
+def IC(ga=None,uri=r.URIRef("http://foo.bar"),string="astringid",label=None,draw=False):
     ind=uri+"#"+str(string)
     if ga:
         for g,A in ga:
             G(g,ind,NS.rdf.type,uri)
-            if clabel:
+            if label:
                 G(g,ind,NS.rdfs.label,LL_(label))
-        if label:
-            A.add_node(label,style="filled")
-            nd=A.get_node(label)
-            nd.attr['color']="#02F3DD"
+            if label and draw:
+                A.add_node(label,style="filled")
+                nd=A.get_node(label)
+                nd.attr['color']="#02F3DD"
+            elif draw:
+                raise ValueError("draw=True but no label")
     return ind
 
-
-def IC(ga=None,uri="turiref",string="astringid",label=None,clabel=True,draw=False):
-    ind=uri+"#"+str(string)
-    if ga:
-        for g,A in ga:
-            G(g,ind,NS.rdf.type,uri)
-            if clabel and label:
-                G(g,ind,NS.rdfs.label,LL_(label))
-        if label and draw:
-            A.add_node(label,style="filled")
-            nd=A.get_node(label)
-            nd.attr['color']="#02F3DD"
-    return ind
-
-#def I(ga=[makeBasicGraph()],uri="turiref",string="astringid",label="alabel"):
-#    global COUNT
-#    ind=uri+"#"+str(string)
-#    if label:
-#        for g,A in ga:
-#            G(g,ind,ns.rdf.type,uri)
-#            A.add_node(COUNT,style="filled")
-#            nd=A.get_node(COUNT)
-#            nd.attr['color']="#A2F3D1"
-#            nd.attr['label']=label
-#    return ind
-
-def link_(ga=[makeBasicGraph()],ind="uriref",slabel=None,props=["uri1","uri2"],objs=["uri1","uri2"],labels=["l1","l2"],draw=True):
-    """Link an instance with the object classes through the props"""
-#    query=prepareQuery(
-#            "SELECT ?name WHERE {?fid fb:name ?name}",
-#            initNs={"fb":ns.fb})
+def linkClasses(ga=[makeBasicGraph()],ind=r.URIRef("http://foo.bar"),\
+        props=["uri1","uri2"],objs=["uri1","uri2"],draw=False):
+    """Link ind subject instance with the objs classes through the props"""
+    if draw:
+        labels=[0]*len(props)
     for prop, obj, label in zip(props,objs,labels):
         for g,A in ga:
             G(g,ind,prop,obj)
-            #bb=g.query(query,initBindings={"fid":obj})
-            #oname=[i for i in bb][0][0].value
-            if draw and slabel:
-                slabel_=slabel.replace("%","")
+            if draw:
+                g.query("SELECT ?s WHERE { <%s> rdfs.label ?label }"%(obj,))
+                slabel_=subject_label.replace("%","")
                 A.add_edge(  slabel_,label)
                 e=A.get_edge(slabel_,label)
                 e.attr["label"]=prop.split("/")[-1]
 
-def link(ga=[makeBasicGraph()],ind="uriref",label="alabel",props=["uri1","uri2"],vals=["val1","val2"],draw=True):
+def linkData(ga=[makeBasicGraph()],ind="uriref",props=[NS.po.foo,NS.po.bar],vals=["val1","val2"],label=None):
     """Link an instance with the vals through the props"""
     global COUNT
     # acha o name do uriref buscando no grafo
     for prop, val in zip(props,vals):
         for g,A in ga:
             G(g,ind,prop,LL_(val))
-            if draw and label:
+            if label:
                 A.add_node(COUNT,style="filled")
                 nd=A.get_node(COUNT)
                 nd.attr["label"]=val

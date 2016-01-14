@@ -7,6 +7,12 @@ import pdb
 
 nestedDict = lambda: collections.defaultdict(nestedDict)
 PROVENANCE_IDS="gmane-", "_fb", "_tw"
+def objectFromDict(adict):
+    class aobj:
+        pass
+    for key in adict:
+        exec("aobj.{}={}".format(key,adict[key])
+    return aobj
 def fileProvenanceDict(files):
     gmane=sorted([i for i in files if PROVENANCE_IDS[0] in i])
     fb=   sorted([i for i in files if PROVENANCE_IDS[1] in i]) # FB
