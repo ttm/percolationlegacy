@@ -114,22 +114,31 @@ querystring=P.sparql.functions.buildQuery(triples1=select,graph1=si.graphidAUX,m
 nInteractions=si.retrieveQuery(querystring)
 c("finish")
 
-# put triples in graph aux2
-# put make aux structs in aux2
+"""
+Full run:
+0.220 get ntriples in all graphs
+0.079 now the number of triples in the default/unnamed graph
+0.045 add local file to endpoint at aux graph
+0.232 count again the number of triples in respective graphs
+0.046 get snapshot in local file
+0.021 insert few metadata triples in
+0.000 perfortm insert
+/usr/local/lib/python3.4/dist-packages/SPARQLWrapper/Wrapper.py:728: RuntimeWarning: unknown response content type, returning raw response...
+warnings.warn("unknown response content type, returning raw response...", RuntimeWarning)
+0.024 get localdir for snapshot from aux graph
+0.015 insert ontology in aux graph
+0.033 get translates
+0.019 make translates local filepath
+0.000 add to the endpoint the translates local filepath
+0.288 retrieve triples that have po:Participants as their subjects
+0.370 retrieve triples that have po:Participants as their objects
+0.103 make localuris for substitution
+0.036 insert new triples in graph AUX 2 !!
+217.035 update where in AUX to tag messages
+0.000 perform update where
+0.019 count number of messages or interactions
+0.013 finish
 
-# test it
-
-#
-#querystring=P.sparql.functions.buildQuery(select,si.graphidAUX)
-#res=si.retrieveQuery(querystring)
-#
-#res=si.getAllTriples(si.graphidAUX)
-#
-#select=(
-#        ("?s",a,NS.po.Participant),
-#      )
-#
-#querystring=P.sparql.functions.buildQuery(select,si.graphidAUX)
-#res2=si.retrieveQuery(querystring)
-#
-## Testes:
+with Fuseki 2.3.1 and this config.tt file:
+https://github.com/ttm/percolation/blob/master/misc/newConfigReasonersCombinedV.ttl
+"""
