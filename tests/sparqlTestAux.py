@@ -92,12 +92,16 @@ for tr_ in participants1:
     tr2=newuri,NS.po.genericURI,genericuri,
     tr3=newuri,NS.po.snapshot,snapshot,
     participants1_+=[tr]+[tr2]+[tr3]
+p1=set([i[0] for i in participants1])
 participants2_=[]
 for tr_ in participants2:
     tr=tr_[:]
     tr[2]=tr[2]+"-_-"+snapshot
+    if tr[0] in p1:
+        tr[0]=tr[0]+"-_-"+snapshot
+
     participants2_+=[tr]
-c("insert new triples in graph AUX 2 !!")
+c("insert new triples in graph AUX 2, ntriples=%s !!"%(len(participants1+participants2),)) # 2228 in 217 seconds
 si.insertTriples(participants1_+participants2_,si.graphidAUX2)
 # 0.02678 por query, 65s for ~2,3k triples TTM
 
@@ -112,6 +116,7 @@ c("count number of messages or interactions")
 select=("?m",a,NS.po.InteractionInstance)
 querystring=P.sparql.functions.buildQuery(triples1=select,graph1=si.graphidAUX,method="select")
 nInteractions=si.retrieveQuery(querystring)
+c("nmessages=%s !!"%(len(participants1+participants2),)) # 2228 in 217 seconds
 c("finish")
 
 """
@@ -139,6 +144,34 @@ warnings.warn("unknown response content type, returning raw response...", Runtim
 0.019 count number of messages or interactions
 0.013 finish
 
+If the number of triples to insert is low, the time it takes is not so high:
+0.227 get ntriples in all graphs
+0.079 now the number of triples in the default/unnamed graph
+0.042 add local file to endpoint at aux graph
+0.264 count again the number of triples in respective graphs
+0.042 get snapshot in local file
+0.039 insert few metadata triples in
+0.000 perfortm insert
+/usr/local/lib/python3.4/dist-packages/SPARQLWrapper/Wrapper.py:728: RuntimeWarning: unknown response content type, returning raw response...
+warnings.warn("unknown response content type, returning raw response...", RuntimeWarning)
+0.021 get localdir for snapshot from aux graph
+0.014 insert ontology in aux graph
+0.032 get translates
+0.020 make translates local filepath
+0.000 add to the endpoint the translates local filepath
+0.197 retrieve triples that have po:Participants as their subjects
+0.100 retrieve triples that have po:Participants as their objects
+0.024 make localuris for substitution
+0.002 insert new triples in graph AUX 2, ntriples=106 !!
+0.784 update where in AUX to tag messages
+0.000 perform update where
+0.017 count number of messages or interactions
+0.014 nmessages=106 !!
+0.000 finish
+
 with Fuseki 2.3.1 and this config.tt file:
 https://github.com/ttm/percolation/blob/master/misc/newConfigReasonersCombinedV.ttl
+
+
+
 """
