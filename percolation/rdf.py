@@ -296,6 +296,8 @@ def makeMetadata():
             (NS.po.TimelineAnalysis,NS.rdfs.comment,"Analysis of topological and textual features of social structures along a timeline"),
             (NS.po.MultiscaleAnalysis,NS.rdfs.comment,"Analysis of topological and textual features of social structures in various scales"),
             (NS.po.Percolation, NS.po.usesTechnique, NS.dbp.Kolmogorov_smirnov_test),
+            (NS.po.Percolation, NS.po.note, "Outlines misturam contexto e roteiro","pt"),
+            (NS.po.Percolation, NS.po.note, "Outlines merge context and script","en"),
             (NS.po.Percolation, NS.po.usesTechnique, NS.dbp.Principal_component_analysis),
             (NS.po.Percolation, NS.po.usesTechnique, NS.dbp.Unit_root_test),
             (NS.po.Percolation, NS.po.usesTechnique, NS.dbp.CorrelationMatrix),

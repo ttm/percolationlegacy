@@ -8,3 +8,4 @@ from . import temporalStats
 from . import text
 from . import topology
 from . import sparql
+from .start import start
