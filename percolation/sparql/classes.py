@@ -2,7 +2,7 @@ __doc__="""
 
 NOTES:
     See https://rdflib.readthedocs.org/en/4.2.1/_modules/rdflib/plugins/stores/sparqlstore.html
-        where SparQLEndpoint + SparQLQuery is called a "sparql store"
+        where SparQLClient + SparQLQuery is called a "sparql store"
 
     INSERTs and DELETEs without a WHERE clause have the DATA keyword: INSERT DATA { ... } DELETE DATA { ... }.
     DELETE INSERT WHERE queries can't swap to INSERT DELETE WHERE. (The DELETE WHERE is in fact a D I W query without I) 
@@ -83,7 +83,10 @@ a=NS.rdf.type
 default="urn:x-arq:DefaultGraph"
 default=NS.po.MainGraph+"#1"
 default="default"
-class SparQLEndpoint:
+g=r.Graph()
+#g.addN(P.rdf.makeMetadata())
+
+class SparQLClient:
     """Fuseki connection maintainer through rdflib"""
     def __init__(self,endpoint_url):
         self.endpoint=SPARQLWrapper(endpoint_url)
@@ -103,7 +106,7 @@ class SparQLEndpoint:
         self.endpoint.method = 'POST'
         self.endpoint.setReturnFormat(JSON)
 class SparQLQueries:
-    """Covenience class for inheritance with SparQLEndpoint and SparQLLegacy"""
+    """Covenience class for inheritance with SparQLClient and SparQLLegacy"""
     iquery=[]
     rquery=[]
     def clearEndpoint(self,tgraph=default):
@@ -137,7 +140,7 @@ class SparQLQueries:
         self.endpoint.method="POST"
         return self.performQuery(querystring)
     def performQuery(self,querystring):
-        """Query method is defined at SparQLEndpoint initialization."""
+        """Query method is defined at SparQLClient initialization."""
          # self.method=POST
         self.endpoint.setQuery(querystring) 
         return self.endpoint.queryAndConvert()
@@ -364,14 +367,14 @@ class SparQLLegacyConvenience:
         c("graph done")
         return dg
 
-class SparQL(SparQLEndpoint,SparQLQueries):
+class Client(SparQLClient,SparQLQueries):
     """Class that holds sparql endpoint connection and convenienves for query"""
     def __init__(self,endpoint_url):
-        SparQLEndpoint.__init__(self,endpoint_url)
-class SparQLLegacy(SparQLEndpoint,SparQLQueries,SparQLLegacyConvenience):
+        SparQLClient.__init__(self,endpoint_url)
+class LegacyClient(SparQLClient,SparQLQueries,SparQLLegacyConvenience):
     """Class that holds sparql endpoint connection and convenienves for query and renderind analysis strictures, tables and figures"""
     def __init__(self,endpoint_url):
-        SparQLEndpoint.__init__(self,endpoint_url)
+        SparQLClient.__init__(self,endpoint_url)
         SparQLLegacyConvenience.__init__(self)
 
     

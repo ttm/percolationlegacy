@@ -11,7 +11,7 @@ def objectFromDict(adict):
     class aobj:
         pass
     for key in adict:
-        exec("aobj.{}={}".format(key,adict[key])
+        exec("aobj.{}={}".format(key,adict[key]))
     return aobj
 def fileProvenanceDict(files):
     gmane=sorted([i for i in files if PROVENANCE_IDS[0] in i])

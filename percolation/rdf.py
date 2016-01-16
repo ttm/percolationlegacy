@@ -53,10 +53,17 @@ class NS:
     irc =    r.Namespace("http://purl.org/socialparticipation/irc/") # irc
     gmane =  r.Namespace("http://purl.org/socialparticipation/gmane/") # gmane
     ld  =    r.Namespace("http://purl.org/socialparticipation/ld/")  # linkedin 
+    dbp  =    r.Namespace("http://dbpedia.org/resource/")
     rdf =    r.namespace.RDF
     rdfs =   r.namespace.RDFS
     owl =    r.namespace.OWL
     xsd =    r.namespace.XSD
+    dc =     r.namespace.DC
+    dct =    r.namespace.DCTERMS
+    foaf =   r.namespace.FOAF
+    doap =   r.namespace.DOAP
+    void =   r.namespace.VOID
+    U=   r.URIRef
 query_=prepareQuery(
         "SELECT ?name WHERE {?fid fb:name ?name}"
         ,initNs={"fb":NS.fb})
@@ -68,6 +75,171 @@ def makeDummyOntology():
             (NS.po.Snapshot, a, NS.rdfs.Class),
             (NS.po.InteractionSnapshot, NS.rdfs.subClassOf, NS.po.Snapshot), # fb, part, tw, irc, gmane, cidade
             (NS.po.GmaneSnapshot, NS.rdfs.subClassOf, NS.po.InteractionSnapshot),
+            )
+    return triples
+def makeExtradata():
+    triples=(
+            (NS.po.Resource+"#PythonSparQLServer1",NS.po.url,"https://projects.bigasterisk.com/sparqlhttp/"),
+            (NS.po.Resource+"#PythonSparQLServer2",NS.po.url,"https://github.com/RDFLib/rdflib-web"),
+            (NS.po.Resource+"#PythonSparQLServer2",NS.po.url,"http://rdflib-web.readthedocs.org/en/latest/"),
+            (NS.po.Resource+"#DocumentCollection1",NS.po.url,"https://www.w3.org/DesignIssues/"),
+            (NS.po.Resource+"#DocumentCollection1",NS.rdfs.comment,"Tim Berners-Lee's outline of architectural principles for thinking specifications."),
+            (NS.po.Resource+"#BFO",NS.po.url,"https://raw.githubusercontent.com/BFO-ontology/BFO/master/releases/2.0/bfo.owl"),
+            (NS.po.Resource+"#BFO",NS.rdfs.comment,"BFO 2.0"),
+            (NS.po.Resource+"#BFO",NS.rdfs.label,"bfo"),
+            (NS.po.Resource+"#BFO",NS.doap.repository,"https://github.com/bfo-ontology/BFO/"),
+            (NS.po.Resource+"#BFO",NS.foaf.homepage,"http://ifomis.uni-saarland.de/bfo/"),
+            (NS.po.Note+"#1",NS.po.url,"leave Fuseki a little bit and start making a Flask interface for dealing with RDF data"),
+            )
+def makeMetadata():
+    triples=(
+            (NS.po.po+".owl", a, NS.owl.Ontology),
+            (NS.po.po+".owl", NS.dct.title, "The Participation Ontology"),
+            (NS.po.po+".owl", NS.dct.description, "The Participation Ontology eases integration of social data\
+                                                for scientific research and harnessing by the participants/integrants of the social structures"),
+            (NS.po.po+".owl", NS.dct.creator, "Renato Fabbri"),
+            (NS.po.po+".owl", NS.doap.maintainer, NS.po.Participant+"#RenatoFabbri"),
+            (NS.po.po+".owl", NS.doap.developer ,NS.po.Participant+"#RenatoFabbri"),
+            (NS.po.po+".owl", NS.foaf.maker,NS.po.Participant+"#RenatoFabbri"),
+            (NS.po.po+".owl", NS.doap.mailing+"-list","listamacambira@googlegroups.com"),
+            (NS.po.po+".owl", NS.dc.license, r.URIRef("http://www.opendatacommons.org/licenses/odbl/")),
+            (NS.po.po+".owl", NS.rdfs.seeAlso, NS.po.Percolation),
+            (NS.po.po+".owl", NS.rdfs.seeAlso, NS.po.Social),
+            (NS.po.po+".owl", NS.rdfs.seeAlso, NS.po.Music),
+            (NS.po.po+".owl", NS.rdfs.seeAlso, NS.po.Visuals),
+            (NS.po.po+".owl", NS.rdfs.seeAlso, ),
+            (NS.po.po+".owl", NS.foaf.homepage, "https://github.com/ttm/percolation"),
+            (NS.po.po+".owl", NS.foaf.mbox, "mailto:renato.fabbri@gmail.com"),
+
+            (NS.po.Participant+"#RenatoFabbri", a, NS.po.Participant),
+            (NS.po.Participant+"#RenatoFabbri", NS.foaf.name, "Renato Fabbri"),
+            (NS.po.Participant+"#RenatoFabbri",NS.foaf.mbox,"mailto:renato.fabbri@gmail.com"),
+
+            (NS.po.Percolation, a, NS.po.PythonPackage),
+            (NS.po.Percolation, NS.po.homeRepo, NS.U("https://github.com/ttm/percolation")),
+            (NS.po.Percolation, NS.rdfs.comment, "The Percolation Python package for social harnessing"),
+            (NS.po.Percolation, NS.po.sparqlEndpoint, NS.po.SparqlEndpoint+"#DEV1"),
+            (NS.po.SparqlEndpoint+"#DEV1",NS.po.url,"http://200.144.255.210:8082/RTDB"),
+            (NS.po.SparqlEndpoint+"#DEV1",NS.rdfs.comment,"for remote development"),
+            (NS.po.SparqlEndpoint+"#DEV1",NS.rdfs.label,"dev1"),
+            (NS.po.Percolation, NS.dct.subject, NS.dbp.Social_network_analysis),
+            (NS.po.Percolation, NS.dct.subject, NS.dbp.Social_networks),
+            (NS.po.Percolation, NS.dct.subject, NS.dbp.Linked_data),
+            (NS.po.Percolation, NS.dct.subject, NS.dbp.Semantic_web),
+            (NS.po.Percolation, NS.dct.subject, NS.dbp.Complex_systems_theory),
+            (NS.po.Percolation, NS.dct.subject, NS.dbp.Complex_networks),
+            (NS.po.Percolation, NS.dct.subject, NS.dbp.Physics),
+
+
+
+
+            (NS.po.Percolation, NS.po.sparqlEndpoint, NS.po.SparqlEndpoint+"#DEV2"),
+            (NS.po.SparqlEndpoint+"#DEV2",NS.po.url,"http://localhost:9082/RTDB"),
+            (NS.po.SparqlEndpoint+"#DEV2",NS.rdfs.comment,"for local development in the VM with Fuseki"),
+            (NS.po.SparqlEndpoint+"#DEV2",NS.rdfs.label,"dev2"),
+
+            (NS.po.Percolation, NS.po.sparqlEndpoint, NS.po.SparqlEndpoint+"#1"),
+            (NS.po.Percolation, NS.po.sparqlEndpoint, NS.po.SparqlEndpoint+"#2"),
+            (NS.po.Percolation, NS.po.sparqlEndpoint, NS.po.SparqlEndpoint+"#3"),
+            (NS.po.Percolation, NS.po.sparqlEndpoint, NS.po.SparqlEndpoint+"#AA"),
+            (NS.po.SparqlEndpoint+"#AA",NS.po.url,"http://openlinkedsocialdata/AA/"),
+            (NS.po.SparqlEndpoint+"#AA",NS.rdfs.comment,"for using AA, i.e. for sharing frfr"),
+            (NS.po.SparqlEndpoint+"#AA",NS.rdfs.label,"dev1"),
+
+            (NS.po.SparqlEndpoint+"#DEVAA",NS.po.url,"http://openlinkedsocialdata/AA/"),
+
+
+
+            (NS.po.Social, a,                NS.po.PythonPackage),
+            (NS.po.Social, NS.po.homeRepo, NS.U("https://github.com/ttm/social")),
+            (NS.po.Social, NS.rdfs.comment, "The Social Python package for accessing data from social platforms and rendering linked data"),
+            (NS.po.Social, NS.po.standardDataPath, "../data/"),
+            (NS.po.Social, NS.po.standardFacebookDataPath, "../data/fb/"),
+            (NS.po.Social, NS.po.standardTwitterDataPath, "../data/tw/"),
+            (NS.po.Social, NS.po.standardIRCDataPath, "../data/irc/"),
+            (NS.po.Social, NS.po.standardGmaneDataPath, "../data/gmane/"),
+
+            (NS.po.Music, a,                NS.po.PythonPackage),
+            (NS.po.Music, NS.po.homeRepo, NS.U("https://github.com/ttm/music")),
+            (NS.po.Music, NS.rdfs.comment, "The Music Python package making music with sample-based methods"),
+
+            (NS.po.Visuals, a,                NS.po.PythonPackage),
+            (NS.po.Visuals, NS.po.homeRepo, NS.U("https://github.com/ttm/visuals")),
+            (NS.po.Visuals, NS.rdfs.comment, "The Visuals Python package making image and video data visualizations"),
+
+
+            (NS.po.OpenLinkedSocialData, a,                NS.po.PythonPackage),
+            (NS.po.OpenLinkedSocialData, NS.foaf.homepage, NS.U("https://github.com/OpenLinkedSocialData")),
+            (NS.po.OpenLinkedSocialData, NS.rdfs.comment, "Linked RDF data rendered through participatory packages"),
+            (NS.po.OpenLinkedSocialData, a, NS.void.Dataset),
+
+            (NS.po.PercolationRelated, NS.dct.subject, NS.dbp.Social_network_analysis),
+            (NS.po.PercolationRelated, NS.dct.subject, NS.dbp.Social_networks),
+            (NS.po.PercolationRelated, NS.dct.subject, NS.dbp.Linked_data),
+            (NS.po.PercolationRelated, NS.dct.subject, NS.dbp.Semantic_web),
+            (NS.po.PercolationRelated, NS.dct.subject, NS.dbp.Complex_systems_theory),
+            (NS.po.PercolationRelated, NS.dct.subject, NS.dbp.Complex_networks),
+            (NS.po.PercolationRelated, NS.dct.subject, NS.dbp.Physics),
+            (NS.po.PercolationRelated, NS.dct.subject, NS.dbp.Art),
+            (NS.po.PercolationRelated, NS.dct.subject, NS.dbp.Music),
+            (NS.po.PercolationRelated, NS.dct.subject, NS.dbp.Internet_art),
+            (NS.po.PercolationRelated, NS.dct.subject, NS.dbp.Data_visualization),
+            (NS.po.PercolationRelated, NS.dct.subject, NS.dbp.Stop_motion),
+            (NS.po.PercolationRelated, NS.dct.subject, NS.dbp.Percolation),
+            (NS.po.PercolationRelated, NS.dct.subject, NS.dbp.Empowerment),
+            (NS.dbp.Empowerment,NS.rdfs.comment, "Empowerment refers to increasing the economic, political, social, educational, gender, or spiritual strength of an entity or entities."), # from dbpedia
+
+            (NS.po.OpenLinkedSocialData, NS.rdfs.subClassOf, NS.po.PercolationRelated),
+            (NS.po.Percolation, NS.rdfs.subClassOf, NS.po.PercolationRelated),
+            (NS.po.Social, NS.rdfs.subClassOf, NS.po.PercolationRelated),
+            (NS.po.Music, NS.rdfs.subClassOf, NS.po.PercolationRelated),
+            (NS.po.Visuals, NS.rdfs.subClassOf, NS.po.PercolationRelated),
+
+            (NS.po.Visuals, NS.po.emphasys, NS.dbp.Stop_motion),
+            (NS.po.Visuals, NS.po.emphasys, NS.dbp.Image),
+            (NS.po.Music, NS.po.emphasys, NS.dbp.Music),
+            (NS.po.Music, NS.po.emphasys, NS.dbp.Sound),
+            (NS.po.Music, NS.po.emphasys, NS.po.SampleBasedDAW),
+
+            (NS.po.Percolation, NS.po.uses, NS.po.Social),
+            (NS.po.Percolation, NS.po.uses, NS.po.Music),
+            (NS.po.Percolation, NS.po.uses, NS.po.Visuals),
+            (NS.po.Percolation, NS.po.uses, NS.po.OpenLinkedSocialData),
+
+            (NS.po.Social , NS.po.dependsOn,  , NS.po.Percolation),
+            (NS.po.Music  , NS.po.dependsOn,  , NS.po.Percolation),
+            (NS.po.Visuals, NS.po.dependsOn,  , NS.po.Percolation),
+            (NS.po.Percolation, NS.po.uses, NS.po.OpenLinkedSocialData),
+
+
+            (NS.po.Social, NS.po.sythesizes, NS.po.OpenLinkedSocialData),
+            (NS.po.Percolation, NS.po.analyzes, NS.po.OpenLinkedSocialData),
+            (NS.po.Percolation, NS.po.makesArtWith, NS.po.OpenLinkedSocialData),
+
+            (NS.po.Percolation, NS.po.enables, NS.dbp.Empowerment),
+
+            (NS.po.Percolation, NS.po.usesTechnique, NS.po.SocialPercolationProcess),
+            (NS.po.Percolation, NS.po.usesTechnique, NS.dbp.KolmogorovSmirnov),
+            (NS.po.Percolation, NS.po.usesTechnique, NS.dbp.PrincipalComponentAnalysis),
+            (NS.po.Percolation, NS.po.usesTechnique, NS.dbp.PrincipalComponentAnalysis),
+
+            )
+
+    return triples
+def makeMetadataOntology():
+    makeMetadata()
+    makeMetadataStructure()
+
+"https://github.com/OpenLinkedSocialData"
+def makeMetadataStructure():
+    triples=(
+            (NS.po.Participant, NS.rdfs.subClassOf, NS.foaf.Person),
+            (NS.po.PythonPackage, NS.rdfs.subClasOf, NS.doap.Project),
+            (NS.po.PythonPackage, NS.doap.programming+"-language", "Python"),
+            (NS.po.homeRepo, NS.rdfs.subPropertyOf, NS.doap.location),
+            (NS.po.homeRepo, NS.rdfs.subPropertyOf, NS.doap.repository),
+            (NS.po.homeRepo, NS.rdfs.subPropertyOf, NS.foaf.homepage),
+            (NS.po.homeRepo, NS.rdfs.range, NS.doap.Repository),
             )
     return triples
 
@@ -130,6 +302,16 @@ def makeOntology():
             (NS.fb.ID, NS.rdfs.subPropertyOf,NS.po.ID),
             (NS.po.numericID, NS.rdfs.subPropertyOf,NS.po.ID),
             (NS.po.stringID, NS.rdfs.subPropertyOf,NS.po.ID),
+
+
+            (NS.fb.nRelations, NS.rdfs.subPropertyOf,NS.po.nRelations),
+            (NS.fb.nInterations, NS.rdfs.subPropertyOf,NS.fb.nRelations),
+            (NS.fb.nFriendships, NS.rdfs.subPropertyOf,NS.fb.nRelations),
+
+
+            (NS.fb.anonymized, NS.rdfs.subPropertyOf,NS.po.anonymized),
+            (NS.fb.friendshipsAnonymized, NS.rdfs.subPropertyOf,NS.fb.anonymized),
+            (NS.fb.interactionssAnonymized, NS.rdfs.subPropertyOf,NS.fb.anonymized),
 
             (NS.fb.numericID,NS.rdfs.subPropertyOf,NS.fb.ID),
             (NS.fb.numericID,NS.rdfs.subPropertyOf,NS.po.numericID),
@@ -253,7 +435,7 @@ def writeAll(per_graph,sname="img_and_rdf",sdir="./",full=False,remove=False,dot
 
 def makeBasicGraph(extra_namespaces=[],graphlabel=None):
     """each namespace a tuple (tag,URI) in extra_namespaces"""
-    g,A=r.Graph()
+    g,A=r.Graph(),gv.AGraph(directed=True,strict=False)
     g.namespace_manager.bind("rdf", NS.rdf)    
     g.namespace_manager.bind("rdfs",NS.rdfs)    
     g.namespace_manager.bind("xsd", NS.xsd)    
