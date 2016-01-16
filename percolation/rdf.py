@@ -95,7 +95,9 @@ def makeMetadata():
     triples=(
             (NS.po.po+".owl", a, NS.owl.Ontology),
             (NS.po.po+".owl", NS.dct.title, "The Participation Ontology"),
-            (NS.po.po+".owl", NS.dct.description, "The Participation Ontology eases integration of social data\
+            (NS.po.po+".owl", NS.dct.title, "The Percolation Ontology"),
+            (NS.po.po+".owl", NS.dct.title, "The Participation/Percolation Ontology"),
+            (NS.po.po+".owl", NS.dct.description, "The Participation/Percolation Ontology eases integration of social data\
                                                 for scientific research and harnessing by the participants/integrants of the social structures"),
             (NS.po.po+".owl", NS.dct.creator, "Renato Fabbri"),
             (NS.po.po+".owl", NS.doap.maintainer, NS.po.Participant+"#RenatoFabbri"),
