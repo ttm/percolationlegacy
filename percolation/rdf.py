@@ -114,6 +114,67 @@ def makeMetadata():
             (NS.po.po+".owl", NS.foaf.mbox, "mailto:renato.fabbri@gmail.com"),
 
             (NS.po.Participant+"#RenatoFabbri", a, NS.po.Participant),
+            (NS.po.Participant+"#RenatoFabbri", NS.po.personToContact, NS.po.Participant+"#Raul"),
+            (NS.po.Participant+"#RenatoFabbri", NS.po.contactNotes, "Raul para quando/onde ele vai tocar\
+                                                                    Markun/Capi para raspagem e criações diversas\
+                                                                    Vilson p js/lm/vida\
+                                                                    Marilia p Teoria Crítica/Filosofia/Antropologia/Psicanálise/Cranio/percolação\
+                                                                    Penalva p física/matemática/percolação\
+                                                                    Rita p vestíveis/percolação/arte/cranio/arquitetura\
+                                                                    Savazone p literatura/arte\
+                                                                    Thata p igreja/arte/música/percolação\
+                                                                    Alfaix p música/arte/stockhausen\
+                                                                    Priscila p antonio/campo grange/antropologia/mobilizacao pela causa indígena\
+                                                                    Chu p VM/doc/Nilc/publicacoes/polimeros\
+                                                                    Joioso p VM\
+                                                                    LM p comunicado/convocação/compartilhamento/ideia\
+                                                                    Iwao p música/percolação\
+                                                                    Besouro p percolação/arte\
+                                                                    PrLeandro p percolação/bíblia\
+                                                                    Wanilton p percolação/bíblia\
+                                                                    Elbio p rio/daime/percolacao\
+                                                                    VGrilo p ceará/daime/percolacao\
+                                                                    Yonashiro p música/arte/transcendência\
+                                                                    Jorge Antunes p música/arte\
+                                                                    Deborah Antunes p personalidade autoritária\
+                                                                    Júlia Tygel p música/antropologia\
+                                                                    Renata de Paula p espiritismo/percolação\
+                                                                    Nitai p dados ligados/minc\
+                                                                    Boechat p bíblia/ipc\
+                                                                    Luis Henrique p jornalismo/filosofia/arte contemporânea/vida\
+                                                                    Rogério Lourenço p antropologia/transcendencia\
+                                                                    Pablo Pascale p labic/percolação\
+                                                                    Massom p artes plásticas\
+                                                                    Marta p daime/video/gamarra\
+                                                                    Camila p daime/sociologia/gamarra/percolação\
+                                                                    Ligia p daime/transcendência/percolação\
+                                                                    Ricardo Fabbri p vida/transcendência/percolação/computação/matemática\
+                                                                    Maurício Fabbri p vida/computação/matemática\
+                                                                    Cláudia Lopes p matemática/tangran/vida/culinária\
+                                                                    Oda p trancendencia/móveis montessori/imagens/processing/dengue\
+                                                                    Gilberto Macruz p transcendência/artes plásticas\
+                                                                    Sandra Leão p transcendência/música/rádio/dj\
+                                                                    Lunhani p transcendência/música/rádio/composição\
+                                                                    Fernando Gularte p transcendência/música/literatura/matematica\
+                                                                    Fabib p transcendência/psicologia/esquizoanálise/submidialogia/tecnoxamanismo\
+                                                                    Goa p transcendência/computação/cultura livre/juntadados\
+                                                                    Marcelo Soares p computação/cultura livre/juntadados\
+                                                                    Canevacci p antropologia/transcendência\
+                                                                    Silvio Carneiro p filosofia/cautela\
+                                                                    Henrique Xavier p filosofia/estética/arte/música\
+                                                                    Porres p música/pd/percolação\
+                                                                    Mario Nunzuo p música/basquete\
+                                                                    Ivan Marin p física/computação/matemática\
+                                                                    SPA p física/computação/matemática\
+                                                                    Cristiane Godoy p física/computação/matemática\
+                                                                    Sérgio Amadeu p cultura livre/sociologia\
+                                                                    Sérgio Amadeu p cultura livre/sociologia\
+                                                                    Chico Simões p tambores/maracatu/transcendência\
+                                                                    Daniel Teixeira p java/bíblia\
+                                                                    Caleb Luporini p processing/diy/\
+
+
+                                                                    "),
             (NS.po.Participant+"#RenatoFabbri", NS.foaf.name, "Renato Fabbri"),
             (NS.po.Participant+"#RenatoFabbri",NS.foaf.mbox,"mailto:renato.fabbri@gmail.com"),
 
@@ -296,8 +357,8 @@ def makeMetadata():
             (NS.po.TimelineAnalysis,NS.rdfs.comment,"Analysis of topological and textual features of social structures along a timeline"),
             (NS.po.MultiscaleAnalysis,NS.rdfs.comment,"Analysis of topological and textual features of social structures in various scales"),
             (NS.po.Percolation, NS.po.usesTechnique, NS.dbp.Kolmogorov_smirnov_test),
-            (NS.po.Percolation, NS.po.note, "Outlines misturam contexto e roteiro","pt"),
-            (NS.po.Percolation, NS.po.note, "Outlines merge context and script","en"),
+            (NS.po.Percolation, NS.po.note, "Percolations.outlines misturam contexto e roteiro","pt"),
+            (NS.po.Percolation, NS.po.note, "Percolation.outlines merge context and script","en"),
             (NS.po.Percolation, NS.po.usesTechnique, NS.dbp.Principal_component_analysis),
             (NS.po.Percolation, NS.po.usesTechnique, NS.dbp.Unit_root_test),
             (NS.po.Percolation, NS.po.usesTechnique, NS.dbp.CorrelationMatrix),
