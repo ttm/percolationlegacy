@@ -172,8 +172,8 @@ def makeMetadata():
                                                                     Chico Simões p tambores/maracatu/transcendência\
                                                                     Daniel Teixeira p java/bíblia\
                                                                     Caleb Luporini p processing/diy/\
-
-
+                                                                    Leo Maia p física/matemática/percolação\
+                                                                    Pedro Rocha para arte/transcendência/percolação\
                                                                     "),
             (NS.po.Participant+"#RenatoFabbri", NS.foaf.name, "Renato Fabbri"),
             (NS.po.Participant+"#RenatoFabbri",NS.foaf.mbox,"mailto:renato.fabbri@gmail.com"),

@@ -58,6 +58,10 @@ Notes:
     """
 
 import percolation as P
+
+def MinimizedOutline:
+    P.start()
+    P.demo() # get some data statistics and make some media
 def overallOutline:
     """The most simple but overall usage of percolation features
     
