@@ -58,6 +58,9 @@ Notes:
     """
 
 import percolation as P, os, rdflib as r
+
+def standardPercolationStartup2(percolationdir="~/.percolation/"):
+    P.start()
 def standardPercolationStartup(percolationdir="~/.percolation/"):
     percolationdir=os.path.expanduser(percolationdir)
     if not os.path.isdir(percolationdir):

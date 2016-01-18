@@ -7,6 +7,59 @@ import pdb
 
 nestedDict = lambda: collections.defaultdict(nestedDict)
 PROVENANCE_IDS="gmane-", "_fb", "_tw"
+
+def startSession(context="session"):
+    current_user_uri=P.get(NS.per.currentUser)
+    now=datetime.datetime.now()
+    if not current_user_uri:
+        nick=P.utils.randomNick()
+        current_user_uri=P.rdf.timestampedURI(NS.per.Participant,nick,now)
+        triples=[
+                (current_user_uri, a, NS.per.DefaultParticipant),
+                (current_user_uri, NS.per.nick, nick),
+                (current_user_uri, NS.per.registered, now),
+                ]
+        c("Please create a user with P.utils.createUser() ASAP. Registered for now as {} with URI: {}".format(nick,current_user_uri))
+    else:
+        triples=[]
+
+    session_uri=P.rdf.timestampedURI(NS.per.Session)
+    current_state_uri=NS.per.CurrentState # shout be in ontology
+    triples+=[
+             (current_state_uri,NS.per.currentSession,session_uri),
+             (session_uri,NS.per.started,now),
+             (session_uri,NS.per.user,current_user_uri),
+             ]
+    P.add(triples,context=context)
+
+def shout(message_string,context="aa"):
+    participant_uri=P.get(NS.per.percolationParticipant)
+
+    nick=P.get(participant_uri,NS.nick)
+    now=datetime.datetime.now()
+    shout_uri=P.rdf.timestampedURI(NS.aa.Shout,nick,now)
+
+    triples=[
+            (shout_uri,aa.user,participant_uri))
+            (shout_uri,aa.shoutMessage,shout),
+            (shout_uri,aa.created,now)
+            ]
+
+    is_percolation_session=P.get(NS.per.trueSession)
+    if is_percolation_session:
+        percolation_session=P.get(NS.per.Session)
+        triples+=[(shout_uri,NS.aa.percolationSession,percolation_session)]
+    aa_session=P.get(NS.aa.currentSession)
+    if aa_session:
+        triples+=[(shout_uri,NS.aa.Session,aa_session)]
+        session_started_timestamp=P.get(aa_session,NS.aa.started)
+        last_shout_timestamp=P.get(aa_session,NS.aa.started)
+        c("your session started at {}.\nlast shout at: {},\n last shout is: {}\nsee P.utils.aaSesion() to start and manage sessions.")
+    return P.add(triples,context=context)
+
+
+
+
 def objectFromDict(adict):
     class aobj:
         pass
