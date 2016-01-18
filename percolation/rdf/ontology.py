@@ -54,6 +54,18 @@ def developmentLiterature():
             (NS.po.Literature+"#BFO",NS.rdfs.label,"bfo"),
             (NS.po.Literature+"#BFO",NS.doap.repository,"https://github.com/bfo-ontology/BFO/"),
             (NS.po.Literature+"#BFO",NS.foaf.homepage,"http://ifomis.uni-saarland.de/bfo/"),
+
+            (NS.po.Literature+"#MusicPlug",NS.po.url,"https://www.youtube.com/watch?v=noL0qY48gug"),
+            (NS.po.Literature+"#MusicPlug",NS.rdfs.comment,"Get from before 33m until 42m. Use attack (note onset), BPM and spectral analysers to make music.\n\
+                    Use chokurei and other symbles as tracks for some sections.
+                    Show sections of the network chosen by walks in measures or geometric walks."),
+            NS.po.Note+"#ContagionGame", rdfs.comment,"think on contagion just as in plague inc (steam games).\n\
+                    Data can be taken from dbpedia, randomized to make other world or be set by user.\n\
+                    Percolation techniques ease adoptors of world transcendence,\n\
+                    these fertilize/infect/influence others, game is won when world transcends.
+                    Make text-mode demo with continents. Translate into D3js (or Netlogo)."
+
+
             ]
     return triples
 

@@ -107,6 +107,7 @@ def startSession(context="session"):
              (session_uri,NS.per.user,current_user_uri),
              (current_state_uri,NS.per.currentUser,current_user_uri),
              ]
+
     P.add(triples,context=context)
     P.rdf.minimumOntology()
     P.rdf.legacyMetadata()
