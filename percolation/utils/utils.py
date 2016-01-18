@@ -8,6 +8,82 @@ import pdb
 nestedDict = lambda: collections.defaultdict(nestedDict)
 PROVENANCE_IDS="gmane-", "_fb", "_tw"
 
+def createAAUser(nick=None,email=None,name=None,comment=None,context="aa"):
+    default_percolation_session=P.get("per:currentState per:currentSession ?foosession. ?foosession per:user ?user . ?user a per:DefaultParticipant")
+    if not default_percolation_session:
+        while 1:
+            try:
+                percolation_equivalence=input("use percolation profile data (y/n)? ")
+                if percolation_equivalence not in ("y","n"):
+                    raise ValueError
+            except ValueError:
+                if percolation_equivalence=="y":
+                    # get nick, email, name and comment from percolation or set equivalence between sets
+                    current_user_uri=P.get(NS.per.currentUser)
+                    nick=P.get(current_user_uri,NS.per.nick)
+                    name=P.get(current_user_uri,NS.per.name)
+                    email=P.get(current_user_uri,NS.per.email)
+                    comment=P.get(current_user_uri,NS.per.coment)
+                    c("got nick: {}\nname: {}\nemail: {}\ncomment: {}\nfrom uri: {}".format(
+                        nick, name, email, comment, current_user_uri)
+                continue
+            break
+    if not nick:
+        nick=input("please write your preferred nick (if any): ")
+    if not email:
+        email=input("please write your preferred email (if any): ")
+    if not name:
+        name=input("please write your name (if any): ")
+    if not comment:
+        comment=input("please write any comment for the user that you are creating (if any): ")
+
+    if not nick:
+        nick=randomNick()
+    now=datetime.datetime.now()
+    user_uri=P.rdf.timestampedURI(NS.per.participant,nick,now)
+    triples=[
+            (user_uri, a, NS.per.Participant),
+            (user_uri, NS.aa.nick, nick),
+            (user_uri, NS.aa.registered, now),
+            ]
+
+    if email:
+        triples+=[(user_uri,NS.aa.email,email)]
+    if name:
+        triples+=[(user_uri,NS.aa.name,name)]
+    if comment:
+        triples+=[(user_uri,NS.aa.comment,comment)]
+    return P.add(triples,context=context)
+
+
+def createUser(nick=None,email=None,name=None,comment=None,context="session"):
+    if not nick:
+        nick=input("please write your preferred nick (if any): ")
+    if not email:
+        email=input("please write your preferred email (if any): ")
+    if not name:
+        name=input("please write your name (if any): ")
+    if not comment:
+        comment=input("please write any comment for the user that you are creating (if any): ")
+
+    if not nick:
+        nick=randomNick()
+    now=datetime.datetime.now()
+    user_uri=P.rdf.timestampedURI(NS.per.participant,nick,now)
+    triples=[
+            (user_uri, a, NS.per.Participant),
+            (user_uri, NS.per.nick, nick),
+            (user_uri, NS.per.registered, now),
+            ]
+
+    if email:
+        triples+=[(user_uri,NS.per.email,email)]
+    if name:
+        triples+=[(user_uri,NS.per.name,name)]
+    if comment:
+        triples+=[(user_uri,NS.per.comment,comment)]
+    return P.add(triples,context=context)
+
 def startSession(context="session"):
     current_user_uri=P.get(NS.per.currentUser)
     now=datetime.datetime.now()
@@ -29,8 +105,8 @@ def startSession(context="session"):
              (current_state_uri,NS.per.currentSession,session_uri),
              (session_uri,NS.per.started,now),
              (session_uri,NS.per.user,current_user_uri),
+             (current_state_uri,NS.per.currentUser,current_user_uri),
              ]
-
     P.add(triples,context=context)
     P.rdf.minimumOntology()
     P.rdf.legacyMetadata()
@@ -46,7 +122,7 @@ def shout(message_string,context="aa"):
     shout_uri=P.rdf.timestampedURI(NS.aa.Shout,nick,now)
 
     triples=[
-            (shout_uri,aa.user,participant_uri))
+            (shout_uri,aa.user,participant_uri)
             (shout_uri,aa.shoutText,shout),
             (shout_uri,aa.created,now)
             ]
@@ -55,10 +131,10 @@ def shout(message_string,context="aa"):
     if is_percolation_session:
         percolation_session_uri=P.get(NS.per.Session)
         triples+=[(shout_uri,NS.aa.percolationSession,percolation_session_uri)]
+    shout_status="current shout timestamp: {}\ncurrent shout text: {}".format(now.isoformat(),message_string)
     session_uri=P.get(NS.aa.currentSession)
-    if aa_session:
+    if session_uri:
         triples+=[(aa_session,NS.aa.hasShout,shout_uri)]
-        shout_status="current shout timestamp: {}\ncurrent shout text: {}".format(now.isoformat(),message_string)
 
         session_started_timestamp=P.get(aa_session,NS.aa.started)
         session_status="aa user: {}\nyour session started at {}.".format(nick,session_started_timestamp)
@@ -69,6 +145,8 @@ def shout(message_string,context="aa"):
         last_message_status="last shout at: {},\nlast shout is: {}".format(last_shout_timestamp,last_shout_text)
         help_codeta="see P.utils.aaSesion() to start and manage sessions and {} context/named graph.".format(context)
         c("{}\n{}\n{}\n{}\n".format(session_status,last_shout_status,shout_status,help_codeta))
+    else:
+        c("{}\nNo aa session active. Manage with P.utils.aaSession() if shouts should be associated to a session.".format(shout_status))
     return P.add(triples,context=context)
 
 
