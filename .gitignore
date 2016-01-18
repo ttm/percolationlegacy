@@ -5,3 +5,6 @@
 *.jpg
 tempo/
 *.zip
+percolation.egg-info/
+dist/
+ipython_log*
