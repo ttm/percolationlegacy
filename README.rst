@@ -81,9 +81,10 @@ Coding conventions:
 
     - in the integrated measures, see if networks that have peculiar distribution of measures in erdos sectors also have smaller KS-distance between histograms of degrees and other topological measures. Generalizing, see if structures with an outlier os a measure is correlated with another measures characteristics, such as the correlation histogram.
 
-    - take mean and std of correlation matrix as a measure of coherence in the system.
-
     - every feature should be related to at least one outline.
+
+    - routines should be oriented towards making or navigating percolation graph paths directly or through numeric computation and rendering of new triples or through navigating the local filesystem, legacy filesystem or connecting to an Open Linked Data sparql endpoint such as:
+     .. _DBPedia: http://dbpedia.org/sparql
 
 Usage example
 =================

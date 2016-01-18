@@ -59,10 +59,33 @@ Notes:
 
 import percolation as P
 
-def MinimizedOutline:
+def startupCustomPercolationGraph(custom_pg_path="./where/db/is/"):
+    percolation_graph=r.ConjunctiveGraph("Sleepycat")
+    rt = percolation_graph.open(custom_pg_path, create=False)
+    P.B.percolation_graph=percolation_graph
+
+def startupStandard():
+    # import percolation as P
+    # which starts the percolation graph with persistence
+    pass
+
+def FirstUsageOutline():
+    """an example of a first usage"""
+    P.statusStatistics()
+    P.describeSnapshots()
+    P.pickSnapshot()
+    P.analyse()
+    P.describeSnapshots()
+    P.describeSnapshot()
+    P.renderMedia("last")
+
+def MinimizedOutline2():
+    P.pickSnapshot()
+    P.snapshotStatistics()
+def MinimizedOutline():
     P.start()
     P.demo() # get some data statistics and make some media
-def overallOutline:
+def overallOutline():
     """The most simple but overall usage of percolation features
     
     ToDo:
