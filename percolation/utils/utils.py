@@ -30,7 +30,13 @@ def startSession(context="session"):
              (session_uri,NS.per.started,now),
              (session_uri,NS.per.user,current_user_uri),
              ]
+
     P.add(triples,context=context)
+    P.rdf.minimumOntology()
+    P.rdf.legacyMetadata()
+    P.rdf.rdfsInference("minimum_ontology","legacy_metadata","session_legacy_metadata")
+    # by this point, one should have the named graphs/contexts:
+    # session, minimum_ontology, legacy_metadata, session_legacy_metadata
 
 def shout(message_string,context="aa"):
     participant_uri=P.get(NS.per.percolationParticipant)
@@ -41,20 +47,28 @@ def shout(message_string,context="aa"):
 
     triples=[
             (shout_uri,aa.user,participant_uri))
-            (shout_uri,aa.shoutMessage,shout),
+            (shout_uri,aa.shoutText,shout),
             (shout_uri,aa.created,now)
             ]
 
     is_percolation_session=P.get(NS.per.trueSession)
     if is_percolation_session:
-        percolation_session=P.get(NS.per.Session)
-        triples+=[(shout_uri,NS.aa.percolationSession,percolation_session)]
-    aa_session=P.get(NS.aa.currentSession)
+        percolation_session_uri=P.get(NS.per.Session)
+        triples+=[(shout_uri,NS.aa.percolationSession,percolation_session_uri)]
+    session_uri=P.get(NS.aa.currentSession)
     if aa_session:
-        triples+=[(shout_uri,NS.aa.Session,aa_session)]
+        triples+=[(aa_session,NS.aa.hasShout,shout_uri)]
+        shout_status="current shout timestamp: {}\ncurrent shout text: {}".format(now.isoformat(),message_string)
+
         session_started_timestamp=P.get(aa_session,NS.aa.started)
-        last_shout_timestamp=P.get(aa_session,NS.aa.started)
-        c("your session started at {}.\nlast shout at: {},\n last shout is: {}\nsee P.utils.aaSesion() to start and manage sessions.")
+        session_status="aa user: {}\nyour session started at {}.".format(nick,session_started_timestamp)
+
+        last_shout_text, last_shout_timestamp=P.get("<%s> aa:hasShout ?shoutfoo . \
+                ?shoutfoo aa:shoutText ?shouttext .\
+                ?shoutfoo aa:created ?shouttime",context,aa_session,"ORDER BY DESC(?shouttime) LIMIT 1")
+        last_message_status="last shout at: {},\nlast shout is: {}".format(last_shout_timestamp,last_shout_text)
+        help_codeta="see P.utils.aaSesion() to start and manage sessions and {} context/named graph.".format(context)
+        c("{}\n{}\n{}\n{}\n".format(session_status,last_shout_status,shout_status,help_codeta))
     return P.add(triples,context=context)
 
 
