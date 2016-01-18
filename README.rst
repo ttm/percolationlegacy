@@ -77,7 +77,11 @@ Coding conventions:
 
     - the file cureimport.py in newtests avoids cluttering the header of the percolation file while hacking framework. In using the Python interpreter, subsequent runs of scripts don't reload or raise error with importlib if the prior error was on load. Justo load it first: import cureimport, percolation as P, etc.
 
-    - to keep the possibility of writing small and clean code, the variabe builtins.state (P.B.stategraph=rdflib.Graph()) keeps track of what has been done by the run and what are the available structures, P.B.statevars=object() keeps the variables in its atributes. Every function and classes use the builtin structures if none is provided. Even better: the variable in P.percolation_graph is a ConjunctiveGraph with all metadata and translates and with each variable/object represented as a string literal given by str(pickle.dumps(object)) or even represent objects as rds collections.
+    - the variable P.percolation_graph is a ConjunctiveGraph with all execution state information metadata and translates and with each variable value as value, a bag (unordered, e.g. word sizes) or a collection (ordered, principal components, etc).
+
+    - in the integrated measures, see if networks that have peculiar distribution of measures in erdos sectors also have smaller KS-distance between histograms of degrees and other topological measures. Generalizing, see if structures with an outlier os a measure is correlated with another measures characteristics, such as the correlation histogram.
+
+    - take mean and std of correlation matrix as a measure of coherence in the system.
 
     - every feature should be related to at least one outline.
 
