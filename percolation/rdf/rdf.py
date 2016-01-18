@@ -79,6 +79,8 @@ def makeDummyOntology():
     return triples
 def makeExtradata():
     triples=(
+            (NS.po.Resource+"#Document1",NS.po.url,"https://www.w3.org/2005/04/fresnel-info/manual/"),
+            (NS.po.Resource+"#Document1",NS.rdfs.comment,"Fresnel Lens for specification of which structures are in each view and is which format"),
             (NS.po.Resource+"#PythonSparQLServer1",NS.po.url,"https://projects.bigasterisk.com/sparqlhttp/"),
             (NS.po.Resource+"#PythonSparQLServer2",NS.po.url,"https://github.com/RDFLib/rdflib-web"),
             (NS.po.Resource+"#PythonSparQLServer2",NS.po.url,"http://rdflib-web.readthedocs.org/en/latest/"),
