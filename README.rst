@@ -2,8 +2,8 @@
 Percolate your social systems
 ==================================================================
 
-This project delivers helper classes for the analysis of the GMANE
-email database. Install with:
+This project delivers helper classes for the analysis of Linked Open Social Data.
+Install with:
 
     $ pip install percolation
 
@@ -17,31 +17,26 @@ For greater control of customization (and debugging), clone the repo and install
 
     $ pip install -e <path_to_repo>
 
-This install method is especially useful with
-reload function from IPython.lib.deepreload and the standard importlib.
+This install method is especially useful while reloading modified module in subsequent runs of percolation
+usually with the standard importlib.
 
+Percolation unites Social, Music and Visuals packages to enable anthropological physics experiments and social harnessing.
 
-Percolation unites Gmane, Participation, Social and MASS packages to enable anthropological physics experiments and social harnessing. Core features are:  
+Core features
+=============
 
     - Ease percolation in social systems by processes such as collection and diffusion of information.
-
     - Enable knowledge about the networked self.
-
+    - Generation of activity reports.                                 
     - Make abstract animations from social data.                      
-
-    - Make music from social data to fit animation as soundtrack.
-
-    - Verification of expected stability and differentiation on the social structures.
-
-    - Directions for agents and networks typologies, extending features from Gmane package.
+    - Make standalone music from social data or to fit animation as soundtrack.
 
     - Integration of resources through RDF data and OWL ontologies.  
 
-    - Routines for representing data from social networks (tweets, Facebook data, IRC logs, LinkedIn, Gmane lists) as RDF.
+    - Directions for agents and networks typologies.
+    - Verification of expected stability and differentiation on the social structures.
 
     - Cross provenance resource recommendation, extending facilities from the Participation package.
-
-    - Generation of activity reports.                                 
 
 
 Plese check this PDF for further information:
@@ -52,28 +47,57 @@ Coding conventions:
 
     - A function name has a verb if t changes state of initialized objects, if it only "returns something", it is has no verb in name.
 
-    - Classes, functions and variables are writen in CamelCase, headlessCamelCase and lowercase, respectively. Undeline is used only in variable names where the words in variable name make something unreadable (usualy because the resulting name is big).
+    - Classes, functions and variables are writen in CamelCase, headlessCamelCase and lowercase, respectively. Underline is used only in variable names where the words in variable name make something unreadable (usually because the resulting name is big).
 
-    - Code should be very readable to avoid writing unecessary documentation and duplicating routine representations. The code is the documentation. This adds up to using docstrings to give context to the objects or omiting the docstrings.
+    - Code should be very readable to avoid writing unnecessary documentation and duplicating routine representations. The code is the documentation. This adds up to using docstrings to give context to the objects or omitting the docstrings.
 
-    - The usual variables in scrits are: P for percolation, NS for P.rdf.NS for namespace, a for NS.rdf.type, c for P.utils.check, S for social, M for music, V for visuals, n for numpy, p for pylab, r for rdflib, x for networkx
+    - The usual variables in scripts are: P for percolation, NS for P.rdf.NS for namespace, a for NS.rdf.type, c for P.utils.check, S for social, M for music, V for visuals, n for numpy, p for pylab, r for rdflib, x for networkx
 
     - The modules are: 
       
-        a. start for the most canonical startup routine.
-        b. legacy for usage outlines and standard analysis and media rendering routines
-        a. rdf to ease add, save and navigation in rdflib graphs (all in rdf.io + rdf.ontology.makeOntolgy)
-        b. rdf.ontology to organize ontology by parts and primarily in functions as they only return the triples or graph.
-        h. text for statistics and analyses of text and making poetry # measures + pca
-        i. topology for making networks, getting measures, making erdos sectorialization and getting meaningfull sequences of participants
-        j. integrated for integrated analyses of text and topology # erdos sectorialization, KS and joint PCA
-        x. analyses for analysis of individual snapshots an one measure to multiscale and timeline analyses # 
-        k. statistics for Kolmogorov-Smirnov, PCA, circular measures, unit root tests and numeric utilites (import stats.ks .pca .urt .utils)
-        c. utils.files for helpers in retrieving filenames and making names according to protocols
-        d. utils.tables for rendering tabular data
-        f. sparql for SparQL standard and legacy routines (imports only most useful objects from sparql.classes and sparql.functions)
-        l. help for helper routines (e.g. wizard or steps to make something).
+        - bootstrap for bootstrapping percolation server and session (startup() is the canonic startup routine)
+        - legacy for usage outlines and standard analyses and media rendering routines of tables and with music and visuals
+        - rdf to ease add, save and navigation in rdflib graphs (all in rdf.io + rdf.ontology.makeOntolgy + rdf.utils)
 
+                - rdf.ontology to organize ontology by parts and primarily in functions as they only return the triples or graph
+                - rdf.sparql for SparQL standard and legacy routines (imports only most useful objects from sparql.classes and sparql.functions)
+
+        - text for measures of text
+        - topology for making networks, getting measures, making erdos sectorialization and meaningful sequences of participants
+        - time for circular statistics and other measures from timestamps
+        - integrated for integrated measures of text, topology and time measures # erdos sectorialization, KS and joint PCA
+
+                - integrated.timeline
+                - integrated.multiscale
+
+        - analyses for rendering knowledge from text, topology, time and integrated measures.
+
+        - statistics for obtaining statistics from measures:
+          
+                - statistics.kolmogorov_smirnov for measures of KS distance and the c statistic
+                - statistics.pca for principal component analysis statistics
+                - statistics.unit_root_tests for e.g. the augmented Dickey–Fuller test
+                - statistics.outliers for detection of outliers in data
+                - statistics.power_law for measures from optimal power-law fit to data
+                - statistics.numeric_utilities (e.g. creating mean and standard deviation variables from array of arrays)
+
+        - utils for small utilities in using percolation
+
+                - utils.files for helpers in retrieving filenames and making names according to protocols
+                - utils.utils for general purpose utilities (e.g. get unique values from sequence without modifying its order)
+                - utils.poetry for making poetry from text
+                - utils.tables for rendering latex and html tables
+
+        - web for integration to the WWW through flask, js and meteor.
+
+        - help for helper routines (e.g. wizard or steps to make something).
+
+    - The modules can be classified with respect to its functionalities:
+
+        - System administration: startup, legacy, help. These modules ease use of percolation with startup and usage routines.
+        - Information architecture: rdf, utils. These modules ease accessing and modifying informational structure of percolation.
+        - Measuring: text, topology, time. These modules take measures and build basic structures for so.
+        - Knowledge achievement: integrated, statistics and analyses.
 
     - the file cureimport.py in newtests avoids cluttering the header of the percolation file while hacking framework. In using the Python interpreter, subsequent runs of scripts don't reload or raise error with importlib if the prior error was on load. Justo load it first: import cureimport, percolation as P, etc.
 
@@ -106,5 +130,4 @@ Usage example
     user_uri=P.oneUser(integrated_analysis) # uri
     P.audiovisuals.makeMusic(integrated_analysis,"/av/",focus=user_uri) # render music
     P.web.startServer(port=5077) # start server in localhost:5077 or better specify
-
 

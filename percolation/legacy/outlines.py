@@ -73,14 +73,15 @@ def standardPercolationStartup(percolationdir="~/.percolation/"):
         percolation_graph.open(dbdir, create=False)
     except:
         percolation_graph.open(dbdir, create=True)
-        po=P.rdf.minimumOntology("triples")
-        metadata=P.rdf.legacyMetadata("triples")
-        percolation_graph.add(po+metadata)
     else:
         assert rt == VALID_STORE, 'The underlying store is corrupt'
     # add percolationdir and dbdir to percolation_graph
     return percolation_graph
 
+def start(): # duplicate in legacy/outlines.py
+    PercolationServer()
+    P.utils.startSession()
+    P.utils.aaSession()
 
 def startupCustomPercolationGraph(custom_pg_path="./where/db/is/"):
     percolation_graph=r.ConjunctiveGraph("Sleepycat")

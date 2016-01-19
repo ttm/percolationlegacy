@@ -13,9 +13,6 @@ class PercolationServer:
             percolation_graph.open(dbdir, create=False)
         except: # get exception type (?)
             percolation_graph.open(dbdir, create=True)
-            po=P.rdf.minimumOntology("triples")
-            metadata=P.rdf.legacyMetadata("triples")
-            percolation_graph.add(po+metadata)
 
             #nick=datetime.datetime.now().isoformat()+'r'++''.join(["%s" % random.randint(0, 9) for num in range(0, 5)])
             #uri_=NS.per.Participant+"#"+NICK

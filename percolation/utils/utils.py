@@ -3,10 +3,8 @@ import builtins as B
 import percolation as P
 from SPARQLWrapper import SPARQLWrapper, JSON
 TT=time.time()
-import pdb
 
 nestedDict = lambda: collections.defaultdict(nestedDict)
-PROVENANCE_IDS="gmane-", "_fb", "_tw"
 
 def createAAUser(nick=None,email=None,name=None,comment=None,context="aa"):
     default_percolation_session=P.get("per:currentState per:currentSession ?foosession. ?foosession per:user ?user . ?user a per:DefaultParticipant")
@@ -171,10 +169,7 @@ def fileProvenanceDict(files):
     all_=files
     del files
     return locals()
-def callDebugger():
-    """Helper function to call interpreter or debugger in the midle of execution for testing and debugging"""
-    pdb.set_trace()
-# use with tdict=nestedDict(); tdict["akey1"]["akey2"]="anything"
+
 def uniqueItems(seq):
     seen = set()
     seen_add = seen.add
@@ -194,6 +189,7 @@ def toUndirected(xgraph):
     for u, v, d in xgraph.edges_iter(data=True):
             gg[u][v]['weight'] += d['weight']
     return gg
+
 def getFiles(datadir,ext=".owl"):
     dirs=os.listdir(datadir)
     aa=[]
@@ -211,10 +207,12 @@ def getFiles(datadir,ext=".owl"):
                 tfile_=rdfdir+tfile
                 aa+=[tfile_]
     return aa
+
 def urifyFilename(fname,digits=True):
     if digits:
         fname="".join(i for i in fname if i not in string.digits)
     return "http://{}".format(fname.split("/")[-1].replace("_","").lower())
+
 def testRdfs(path,end_url,do_query=True,write_back=True):
     files=os.listdir(path)
     for afile in files:
@@ -262,7 +260,6 @@ def getGraphs(path,end_url):
         os.system(cmd)
         check(cmd)
 
-
 def utf8(astring):
     """Ensure string is utf8"""
     return astring.strip().encode("utf-8").decode("utf-8","ignore")
@@ -294,6 +291,7 @@ prefix tw: <http://purl.org/socialparticipation/tw/>
 prefix irc: <http://purl.org/socialparticipation/irc/>
 prefix gmane: <http://purl.org/socialparticipation/gmane/>
 prefix ld: <http://purl.org/socialparticipation/ld/>\n""" 
+
 def mQuery(spql_endpoint,query,mvars=None):
     se=spql_endpoint[:]
     spql_endpoint=SPARQLWrapper(spql_endpoint)
@@ -324,6 +322,7 @@ def mQuery(spql_endpoint,query,mvars=None):
         #for result in results["results"]["bindings"]:
         #    res.append([result[i]['value'] for i in mvars])
         return res
+
 def zipdir(path, ziph):
     # ziph is zipfile handle
     for root, dirs, files in os.walk(path):
@@ -363,15 +362,6 @@ def check(*args):
         print("{:.3f}".format(time.time()-TT),*args); TT=time.time()
     if prompt:
         input("ANY KEY TO CONTINUE")
-# pdumps aqui tb
-def identifyProvenance(astring):
-    if "gmane-" in astring:
-        return P.rdf.NS.po.GmaneSnapshot
-    elif "_fb" in astring:
-        return P.rdf.NS.po.FacebookSnapshot
-    elif "_tw" in astring:
-        return P.rdf.NS.po.TwitterSnapshot
-
 class Dumper:
     def __init__(self,tfilename):
         if os.path.isfile(tfilename):
@@ -471,8 +461,8 @@ class RegexpReplacer(object):
         return s, count_
 REPLACER=RegexpReplacer()
 del RegexpReplacer
-def chunks(l, n):
-    """Yield successive n-sized chunks from l."""
+def makeChunks(l, n):
+    """Make successive n-sized chunks from l."""
     ll=[]
     for i in range(0, len(l), n):
         ll.append(l[i:i+n])
